@@ -113,12 +113,12 @@
     transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
-    min-width: 320px;
+    min-width: 280px;
     text-align: center;
   }
   .btn:hover, .btn:focus {
     background: rgba(0,240,255,0.15);
-    box-shadow: 0 0 30px rgba(0,240,255,0.3), inset 0 0 30px rgba(0,240,255,0.1);
+    box-shadow: 0 0 15px rgba(0,240,255,0.3), inset 0 0 15px rgba(0,240,255,0.1);
     transform: scale(1.05);
     outline: none;
   }
@@ -132,7 +132,7 @@
   }
   .btn.pink:hover, .btn.pink:focus {
     background: rgba(255,45,120,0.15);
-    box-shadow: 0 0 30px rgba(255,45,120,0.3), inset 0 0 30px rgba(255,45,120,0.1);
+    box-shadow: 0 0 15px rgba(255,45,120,0.3), inset 0 0 15px rgba(255,45,120,0.1);
   }
 
   .btn-group {
@@ -823,9 +823,9 @@
       </div>
     </div>
   </div>
-  <div class="btn-group" style="flex-direction:row; gap:30px;">
-    <button class="btn pink" onclick="showScreen('title')">Back</button>
-    <button class="btn" onclick="startGame()">Play!</button>
+  <div class="btn-group" style="flex-direction:row; gap:60px;">
+    <button class="btn pink" onclick="showScreen('title')" style="min-width:220px;">Back</button>
+    <button class="btn" onclick="startGame()" style="min-width:220px;">Play!</button>
   </div>
 </div>
 
@@ -903,9 +903,9 @@
     </div>
   </div>
 
-  <div class="btn-group" style="flex-direction:row; gap:50px;">
-    <button class="btn" onclick="startGame()" style="min-width:260px; padding:20px 40px;">Play Again!</button>
-    <button class="btn pink" onclick="showScreen('title')" style="min-width:200px; padding:20px 40px;">Home</button>
+  <div class="btn-group" style="flex-direction:row; gap:80px;">
+    <button class="btn" onclick="startGame()" style="min-width:220px;">Play Again!</button>
+    <button class="btn pink" onclick="showScreen('title')" style="min-width:180px;">Home</button>
   </div>
 </div>
 
@@ -914,9 +914,9 @@
   <div class="error-icon">&#128561;</div>
   <div class="screen-title" style="color:var(--neon-pink);">Haibo!</div>
   <div class="error-message" id="error-message">Something went wrong, boet.</div>
-  <div class="btn-group" style="flex-direction:row; gap:30px;">
-    <button class="btn" onclick="startGame()">Try Again</button>
-    <button class="btn pink" onclick="showScreen('title')">Home</button>
+  <div class="btn-group" style="flex-direction:row; gap:60px;">
+    <button class="btn" onclick="startGame()" style="min-width:220px;">Try Again</button>
+    <button class="btn pink" onclick="showScreen('title')" style="min-width:180px;">Home</button>
   </div>
 </div>
 
