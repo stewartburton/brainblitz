@@ -1450,6 +1450,10 @@
       <div class="admin-section-title">ElevenLabs TTS Usage</div>
       <div id="admin-tts-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
       <div id="admin-tts-stats" style="display:none;">
+        <div class="admin-stat-row" style="padding:16px 0; border-bottom:2px solid rgba(255,230,0,0.15);">
+          <span class="admin-stat-label" style="font-size:clamp(18px,1.8vw,24px); font-weight:700; color:rgba(255,255,255,0.8);">Total Cost to Date</span>
+          <span class="admin-stat-value cost" id="admin-tts-cost" style="font-size:clamp(22px,2.2vw,32px);">R0.00</span>
+        </div>
         <div class="admin-stat-row">
           <span class="admin-stat-label">Total Characters</span>
           <span class="admin-stat-value" id="admin-tts-chars">0</span>
@@ -1459,8 +1463,8 @@
           <span class="admin-stat-value" id="admin-tts-requests">0</span>
         </div>
         <div class="admin-stat-row">
-          <span class="admin-stat-label">Est. Cost</span>
-          <span class="admin-stat-value cost" id="admin-tts-cost">$0.00</span>
+          <span class="admin-stat-label">Avg Cost/Request</span>
+          <span class="admin-stat-value cost" id="admin-tts-avg-cost">R0.00</span>
         </div>
         <div class="admin-stat-row">
           <span class="admin-stat-label">Avg Chars/Request</span>
@@ -3736,12 +3740,17 @@
         var totalChars = data.totalChars || 0;
         var totalReqs = data.totalRequests || 0;
         // ElevenLabs pricing: ~$0.18 per 1000 chars (Turbo v2.5)
-        var estCost = (totalChars / 1000) * 0.18;
+        var estCostUSD = (totalChars / 1000) * 0.18;
+        // Convert to ZAR (~18.50 ZAR per USD)
+        var USD_TO_ZAR = 18.50;
+        var estCostZAR = estCostUSD * USD_TO_ZAR;
         var avgChars = totalReqs > 0 ? Math.round(totalChars / totalReqs) : 0;
+        var avgCostZAR = totalReqs > 0 ? (estCostZAR / totalReqs) : 0;
 
         document.getElementById('admin-tts-chars').textContent = formatScore(totalChars);
         document.getElementById('admin-tts-requests').textContent = formatScore(totalReqs);
-        document.getElementById('admin-tts-cost').textContent = '$' + estCost.toFixed(2);
+        document.getElementById('admin-tts-cost').textContent = 'R' + estCostZAR.toFixed(2);
+        document.getElementById('admin-tts-avg-cost').textContent = 'R' + avgCostZAR.toFixed(2);
         document.getElementById('admin-tts-avg').textContent = formatScore(avgChars);
       })
       .catch(function() {
