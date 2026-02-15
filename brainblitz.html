@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAINBLITZ - TV Trivia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --neon-cyan: #00f0ff;
+    --neon-pink: #ff2d78;
+    --neon-yellow: #ffe600;
+    --neon-green: #00ff88;
+    --neon-purple: #b44dff;
+    --bg-dark: #0a0a1a;
+    --bg-card: rgba(15, 15, 40, 0.85);
+    --correct: #00ff88;
+    --wrong: #ff2d78;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-dark);
+    font-family: 'Rajdhani', sans-serif;
+    color: #fff;
+    cursor: none;
+  }
+
+  /* Custom large cursor for TV pointer */
+  body.show-cursor { cursor: default; }
+
+  /* ─── BACKGROUND ─── */
+  .bg-grid {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+  }
+  .bg-glow {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,240,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(255,45,120,0.06) 0%, transparent 50%);
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    position: absolute; inset: 0; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ─── TITLE SCREEN ─── */
+  .title-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(60px, 8vw, 120px);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 4s ease infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(0,240,255,0.3));
+    margin-bottom: 10px;
+  }
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .title-sub {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 2vw, 28px);
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 2.2vw, 28px);
+    font-weight: 700;
+    padding: 20px 60px;
+    border: 2px solid var(--neon-cyan);
+    background: rgba(0,240,255,0.05);
+    color: var(--neon-cyan);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    min-width: 320px;
+    text-align: center;
+  }
+  .btn:hover, .btn:focus {
+    background: rgba(0,240,255,0.15);
+    box-shadow: 0 0 30px rgba(0,240,255,0.3), inset 0 0 30px rgba(0,240,255,0.1);
+    transform: scale(1.05);
+    outline: none;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn.pink {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    background: rgba(255,45,120,0.05);
+  }
+  .btn.pink:hover, .btn.pink:focus {
+    background: rgba(255,45,120,0.15);
+    box-shadow: 0 0 30px rgba(255,45,120,0.3), inset 0 0 30px rgba(255,45,120,0.1);
+  }
+
+  .btn-group {
+    display: flex; flex-direction: column; gap: 20px;
+    align-items: center;
+  }
+
+  /* ─── SETTINGS SCREEN ─── */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 80px;
+    max-width: 900px;
+    width: 100%;
+    margin-bottom: 50px;
+  }
+  .setting-group label {
+    display: block;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 20px);
+    color: var(--neon-cyan);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .pill-group {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .pill {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(16px, 1.8vw, 22px);
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pill:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.8);
+  }
+  .pill.selected {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    background: rgba(0,240,255,0.1);
+    box-shadow: 0 0 15px rgba(0,240,255,0.15);
+  }
+
+  /* ─── GAME SCREEN ─── */
+  .game-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+  .hud-item {
+    text-align: center;
+  }
+  .hud-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(10px, 1.2vw, 14px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .hud-value {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+  }
+  .hud-value.streak { color: var(--neon-yellow); }
+  .hud-value.score { color: var(--neon-pink); }
+
+  /* Timer bar */
+  .timer-track {
+    width: 100%;
+    max-width: 1200px;
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    margin-bottom: 40px;
+    overflow: hidden;
+    position: relative;
+  }
+  .timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+    transition: width 0.1s linear;
+    box-shadow: 0 0 20px rgba(0,240,255,0.4);
+  }
+  .timer-fill.danger {
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-yellow));
+    box-shadow: 0 0 20px rgba(255,45,120,0.4);
+  }
+
+  /* Category badge */
+  .category-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(11px, 1.2vw, 16px);
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* Question */
+  .question-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(28px, 3.8vw, 56px);
+    font-weight: 700;
+    text-align: center;
+    max-width: 1100px;
+    line-height: 1.2;
+    margin-bottom: 50px;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(255,255,255,0.1);
+  }
+
+  /* Answer grid */
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .answer-btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(20px, 2.5vw, 34px);
+    font-weight: 600;
+    padding: 24px 30px;
+    border: 2px solid rgba(255,255,255,0.12);
+    background: var(--bg-card);
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .answer-btn .letter {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 1.8vw, 24px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+    min-width: 44px;
+    height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--neon-cyan);
+    flex-shrink: 0;
+  }
+  .answer-btn:hover {
+    border-color: var(--neon-cyan);
+    background: rgba(0,240,255,0.08);
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(0,240,255,0.15);
+  }
+  .answer-btn.correct {
+    border-color: var(--correct) !important;
+    background: rgba(0,255,136,0.15) !important;
+    box-shadow: 0 0 40px rgba(0,255,136,0.3);
+  }
+  .answer-btn.correct .letter {
+    border-color: var(--correct);
+    color: var(--correct);
+    background: rgba(0,255,136,0.2);
+  }
+  .answer-btn.wrong {
+    border-color: var(--wrong) !important;
+    background: rgba(255,45,120,0.15) !important;
+    box-shadow: 0 0 40px rgba(255,45,120,0.3);
+  }
+  .answer-btn.wrong .letter {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,45,120,0.2);
+  }
+  .answer-btn.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* ─── FEEDBACK OVERLAY ─── */
+  .feedback-overlay {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .feedback-overlay.show { opacity: 1; }
+  .feedback-text {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(50px, 8vw, 120px);
+    font-weight: 900;
+    text-transform: uppercase;
+    animation: feedbackPop 0.6s ease forwards;
+  }
+  .feedback-text.correct-fb {
+    color: var(--correct);
+    text-shadow: 0 0 60px rgba(0,255,136,0.5);
+  }
+  .feedback-text.wrong-fb {
+    color: var(--wrong);
+    text-shadow: 0 0 60px rgba(255,45,120,0.5);
+  }
+  .feedback-text.timeout-fb {
+    color: var(--neon-yellow);
+    text-shadow: 0 0 60px rgba(255,230,0,0.5);
+  }
+  @keyframes feedbackPop {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Bonus points popup */
+  .bonus-popup {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, 20px);
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 3vw, 36px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 20px rgba(255,230,0,0.5);
+    opacity: 0;
+    z-index: 11;
+    pointer-events: none;
+    transition: all 0.8s ease;
+  }
+  .bonus-popup.show {
+    opacity: 1;
+    transform: translate(-50%, -20px);
+  }
+
+  /* ─── RESULTS SCREEN ─── */
+  .results-score {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(60px, 10vw, 140px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(0,240,255,0.3));
+    margin-bottom: 10px;
+  }
+  .results-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 22px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .stats-row {
+    display: flex; gap: 60px;
+    margin-bottom: 50px;
+  }
+  .stat-item {
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(30px, 4vw, 50px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+  }
+  .stat-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(10px, 1vw, 14px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .rank-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(22px, 2.5vw, 36px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    margin-bottom: 40px;
+  }
+
+  /* ─── PARTICLES ─── */
+  .particle {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+  }
+
+  /* ─── ROUND INDICATOR ─── */
+  .round-splash {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,10,26,0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .round-splash.show {
+    opacity: 1;
+  }
+  .round-number {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(80px, 12vw, 160px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 60px rgba(0,240,255,0.4);
+    animation: feedbackPop 0.6s ease forwards;
+  }
+  .round-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 2vw, 28px);
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  /* Responsive for smaller screens */
+  @media (max-width: 800px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; gap: 30px; }
+    .stats-row { gap: 30px; }
+  }
+
+  /* Focus visible for remote/keyboard nav */
+  *:focus-visible {
+    outline: 3px solid var(--neon-cyan);
+    outline-offset: 4px;
+  }
+
+  /* Loading spinner */
+  .loading-ring {
+    width: 60px; height: 60px;
+    border: 4px solid rgba(0,240,255,0.1);
+    border-top-color: var(--neon-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .screen-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(24px, 3vw, 40px);
+    font-weight: 700;
+    color: var(--neon-cyan);
+    letter-spacing: 0.1em;
+    margin-bottom: 40px;
+  }
+</style>
+</head>
+<body class="show-cursor">
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- ═══ TITLE SCREEN ═══ -->
+<div id="screen-title" class="screen active">
+  <div class="title-logo">BRAINBLITZ</div>
+  <div class="title-sub">Lekker TV Trivia</div>
+  <div class="btn-group">
+    <button class="btn" onclick="showScreen('settings')" autofocus>Kom Ons Speel!</button>
+    <button class="btn pink" onclick="showScreen('howto')">How to Play</button>
+  </div>
+</div>
+
+<!-- ═══ HOW TO PLAY ═══ -->
+<div id="screen-howto" class="screen">
+  <div class="screen-title">How to Play</div>
+  <div style="max-width:800px; text-align:center; font-size:clamp(18px,2.2vw,28px); line-height:1.7; color:rgba(255,255,255,0.7); margin-bottom:50px;">
+    Answer <span style="color:var(--neon-cyan); font-weight:700;">trivia questions</span> before the timer runs out, boet!<br><br>
+    <span style="color:var(--neon-green);">Faster answers = more points. Moerse lekker!</span><br>
+    Build a <span style="color:var(--neon-yellow); font-weight:700;">streak</span> for bonus multipliers — jy's 'n Boss!<br><br>
+    Use your <span style="color:var(--neon-pink);">remote pointer</span> or keyboard (A/B/C/D) to answer.<br>
+    <span style="color:rgba(255,255,255,0.4); font-size:0.85em;">Dis maklik, just point and kliek!</span>
+  </div>
+  <button class="btn" onclick="showScreen('title')">Terug</button>
+</div>
+
+<!-- ═══ SETTINGS SCREEN ═══ -->
+<div id="screen-settings" class="screen">
+  <div class="screen-title">Game Setup</div>
+  <div class="settings-grid">
+    <div class="setting-group">
+      <label>Difficulty</label>
+      <div class="pill-group" id="diff-pills">
+        <button class="pill" data-val="easy" onclick="selectPill(this,'diff')">Easy</button>
+        <button class="pill selected" data-val="medium" onclick="selectPill(this,'diff')">Medium</button>
+        <button class="pill" data-val="hard" onclick="selectPill(this,'diff')">Hard</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Timer</label>
+      <div class="pill-group" id="timer-pills">
+        <button class="pill" data-val="10" onclick="selectPill(this,'timer')">10s</button>
+        <button class="pill selected" data-val="15" onclick="selectPill(this,'timer')">15s</button>
+        <button class="pill" data-val="20" onclick="selectPill(this,'timer')">20s</button>
+        <button class="pill" data-val="30" onclick="selectPill(this,'timer')">30s</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Category</label>
+      <div class="pill-group" id="cat-pills">
+        <button class="pill selected" data-val="" onclick="selectPill(this,'cat')">Any</button>
+        <button class="pill" data-val="9" onclick="selectPill(this,'cat')">General</button>
+        <button class="pill" data-val="17" onclick="selectPill(this,'cat')">Science</button>
+        <button class="pill" data-val="23" onclick="selectPill(this,'cat')">History</button>
+        <button class="pill" data-val="21" onclick="selectPill(this,'cat')">Sports</button>
+        <button class="pill" data-val="11" onclick="selectPill(this,'cat')">Film</button>
+        <button class="pill" data-val="15" onclick="selectPill(this,'cat')">Gaming</button>
+        <button class="pill" data-val="22" onclick="selectPill(this,'cat')">Geography</button>
+        <button class="pill" data-val="18" onclick="selectPill(this,'cat')">Computers</button>
+        <button class="pill" data-val="12" onclick="selectPill(this,'cat')">Music</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Rounds</label>
+      <div class="pill-group" id="rounds-pills">
+        <button class="pill" data-val="5" onclick="selectPill(this,'rounds')">5</button>
+        <button class="pill selected" data-val="10" onclick="selectPill(this,'rounds')">10</button>
+        <button class="pill" data-val="15" onclick="selectPill(this,'rounds')">15</button>
+        <button class="pill" data-val="20" onclick="selectPill(this,'rounds')">20</button>
+      </div>
+    </div>
+  </div>
+  <div class="btn-group" style="flex-direction:row; gap:30px;">
+    <button class="btn pink" onclick="showScreen('title')">Terug</button>
+    <button class="btn" onclick="startGame()">Speel!</button>
+  </div>
+</div>
+
+<!-- ═══ GAME SCREEN ═══ -->
+<div id="screen-game" class="screen">
+  <div class="game-hud">
+    <div class="hud-item">
+      <div class="hud-label">Vraag</div>
+      <div class="hud-value" id="hud-question">1/10</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Streak</div>
+      <div class="hud-value streak" id="hud-streak">0</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Punte</div>
+      <div class="hud-value score" id="hud-score">0</div>
+    </div>
+  </div>
+  <div class="timer-track">
+    <div class="timer-fill" id="timer-fill"></div>
+  </div>
+  <div class="category-badge" id="q-category"></div>
+  <div class="question-text" id="q-text"></div>
+  <div class="answers-grid" id="answers-grid"></div>
+</div>
+
+<!-- ═══ LOADING ═══ -->
+<div id="screen-loading" class="screen">
+  <div class="loading-ring"></div>
+  <div style="margin-top:30px; font-family:'Orbitron',monospace; font-size:18px; color:rgba(255,255,255,0.4); letter-spacing:0.2em;">WRAG VIR JOU VRAE...</div>
+</div>
+
+<!-- ═══ RESULTS SCREEN ═══ -->
+<div id="screen-results" class="screen">
+  <div class="results-label">Finale Telling</div>
+  <div class="results-score" id="res-score">0</div>
+  <div class="rank-text" id="res-rank"></div>
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-value" id="res-correct">0</div>
+      <div class="stat-label">Reg</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="res-wrong" style="color:var(--neon-pink)">0</div>
+      <div class="stat-label">Verkeerd</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="res-streak" style="color:var(--neon-yellow)">0</div>
+      <div class="stat-label">Beste Streak</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="res-avg" style="color:var(--neon-green)">0s</div>
+      <div class="stat-label">Gem. Tyd</div>
+    </div>
+  </div>
+  <div class="btn-group" style="flex-direction:row; gap:30px;">
+    <button class="btn" onclick="startGame()">Nog 'n Rondte!</button>
+    <button class="btn pink" onclick="showScreen('title')">Huis Toe</button>
+  </div>
+</div>
+
+<!-- Feedback overlay -->
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-text" id="feedback-text"></div>
+</div>
+<div class="bonus-popup" id="bonus-popup"></div>
+
+<!-- Round splash -->
+<div class="round-splash" id="round-splash">
+  <div class="round-label">Vraag</div>
+  <div class="round-number" id="round-number">1</div>
+</div>
+
+<script>
+  // ═══════════════════════════════════════
+  //  AUDIO ENGINE (Web Audio API)
+  // ═══════════════════════════════════════
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx;
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone(freq, dur, type = 'sine', vol = 0.15) {
+    try {
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    } catch(e) {}
+  }
+
+  function sfxCorrect() {
+    playTone(523, 0.12, 'sine', 0.15);
+    setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 80);
+    setTimeout(() => playTone(784, 0.25, 'sine', 0.15), 160);
+  }
+  function sfxWrong() {
+    playTone(200, 0.3, 'sawtooth', 0.1);
+    setTimeout(() => playTone(150, 0.4, 'sawtooth', 0.08), 150);
+  }
+  function sfxTick() {
+    playTone(800, 0.05, 'square', 0.04);
+  }
+  function sfxCountdown() {
+    playTone(440, 0.15, 'square', 0.08);
+  }
+  function sfxStart() {
+    [523, 659, 784, 1047].forEach((f, i) => {
+      setTimeout(() => playTone(f, 0.2, 'sine', 0.12), i * 100);
+    });
+  }
+
+  // ═══════════════════════════════════════
+  //  STATE
+  // ═══════════════════════════════════════
+  let settings = { difficulty: 'medium', timer: 15, category: '', rounds: 10 };
+  let questions = [];
+  let currentQ = 0;
+  let score = 0;
+  let streak = 0;
+  let bestStreak = 0;
+  let correctCount = 0;
+  let totalTime = 0;
+  let timerInterval = null;
+  let timeLeft = 0;
+  let answered = false;
+
+  // ═══════════════════════════════════════
+  //  NAVIGATION
+  // ═══════════════════════════════════════
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    // Focus first button
+    setTimeout(() => {
+      const btn = document.querySelector('#screen-' + id + ' .btn, #screen-' + id + ' .pill, #screen-' + id + ' .answer-btn');
+      if (btn) btn.focus();
+    }, 100);
+  }
+
+  function selectPill(el, group) {
+    el.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    sfxTick();
+  }
+
+  function getSelected(groupId) {
+    const pill = document.querySelector('#' + groupId + '-pills .pill.selected');
+    return pill ? pill.dataset.val : '';
+  }
+
+  // ═══════════════════════════════════════
+  //  GAME LOGIC
+  // ═══════════════════════════════════════
+  async function startGame() {
+    settings.difficulty = getSelected('diff');
+    settings.timer = parseInt(getSelected('timer')) || 15;
+    settings.category = getSelected('cat');
+    settings.rounds = parseInt(getSelected('rounds')) || 10;
+
+    score = 0; streak = 0; bestStreak = 0;
+    correctCount = 0; totalTime = 0; currentQ = 0;
+
+    showScreen('loading');
+    await fetchQuestions();
+
+    if (questions.length === 0) {
+      alert('Haibo! Could not load questions. Check your internet connection, boet.');
+      showScreen('title');
+      return;
+    }
+
+    sfxStart();
+    showScreen('game');
+    showRoundSplash(1, () => loadQuestion());
+  }
+
+  async function fetchQuestions() {
+    const diff = settings.difficulty;
+    const cat = settings.category ? `&category=${settings.category}` : '';
+    const url = `https://opentdb.com/api.php?amount=${settings.rounds}&type=multiple&difficulty=${diff}${cat}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.response_code === 0) {
+        questions = data.results;
+      } else {
+        // Fallback: try without category
+        const res2 = await fetch(`https://opentdb.com/api.php?amount=${settings.rounds}&type=multiple&difficulty=${diff}`);
+        const data2 = await res2.json();
+        questions = data2.results || [];
+      }
+    } catch(e) {
+      questions = [];
+    }
+  }
+
+  function decodeHTML(html) {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  }
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function showRoundSplash(num, cb) {
+    const splash = document.getElementById('round-splash');
+    document.getElementById('round-number').textContent = num;
+    splash.classList.add('show');
+    sfxTick();
+    setTimeout(() => {
+      splash.classList.remove('show');
+      if (cb) cb();
+    }, 1200);
+  }
+
+  function loadQuestion() {
+    if (currentQ >= questions.length) {
+      endGame();
+      return;
+    }
+
+    answered = false;
+    const q = questions[currentQ];
+    const answers = shuffleArray([
+      ...q.incorrect_answers.map(a => ({ text: decodeHTML(a), correct: false })),
+      { text: decodeHTML(q.correct_answer), correct: true }
+    ]);
+
+    document.getElementById('hud-question').textContent = `${currentQ + 1}/${questions.length}`;
+    document.getElementById('hud-streak').textContent = streak;
+    document.getElementById('hud-score').textContent = score;
+    document.getElementById('q-category').textContent = decodeHTML(q.category);
+    document.getElementById('q-text').textContent = decodeHTML(q.question);
+
+    const grid = document.getElementById('answers-grid');
+    const letters = ['A', 'B', 'C', 'D'];
+    grid.innerHTML = answers.map((a, i) => `
+      <button class="answer-btn" data-correct="${a.correct}" data-index="${i}" onclick="selectAnswer(this)">
+        <span class="letter">${letters[i]}</span>
+        <span>${a.text}</span>
+      </button>
+    `).join('');
+
+    // Start timer
+    timeLeft = settings.timer;
+    const fill = document.getElementById('timer-fill');
+    fill.style.width = '100%';
+    fill.classList.remove('danger');
+
+    clearInterval(timerInterval);
+    const startTime = Date.now();
+    timerInterval = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      timeLeft = Math.max(0, settings.timer - elapsed);
+      const pct = (timeLeft / settings.timer) * 100;
+      fill.style.width = pct + '%';
+
+      if (pct < 30 && !fill.classList.contains('danger')) {
+        fill.classList.add('danger');
+      }
+      if (timeLeft <= 3 && timeLeft > 0 && Math.floor(timeLeft) !== Math.floor(timeLeft + 0.1)) {
+        sfxCountdown();
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        if (!answered) timeUp();
+      }
+    }, 50);
+
+    // Focus first answer for keyboard nav
+    setTimeout(() => {
+      const first = grid.querySelector('.answer-btn');
+      if (first) first.focus();
+    }, 100);
+  }
+
+  function selectAnswer(btn) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timerInterval);
+    ensureAudio();
+
+    const isCorrect = btn.dataset.correct === 'true';
+    const elapsed = settings.timer - timeLeft;
+    totalTime += elapsed;
+
+    // Disable all buttons
+    document.querySelectorAll('.answer-btn').forEach(b => b.classList.add('disabled'));
+
+    // Highlight correct answer
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+
+    if (isCorrect) {
+      sfxCorrect();
+      streak++;
+      if (streak > bestStreak) bestStreak = streak;
+      correctCount++;
+
+      // Score: base 100 + speed bonus + streak bonus
+      const speedBonus = Math.round((timeLeft / settings.timer) * 100);
+      const streakBonus = Math.min(streak, 5) * 20;
+      const points = 100 + speedBonus + streakBonus;
+      score += points;
+
+      showFeedback('correct');
+      if (streak >= 3) {
+        const streakMsgs = [
+          `🔥 ${streak}x STREAK! Jy's op Vuur! +${streakBonus}`,
+          `🔥 ${streak}x STREAK! Moerse Lekker! +${streakBonus}`,
+          `🔥 ${streak}x STREAK! Nou Gaan Ons Braai! +${streakBonus}`,
+          `🔥 ${streak}x STREAK! Hou So! +${streakBonus}`
+        ];
+        showBonus(streakMsgs[Math.floor(Math.random() * streakMsgs.length)]);
+      }
+    } else {
+      btn.classList.add('wrong');
+      sfxWrong();
+      streak = 0;
+      showFeedback('wrong');
+    }
+
+    document.getElementById('hud-streak').textContent = streak;
+    document.getElementById('hud-score').textContent = score;
+
+    // Next question
+    setTimeout(() => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        showRoundSplash(currentQ + 1, () => loadQuestion());
+      } else {
+        endGame();
+      }
+    }, 2000);
+  }
+
+  function timeUp() {
+    answered = true;
+    streak = 0;
+    totalTime += settings.timer;
+
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      b.classList.add('disabled');
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+
+    sfxWrong();
+    showFeedback('timeout');
+    document.getElementById('hud-streak').textContent = streak;
+
+    setTimeout(() => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        showRoundSplash(currentQ + 1, () => loadQuestion());
+      } else {
+        endGame();
+      }
+    }, 2000);
+  }
+
+  function showFeedback(type) {
+    const overlay = document.getElementById('feedback-overlay');
+    const text = document.getElementById('feedback-text');
+    text.className = 'feedback-text';
+
+    if (type === 'correct') {
+      const msgs = ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Yoh Nailed It!', 'Eish, Too Easy!', 'Baie Mooi!', 'Jy\'s \'n Bees!', 'Sharp Sharp!'];
+      text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+      text.classList.add('correct-fb');
+    } else if (type === 'wrong') {
+      const msgs = ['Eina!', 'Ag Nee!', 'Haibo!', 'Shame Man!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!'];
+      text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+      text.classList.add('wrong-fb');
+    } else {
+      text.textContent = "Tyd Op, Bru!";
+      text.classList.add('timeout-fb');
+    }
+
+    overlay.classList.add('show');
+    // Force re-trigger animation
+    text.style.animation = 'none';
+    text.offsetHeight;
+    text.style.animation = '';
+
+    setTimeout(() => overlay.classList.remove('show'), 1500);
+  }
+
+  function showBonus(msg) {
+    const el = document.getElementById('bonus-popup');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1500);
+  }
+
+  function endGame() {
+    clearInterval(timerInterval);
+
+    document.getElementById('res-score').textContent = score;
+    document.getElementById('res-correct').textContent = correctCount;
+    document.getElementById('res-wrong').textContent = questions.length - correctCount;
+    document.getElementById('res-streak').textContent = bestStreak;
+
+    const avgTime = questions.length > 0 ? (totalTime / questions.length).toFixed(1) : 0;
+    document.getElementById('res-avg').textContent = avgTime + 's';
+
+    // Rank
+    const pct = (correctCount / questions.length) * 100;
+    let rank = '';
+    if (pct === 100) rank = '🏆 PERFEK! Jy\'s die Groot Baas van Trivia!';
+    else if (pct >= 80) rank = '🌟 Kwaai! Jy\'s \'n Slim Kop!';
+    else if (pct >= 60) rank = '⚡ Lekker Gespeel! Sharp Mind, Boet!';
+    else if (pct >= 40) rank = '🎯 Nie Sleg Nie — Probeer Weer!';
+    else rank = '💪 Eish, Taai Rondte — Kom Ons Gaan Weer!';
+    document.getElementById('res-rank').textContent = rank;
+
+    sfxStart();
+    showScreen('results');
+  }
+
+  // ═══════════════════════════════════════
+  //  KEYBOARD SUPPORT
+  // ═══════════════════════════════════════
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toUpperCase();
+    // A/B/C/D to select answers during game
+    if (['A','B','C','D'].includes(key) && document.getElementById('screen-game').classList.contains('active') && !answered) {
+      const idx = key.charCodeAt(0) - 65;
+      const btn = document.querySelector(`.answer-btn[data-index="${idx}"]`);
+      if (btn) selectAnswer(btn);
+    }
+    // Enter to start from title
+    if (e.key === 'Enter' && document.getElementById('screen-title').classList.contains('active')) {
+      showScreen('settings');
+    }
+  });
+
+  // Init: show cursor on mouse move
+  document.addEventListener('mousemove', () => document.body.classList.add('show-cursor'));
+</script>
+
+</body>
+</html>
