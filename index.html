@@ -543,7 +543,8 @@
 
   /* ─── ROUND INDICATOR ─── */
   .round-splash {
-    position: fixed; inset: 0; z-index: 10;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     background: rgba(10,10,26,0.9);
@@ -568,6 +569,41 @@
     color: rgba(255,255,255,0.3);
     letter-spacing: 0.4em;
     text-transform: uppercase;
+  }
+
+  /* ─── TURN SWITCH OVERLAY ─── */
+  .turn-switch {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,10,26,0.92);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .turn-switch.show { opacity: 1; }
+  .turn-switch-name {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .turn-switch-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 2.5vw, 32px);
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+  .turn-switch-countdown {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(60px, 10vw, 120px);
+    font-weight: 900;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 40px rgba(255,230,0,0.4);
   }
 
   /* ─── ERROR SCREEN ─── */
@@ -830,7 +866,7 @@
     <!-- Stu Stats -->
     <div id="res-stu-col" class="result-column" style="text-align: center;">
       <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-pink); margin-bottom: 10px;">STU</div>
-      <div class="results-score" id="res-stu-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));">0</div>
+      <div class="results-score" id="res-stu-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
       <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
         <div class="stat-item">
           <div class="stat-value" id="res-stu-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
@@ -895,6 +931,13 @@
   <div class="feedback-text" id="feedback-text"></div>
 </div>
 <div class="bonus-popup" id="bonus-popup"></div>
+
+<!-- Turn switch overlay -->
+<div class="turn-switch" id="turn-switch">
+  <div class="turn-switch-label">GET READY</div>
+  <div class="turn-switch-name" id="turn-switch-name">BURDEN</div>
+  <div class="turn-switch-countdown" id="turn-switch-countdown">3</div>
+</div>
 
 <!-- Round splash -->
 <div class="round-splash" id="round-splash">
@@ -1098,7 +1141,7 @@
       if (this.currentTrack === 'title') return;
       this.stop(0.2);
       setTimeout(() => {
-        const master = this._init(0.07);
+        const master = this._init(0.18);
         this.currentTrack = 'title';
         this._bpm = 82;
 
@@ -1107,7 +1150,7 @@
         padFilter.type = 'lowpass'; padFilter.frequency.value = 800;
         padFilter.connect(master);
         const padGain = audioCtx.createGain();
-        padGain.gain.value = 0.04;
+        padGain.gain.value = 0.06;
         padGain.connect(padFilter);
 
         const padNotes = [130.81, 164.81, 196, 246.94]; // Cmaj7
@@ -1175,7 +1218,7 @@
     game() {
       this.stop(0.15);
       setTimeout(() => {
-        const master = this._init(0.06);
+        const master = this._init(0.15);
         this.currentTrack = 'game';
         this._bpm = 115;
         this._intensity = 0;
@@ -1237,7 +1280,7 @@
     setIntensity(level) {
       this._intensity = Math.max(0, Math.min(1, level));
       if (this.masterGain && this.playing) {
-        const vol = 0.06 + level * 0.05;
+        const vol = 0.15 + level * 0.10;
         try { this.masterGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.3); } catch(e) {}
       }
     },
@@ -1246,7 +1289,7 @@
     victory() {
       this.stop(0.15);
       setTimeout(() => {
-        const master = this._init(0.07);
+        const master = this._init(0.18);
         this.currentTrack = 'victory';
         this._bpm = 135;
 
@@ -1296,7 +1339,7 @@
     draw() {
       this.stop(0.2);
       setTimeout(() => {
-        const master = this._init(0.04);
+        const master = this._init(0.10);
         this.currentTrack = 'draw';
 
         const padFilter = audioCtx.createBiquadFilter();
@@ -1332,7 +1375,7 @@
       btn.classList.remove('muted');
       btn.innerHTML = '&#128266;'; // speaker with sound
       if (Music.masterGain && Music.playing) {
-        try { Music.masterGain.gain.setTargetAtTime(0.06, audioCtx.currentTime, 0.05); } catch(e) {}
+        try { Music.masterGain.gain.setTargetAtTime(0.15, audioCtx.currentTime, 0.05); } catch(e) {}
       }
     }
   }
@@ -1623,6 +1666,35 @@
     return arr;
   }
 
+  function showTurnSwitch(playerKey, cb) {
+    const overlay = document.getElementById('turn-switch');
+    const nameEl = document.getElementById('turn-switch-name');
+    const countEl = document.getElementById('turn-switch-countdown');
+    const name = players[playerKey].name.toUpperCase();
+    const color = playerKey === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+
+    nameEl.textContent = name;
+    nameEl.style.color = color;
+    nameEl.style.textShadow = `0 0 40px ${playerKey === 'burden' ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)'}`;
+
+    let count = 3;
+    countEl.textContent = count;
+    overlay.classList.add('show');
+    sfxTick();
+
+    const interval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        countEl.textContent = count;
+        sfxTick();
+      } else {
+        clearInterval(interval);
+        overlay.classList.remove('show');
+        if (cb) cb();
+      }
+    }, 800);
+  }
+
   function showRoundSplash(num, cb) {
     const splash = document.getElementById('round-splash');
     document.getElementById('round-number').textContent = num;
@@ -1783,18 +1855,21 @@
     document.getElementById('hud-burden-score').textContent = players.burden.score;
     document.getElementById('hud-stu-score').textContent = players.stu.score;
 
-    // Alternate players
+    // Alternate players and go to next question
+    const prevPlayer = currentPlayer;
     currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
 
-    // Next question
     setTimeout(() => {
       currentQ++;
       if (currentQ < questions.length) {
-        showRoundSplash(currentQ + 1, () => loadQuestion());
+        // Show turn switch countdown if switching to a different player
+        showTurnSwitch(currentPlayer, () => {
+          showRoundSplash(currentQ + 1, () => loadQuestion());
+        });
       } else {
         endGame();
       }
-    }, 2000);
+    }, 1800);
   }
 
   function timeUp() {
@@ -1816,16 +1891,19 @@
     showFeedback('timeout');
 
     // Alternate players
+    const prevPlayer = currentPlayer;
     currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
 
     setTimeout(() => {
       currentQ++;
       if (currentQ < questions.length) {
-        showRoundSplash(currentQ + 1, () => loadQuestion());
+        showTurnSwitch(currentPlayer, () => {
+          showRoundSplash(currentQ + 1, () => loadQuestion());
+        });
       } else {
         endGame();
       }
-    }, 2000);
+    }, 1800);
   }
 
   function showFeedback(type) {
@@ -2029,6 +2107,7 @@
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
+      audio.volume = 0.5;
       return new Promise(resolve => {
         audio.onended = () => { URL.revokeObjectURL(url); resolve(true); };
         audio.onerror = () => { URL.revokeObjectURL(url); resolve(false); };

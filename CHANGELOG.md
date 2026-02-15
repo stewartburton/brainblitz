@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.0] - 2026-02-15
+
+### New Features
+- **Turn switch countdown**: 3-2-1 countdown overlay between player turns showing next player's name in their color — gives players time to swap and get ready
+- **Voice selection**: Choose between Rachel and Butcher voices in settings (was On/Off)
+
+### Bug Fixes
+- **Loser score hidden**: Fixed purple block covering loser's score on results screen — added missing `-webkit-background-clip: text` to Stu's inline gradient style for webOS compatibility
+- **Music too quiet**: Increased all music master gain volumes (~2.5x louder)
+- **TTS too loud**: Reduced voice playback volume to 50%
+
 ## [2.1.0] - 2026-02-15
 
 ### New Features
