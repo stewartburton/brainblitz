@@ -1,6 +1,6 @@
 # 🧠 BRAINBLITZ — Lekker TV Trivia
 
-A Triviaverse-inspired trivia game show built for LG webOS TVs (and any browser). Features South African Afrikaans expressions throughout for that local flavour.
+A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and any browser). Burden vs Stu — who's the Boss? Features South African Afrikaans expressions throughout for that local flavour.
 
 ![Built for TV](https://img.shields.io/badge/Built%20For-LG%20webOS%20TV-ff2d78?style=flat-square)
 ![HTML5](https://img.shields.io/badge/HTML5-Single%20File-00f0ff?style=flat-square)
@@ -8,13 +8,17 @@ A Triviaverse-inspired trivia game show built for LG webOS TVs (and any browser)
 
 ## Features
 
+- **Two-player game** — Burden vs Stu, alternating turns
 - **Game show UI** — Neon-styled, large text optimised for TV viewing distance
-- **Magic Remote compatible** — Point and click with the LG remote
+- **Magic Remote + Arrow Keys** — Full LG remote navigation support
 - **Keyboard support** — Press A/B/C/D to answer (pair a Bluetooth keyboard)
 - **Speed scoring** — Faster answers earn more points
 - **Streak multiplier** — 3+ correct in a row gives bonus points
+- **Winner celebration** — Confetti, trophy animation, and victory fanfare
 - **Sound effects** — Web Audio API synth sounds, no files needed
 - **Configurable** — Difficulty, timer, categories, and round count
+- **Voice mode** — Optional ElevenLabs TTS reads questions aloud
+- **Leaderboard** — Lifetime stats persisted via Cloudflare KV
 - **SA Expressions** — Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
 - **Fresh questions** — Pulls from the Open Trivia Database API
 
@@ -22,7 +26,7 @@ A Triviaverse-inspired trivia game show built for LG webOS TVs (and any browser)
 
 ### Option A: Host from your PC (Local Network)
 
-1. Clone this repo or download `brainblitz.html`
+1. Clone this repo or download `index.html`
 2. Serve it locally:
    ```bash
    # Python
@@ -33,15 +37,47 @@ A Triviaverse-inspired trivia game show built for LG webOS TVs (and any browser)
    ```
 3. Find your PC's local IP (e.g. `192.168.1.100`)
 4. On your LG TV, open the **Web Browser** app
-5. Navigate to `http://192.168.1.100:8080/brainblitz.html`
+5. Navigate to `http://192.168.1.100:8080/`
 6. Bookmark it for quick access!
 
-### Option B: Host on Cloudflare Pages (Public URL)
+> Note: Score persistence and TTS require Cloudflare Pages deployment.
+
+### Option B: Deploy to Cloudflare Pages (Recommended)
 
 1. Go to [Cloudflare Pages](https://pages.cloudflare.com)
-2. Connect this GitHub repo or drag-and-drop `brainblitz.html`
+2. Connect this GitHub repo
 3. Deploy — you'll get a URL like `brainblitz.pages.dev`
 4. Open that URL in your TV browser
+
+#### Setting up Cloudflare KV (Score Persistence)
+
+1. In your Cloudflare dashboard, go to **Workers & Pages > KV**
+2. Create a new KV namespace called `BRAINBLITZ_KV`
+3. Go to your Pages project > **Settings > Functions > KV namespace bindings**
+4. Add binding: Variable name = `BRAINBLITZ_KV`, KV namespace = the one you created
+5. Redeploy — scores will now persist!
+
+#### Setting up ElevenLabs TTS (Optional Voice)
+
+1. Create an [ElevenLabs](https://elevenlabs.io) account (free tier: 10,000 chars/month)
+2. Create a restricted API key with **Text to Speech → Access** permission
+3. In Cloudflare Pages > **Settings > Environment variables**
+4. Add: `ELEVENLABS_API_KEY` = your API key
+5. Redeploy — enable "Voice: On" in game settings to hear questions read aloud
+
+## File Structure
+
+```
+brainblitz/
+├── index.html              # The entire game (HTML + CSS + JS)
+├── functions/
+│   └── api/
+│       ├── _middleware.js   # CORS headers for API routes
+│       ├── scores.js        # GET/POST player stats (Cloudflare KV)
+│       └── tts.js           # ElevenLabs TTS proxy
+├── CHANGELOG.md
+└── README.md
+```
 
 ## TV Compatibility
 
@@ -74,12 +110,14 @@ Tested/designed for:
 
 ## Tech Stack
 
-Zero dependencies. Single HTML file containing:
+Single HTML file + Cloudflare Pages Functions:
 - HTML5
-- CSS3 (custom properties, grid, animations)
+- CSS3 (custom properties, grid, animations, confetti)
 - Vanilla JavaScript
 - Web Audio API (synthesised sound effects)
 - [Open Trivia Database API](https://opentdb.com/api_config.php)
+- [ElevenLabs TTS API](https://elevenlabs.io) (optional voice)
+- Cloudflare KV (score persistence)
 - Google Fonts (Orbitron + Rajdhani)
 
 ## License

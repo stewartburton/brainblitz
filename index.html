@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAINBLITZ - TV Trivia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --neon-cyan: #00f0ff;
+    --neon-pink: #ff2d78;
+    --neon-yellow: #ffe600;
+    --neon-green: #00ff88;
+    --neon-purple: #b44dff;
+    --bg-dark: #0a0a1a;
+    --bg-card: rgba(15, 15, 40, 0.85);
+    --correct: #00ff88;
+    --wrong: #ff2d78;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-dark);
+    font-family: 'Rajdhani', sans-serif;
+    color: #fff;
+    cursor: none;
+  }
+
+  /* Custom large cursor for TV pointer */
+  body.show-cursor { cursor: default; }
+
+  /* ─── BACKGROUND ─── */
+  .bg-grid {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+  }
+  .bg-glow {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,240,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(255,45,120,0.06) 0%, transparent 50%);
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    position: absolute; inset: 0; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ─── TITLE SCREEN ─── */
+  .title-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(60px, 8vw, 120px);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 4s ease infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(0,240,255,0.3));
+    margin-bottom: 10px;
+  }
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .title-sub {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 2vw, 28px);
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 2.2vw, 28px);
+    font-weight: 700;
+    padding: 20px 60px;
+    border: 2px solid var(--neon-cyan);
+    background: rgba(0,240,255,0.05);
+    color: var(--neon-cyan);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    min-width: 320px;
+    text-align: center;
+  }
+  .btn:hover, .btn:focus {
+    background: rgba(0,240,255,0.15);
+    box-shadow: 0 0 30px rgba(0,240,255,0.3), inset 0 0 30px rgba(0,240,255,0.1);
+    transform: scale(1.05);
+    outline: none;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn.pink {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    background: rgba(255,45,120,0.05);
+  }
+  .btn.pink:hover, .btn.pink:focus {
+    background: rgba(255,45,120,0.15);
+    box-shadow: 0 0 30px rgba(255,45,120,0.3), inset 0 0 30px rgba(255,45,120,0.1);
+  }
+
+  .btn-group {
+    display: flex; flex-direction: column; gap: 20px;
+    align-items: center;
+  }
+
+  /* ─── SETTINGS SCREEN ─── */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 80px;
+    max-width: 900px;
+    width: 100%;
+    margin-bottom: 50px;
+  }
+  .setting-group label {
+    display: block;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 20px);
+    color: var(--neon-cyan);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .pill-group {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .pill {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(16px, 1.8vw, 22px);
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pill:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.8);
+  }
+  .pill.selected {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    background: rgba(0,240,255,0.1);
+    box-shadow: 0 0 15px rgba(0,240,255,0.15);
+  }
+
+  /* ─── GAME SCREEN ─── */
+  .game-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+  .hud-item {
+    text-align: center;
+    position: relative;
+    padding: 8px 12px;
+  }
+  .hud-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 20px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .hud-value {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+  }
+  .hud-value.streak { color: var(--neon-yellow); }
+  .hud-value.score { color: var(--neon-pink); }
+
+  /* Active turn indicator */
+  .hud-item.active-turn::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 8px;
+    animation: turnPulse 1.5s ease infinite;
+    pointer-events: none;
+  }
+  .hud-item.active-turn.stu-turn::after {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255,45,120,0.3);
+  }
+  @keyframes turnPulse {
+    0%, 100% { opacity: 0.3; box-shadow: 0 0 10px rgba(0,240,255,0.1); }
+    50% { opacity: 1; box-shadow: 0 0 25px rgba(0,240,255,0.4); }
+  }
+
+  /* Speaker icon */
+  .hud-speaker {
+    font-size: clamp(14px, 1.5vw, 20px);
+    margin-left: 8px;
+    vertical-align: middle;
+    opacity: 0.5;
+  }
+
+  /* Timer bar */
+  .timer-track {
+    width: 100%;
+    max-width: 1200px;
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    margin-bottom: 40px;
+    overflow: hidden;
+    position: relative;
+  }
+  .timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+    transition: width 0.1s linear;
+    box-shadow: 0 0 20px rgba(0,240,255,0.4);
+  }
+  .timer-fill.danger {
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-yellow));
+    box-shadow: 0 0 20px rgba(255,45,120,0.4);
+  }
+
+  /* Category badge */
+  .category-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 1.8vw, 24px);
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* Question */
+  .question-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(28px, 3.8vw, 56px);
+    font-weight: 700;
+    text-align: center;
+    max-width: 1100px;
+    line-height: 1.2;
+    margin-bottom: 50px;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(255,255,255,0.1);
+  }
+
+  /* Answer grid */
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .answer-btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(20px, 2.5vw, 34px);
+    font-weight: 600;
+    padding: 24px 30px;
+    border: 2px solid rgba(255,255,255,0.12);
+    background: var(--bg-card);
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .answer-btn .letter {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 1.8vw, 24px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+    min-width: 44px;
+    height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--neon-cyan);
+    flex-shrink: 0;
+  }
+  .answer-btn:hover, .answer-btn:focus {
+    border-color: var(--neon-cyan);
+    background: rgba(0,240,255,0.08);
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(0,240,255,0.15);
+    outline: none;
+  }
+  .answer-btn.correct {
+    border-color: var(--correct) !important;
+    background: rgba(0,255,136,0.15) !important;
+    box-shadow: 0 0 40px rgba(0,255,136,0.3);
+  }
+  .answer-btn.correct .letter {
+    border-color: var(--correct);
+    color: var(--correct);
+    background: rgba(0,255,136,0.2);
+  }
+  .answer-btn.wrong {
+    border-color: var(--wrong) !important;
+    background: rgba(255,45,120,0.15) !important;
+    box-shadow: 0 0 40px rgba(255,45,120,0.3);
+  }
+  .answer-btn.wrong .letter {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,45,120,0.2);
+  }
+  .answer-btn.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* Enhanced answer animations */
+  .answer-btn.pulse-correct {
+    animation: pulseGlow 0.6s ease;
+  }
+  @keyframes pulseGlow {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0,255,136,0.6); }
+    100% { transform: scale(1); }
+  }
+  .answer-btn.shake-wrong {
+    animation: shake 0.5s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .answer-btn.dimmed {
+    opacity: 0.2;
+    transform: scale(0.97);
+    transition: all 0.4s ease;
+    pointer-events: none;
+  }
+
+  /* ─── FEEDBACK OVERLAY ─── */
+  .feedback-overlay {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .feedback-overlay.show { opacity: 1; }
+  .feedback-text {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(50px, 8vw, 120px);
+    font-weight: 900;
+    text-transform: uppercase;
+    animation: feedbackPop 0.6s ease forwards;
+  }
+  .feedback-text.correct-fb {
+    color: var(--correct);
+    text-shadow: 0 0 60px rgba(0,255,136,0.5);
+  }
+  .feedback-text.wrong-fb {
+    color: var(--wrong);
+    text-shadow: 0 0 60px rgba(255,45,120,0.5);
+  }
+  .feedback-text.timeout-fb {
+    color: var(--neon-yellow);
+    text-shadow: 0 0 60px rgba(255,230,0,0.5);
+  }
+  @keyframes feedbackPop {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Bonus points popup */
+  .bonus-popup {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, 20px);
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 3vw, 36px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 20px rgba(255,230,0,0.5);
+    opacity: 0;
+    z-index: 11;
+    pointer-events: none;
+    transition: all 0.8s ease;
+  }
+  .bonus-popup.show {
+    opacity: 1;
+    transform: translate(-50%, -20px);
+  }
+
+  /* ─── RESULTS SCREEN ─── */
+  .results-score {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(60px, 10vw, 140px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(0,240,255,0.3));
+    margin-bottom: 10px;
+  }
+  .results-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 22px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .stats-row {
+    display: flex; gap: 60px;
+    margin-bottom: 50px;
+  }
+  .stat-item {
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(30px, 4vw, 50px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+  }
+  .stat-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.3vw, 18px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .rank-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(22px, 2.5vw, 36px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    margin-bottom: 40px;
+  }
+
+  /* Result column winner/loser styles */
+  .result-column { transition: all 0.5s ease; }
+  .winner-column {
+    animation: winnerGlow 1.5s ease infinite;
+  }
+  .winner-column .results-score {
+    background: linear-gradient(135deg, #ffd700, #ffaa00, #ffd700) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+  @keyframes winnerGlow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(255,230,0,0.3)); }
+    50% { filter: drop-shadow(0 0 30px rgba(255,230,0,0.6)); }
+  }
+  .loser-column { opacity: 0.45; }
+
+  /* Trophy animation */
+  .trophy-icon {
+    font-size: clamp(40px, 6vw, 80px);
+    animation: trophyBounce 0.8s ease infinite;
+    display: none;
+  }
+  @keyframes trophyBounce {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.15) rotate(5deg); }
+  }
+
+  /* ─── CONFETTI ─── */
+  .confetti-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    top: -20px;
+    width: 10px;
+    height: 10px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ─── PARTICLES ─── */
+  .particle {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+  }
+
+  /* ─── ROUND INDICATOR ─── */
+  .round-splash {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,10,26,0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .round-splash.show {
+    opacity: 1;
+  }
+  .round-number {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(80px, 12vw, 160px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 60px rgba(0,240,255,0.4);
+    animation: feedbackPop 0.6s ease forwards;
+  }
+  .round-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 2vw, 28px);
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  /* ─── ERROR SCREEN ─── */
+  .error-icon {
+    font-size: clamp(50px, 8vw, 100px);
+    margin-bottom: 20px;
+  }
+  .error-message {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(18px, 2.2vw, 28px);
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    max-width: 600px;
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+
+  /* ─── LEADERBOARD SCREEN ─── */
+  .lb-columns {
+    display: flex;
+    gap: 80px;
+    margin-bottom: 40px;
+  }
+  .lb-column {
+    text-align: center;
+    min-width: 220px;
+  }
+  .lb-name {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 2.5vw, 32px);
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .lb-stat {
+    margin-bottom: 16px;
+  }
+  .lb-val {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+    display: block;
+  }
+  .lb-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(12px, 1.2vw, 16px);
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .lb-no-data {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(16px, 2vw, 24px);
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 40px;
+  }
+
+  /* Responsive for smaller screens */
+  @media (max-width: 800px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; gap: 30px; }
+    .stats-row { gap: 30px; }
+    .lb-columns { flex-direction: column; gap: 40px; }
+  }
+
+  /* Focus visible for remote/keyboard nav */
+  *:focus-visible {
+    outline: 3px solid var(--neon-cyan);
+    outline-offset: 4px;
+  }
+
+  /* Loading spinner */
+  .loading-ring {
+    width: 60px; height: 60px;
+    border: 4px solid rgba(0,240,255,0.1);
+    border-top-color: var(--neon-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .screen-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(24px, 3vw, 40px);
+    font-weight: 700;
+    color: var(--neon-cyan);
+    letter-spacing: 0.1em;
+    margin-bottom: 40px;
+  }
+</style>
+</head>
+<body class="show-cursor">
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- ═══ TITLE SCREEN ═══ -->
+<div id="screen-title" class="screen active">
+  <div class="title-logo">BRAINBLITZ</div>
+  <div class="title-sub">Lekker TV Trivia</div>
+  <div class="btn-group">
+    <button class="btn" onclick="showScreen('settings')" autofocus>Let's Play!</button>
+    <button class="btn pink" onclick="showScreen('howto')">How to Play</button>
+    <button class="btn pink" onclick="showScreen('leaderboard')">Leaderboard</button>
+  </div>
+  <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
+    <span id="title-burden-wins">BURDEN: 0</span> &nbsp;|&nbsp; <span id="title-stu-wins">STU: 0</span>
+  </div>
+</div>
+
+<!-- ═══ HOW TO PLAY ═══ -->
+<div id="screen-howto" class="screen">
+  <div class="screen-title">How to Play</div>
+  <div style="max-width:800px; text-align:center; font-size:clamp(18px,2.2vw,28px); line-height:1.7; color:rgba(255,255,255,0.7); margin-bottom:50px;">
+    Answer <span style="color:var(--neon-cyan); font-weight:700;">trivia questions</span> before the timer runs out, boet!<br><br>
+    <span style="color:var(--neon-green);">Faster answers = more points. Moerse lekker!</span><br>
+    Build a <span style="color:var(--neon-yellow); font-weight:700;">streak</span> for bonus multipliers — jy's 'n Boss!<br><br>
+    Use your <span style="color:var(--neon-pink);">remote pointer</span> or keyboard (A/B/C/D) to answer.<br>
+    Use <span style="color:var(--neon-cyan);">arrow keys</span> + Enter to navigate with your remote.<br>
+    <span style="color:rgba(255,255,255,0.4); font-size:0.85em;">Dis maklik, just point and kliek!</span>
+  </div>
+  <button class="btn" onclick="showScreen('title')">Back</button>
+</div>
+
+<!-- ═══ SETTINGS SCREEN ═══ -->
+<div id="screen-settings" class="screen">
+  <div class="screen-title">Game Setup</div>
+  <div class="settings-grid">
+    <div class="setting-group">
+      <label>Category</label>
+      <div class="pill-group" id="cat-pills">
+        <button class="pill selected" data-val="" onclick="selectPill(this,'cat')">Any</button>
+        <button class="pill" data-val="Frenchies" onclick="selectPill(this,'cat')">Frenchies</button>
+        <button class="pill" data-val="Hiking" onclick="selectPill(this,'cat')">Hiking</button>
+        <button class="pill" data-val="SA Wines" onclick="selectPill(this,'cat')">SA Wines</button>
+        <button class="pill" data-val="Paris" onclick="selectPill(this,'cat')">Paris</button>
+        <button class="pill" data-val="Cheeses" onclick="selectPill(this,'cat')">Cheeses</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Timer</label>
+      <div class="pill-group" id="timer-pills">
+        <button class="pill" data-val="10" onclick="selectPill(this,'timer')">10s</button>
+        <button class="pill selected" data-val="15" onclick="selectPill(this,'timer')">15s</button>
+        <button class="pill" data-val="20" onclick="selectPill(this,'timer')">20s</button>
+        <button class="pill" data-val="30" onclick="selectPill(this,'timer')">30s</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Rounds</label>
+      <div class="pill-group" id="rounds-pills">
+        <button class="pill" data-val="5" onclick="selectPill(this,'rounds')">5</button>
+        <button class="pill selected" data-val="10" onclick="selectPill(this,'rounds')">10</button>
+        <button class="pill" data-val="15" onclick="selectPill(this,'rounds')">15</button>
+        <button class="pill" data-val="20" onclick="selectPill(this,'rounds')">20</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Voice</label>
+      <div class="pill-group" id="voice-pills">
+        <button class="pill selected" data-val="off" onclick="selectPill(this,'voice')">Off</button>
+        <button class="pill" data-val="on" onclick="selectPill(this,'voice')">On</button>
+      </div>
+    </div>
+  </div>
+  <div class="btn-group" style="flex-direction:row; gap:30px;">
+    <button class="btn pink" onclick="showScreen('title')">Back</button>
+    <button class="btn" onclick="startGame()">Play!</button>
+  </div>
+</div>
+
+<!-- ═══ GAME SCREEN ═══ -->
+<div id="screen-game" class="screen">
+  <div class="game-hud">
+    <div class="hud-item">
+      <div class="hud-label">Question</div>
+      <div class="hud-value" id="hud-question">1/10</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Current Player</div>
+      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Burden<span id="hud-speaker" class="hud-speaker" style="display:none;">&#128264;</span></div>
+    </div>
+    <div class="hud-item" id="hud-burden-section">
+      <div class="hud-label">Burden</div>
+      <div class="hud-value score" id="hud-burden-score">0</div>
+    </div>
+    <div class="hud-item" id="hud-stu-section">
+      <div class="hud-label">Stu</div>
+      <div class="hud-value score" id="hud-stu-score">0</div>
+    </div>
+  </div>
+  <div class="timer-track">
+    <div class="timer-fill" id="timer-fill"></div>
+  </div>
+  <div class="category-badge" id="q-category"></div>
+  <div class="question-text" id="q-text"></div>
+  <div class="answers-grid" id="answers-grid"></div>
+</div>
+
+<!-- ═══ LOADING ═══ -->
+<div id="screen-loading" class="screen">
+  <div class="loading-ring"></div>
+  <div style="margin-top:30px; font-family:'Orbitron',monospace; font-size:18px; color:rgba(255,255,255,0.4); letter-spacing:0.2em;">LOADING QUESTIONS...</div>
+</div>
+
+<!-- ═══ RESULTS SCREEN ═══ -->
+<div id="screen-results" class="screen">
+  <div class="results-label">Final Score</div>
+  <div id="res-trophy" class="trophy-icon">&#127942;</div>
+  <div class="rank-text" id="res-winner" style="margin-bottom: 40px;"></div>
+
+  <div style="display: flex; gap: 80px; margin-bottom: 40px;">
+    <!-- Burden Stats -->
+    <div id="res-burden-col" class="result-column" style="text-align: center;">
+      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-cyan); margin-bottom: 10px;">BURDEN</div>
+      <div class="results-score" id="res-burden-score" style="font-size: clamp(40px, 8vw, 80px);">0</div>
+      <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
+        <div class="stat-item">
+          <div class="stat-value" id="res-burden-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="res-burden-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stu Stats -->
+    <div id="res-stu-col" class="result-column" style="text-align: center;">
+      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-pink); margin-bottom: 10px;">STU</div>
+      <div class="results-score" id="res-stu-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));">0</div>
+      <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
+        <div class="stat-item">
+          <div class="stat-value" id="res-stu-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="res-stu-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group" style="flex-direction:row; gap:30px;">
+    <button class="btn" onclick="startGame()">Play Again!</button>
+    <button class="btn pink" onclick="showScreen('title')">Home</button>
+  </div>
+</div>
+
+<!-- ═══ ERROR SCREEN ═══ -->
+<div id="screen-error" class="screen">
+  <div class="error-icon">&#128561;</div>
+  <div class="screen-title" style="color:var(--neon-pink);">Haibo!</div>
+  <div class="error-message" id="error-message">Something went wrong, boet.</div>
+  <div class="btn-group" style="flex-direction:row; gap:30px;">
+    <button class="btn" onclick="startGame()">Try Again</button>
+    <button class="btn pink" onclick="showScreen('title')">Home</button>
+  </div>
+</div>
+
+<!-- ═══ LEADERBOARD SCREEN ═══ -->
+<div id="screen-leaderboard" class="screen">
+  <div class="screen-title">Leaderboard</div>
+  <div id="lb-content" class="lb-columns">
+    <div class="lb-column">
+      <div class="lb-name" style="color: var(--neon-cyan);">BURDEN</div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-wins">0</span><span class="lb-label">Wins</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-games">0</span><span class="lb-label">Games</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-draws">0</span><span class="lb-label">Draws</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-total">0</span><span class="lb-label">Total Score</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-correct">0</span><span class="lb-label">Total Correct</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-best">0</span><span class="lb-label">Best Game</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-burden-streak">0</span><span class="lb-label">Best Streak</span></div>
+    </div>
+    <div class="lb-column">
+      <div class="lb-name" style="color: var(--neon-pink);">STU</div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-wins">0</span><span class="lb-label">Wins</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-games">0</span><span class="lb-label">Games</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-draws">0</span><span class="lb-label">Draws</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-total">0</span><span class="lb-label">Total Score</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-correct">0</span><span class="lb-label">Total Correct</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-best">0</span><span class="lb-label">Best Game</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-stu-streak">0</span><span class="lb-label">Best Streak</span></div>
+    </div>
+  </div>
+  <div id="lb-no-data" class="lb-no-data" style="display:none;">No games played yet. Let's play!</div>
+  <button class="btn" onclick="showScreen('title')">Home</button>
+</div>
+
+<!-- Feedback overlay -->
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-text" id="feedback-text"></div>
+</div>
+<div class="bonus-popup" id="bonus-popup"></div>
+
+<!-- Round splash -->
+<div class="round-splash" id="round-splash">
+  <div class="round-label">Question</div>
+  <div class="round-number" id="round-number">1</div>
+</div>
+
+<!-- Confetti container -->
+<div id="confetti-container" class="confetti-container"></div>
+
+<script>
+  // ═══════════════════════════════════════
+  //  POLYFILLS (webOS compatibility)
+  // ═══════════════════════════════════════
+  if (typeof AbortSignal !== 'undefined' && !AbortSignal.timeout) {
+    AbortSignal.timeout = function(ms) {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(), ms);
+      return controller.signal;
+    };
+  }
+
+  // ═══════════════════════════════════════
+  //  AUDIO ENGINE (Web Audio API)
+  // ═══════════════════════════════════════
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx;
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone(freq, dur, type = 'sine', vol = 0.15) {
+    try {
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    } catch(e) {}
+  }
+
+  function sfxCorrect() {
+    playTone(523, 0.12, 'sine', 0.15);
+    setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 80);
+    setTimeout(() => playTone(784, 0.25, 'sine', 0.15), 160);
+  }
+  function sfxWrong() {
+    playTone(200, 0.3, 'sawtooth', 0.1);
+    setTimeout(() => playTone(150, 0.4, 'sawtooth', 0.08), 150);
+  }
+  function sfxTick() {
+    playTone(800, 0.05, 'square', 0.04);
+  }
+  function sfxCountdown() {
+    playTone(440, 0.15, 'square', 0.08);
+  }
+  function sfxStart() {
+    [523, 659, 784, 1047].forEach((f, i) => {
+      setTimeout(() => playTone(f, 0.2, 'sine', 0.12), i * 100);
+    });
+  }
+  function sfxClick() {
+    playTone(1200, 0.05, 'sine', 0.08);
+  }
+  function sfxWhoosh() {
+    try {
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    } catch(e) {}
+  }
+  function sfxVictory() {
+    const notes = [523, 659, 784, 1047, 784, 1047, 1319];
+    notes.forEach((f, i) => {
+      setTimeout(() => playTone(f, 0.3, 'sine', 0.12), i * 150);
+    });
+  }
+  function sfxDraw() {
+    playTone(440, 0.3, 'sine', 0.1);
+    setTimeout(() => playTone(440, 0.3, 'triangle', 0.08), 300);
+  }
+
+  // ═══════════════════════════════════════
+  //  QUESTION BANK
+  // ═══════════════════════════════════════
+  const QUESTION_BANK = [
+    // ── FRENCHIES (French Bulldogs) ──
+    {category:"Frenchies",question:"What country did French Bulldogs originally come from before becoming popular in France?",correct_answer:"England",incorrect_answers:["Germany","Spain","Belgium"]},
+    {category:"Frenchies",question:"What is the average weight range of an adult French Bulldog?",correct_answer:"16-28 pounds",incorrect_answers:["30-45 pounds","8-12 pounds","50-65 pounds"]},
+    {category:"Frenchies",question:"French Bulldogs are known for their distinctive ears. What shape are they?",correct_answer:"Bat-shaped",incorrect_answers:["Floppy","Pointed","Rose-shaped"]},
+    {category:"Frenchies",question:"What is a common health concern specific to French Bulldogs due to their flat face?",correct_answer:"Brachycephalic airway syndrome",incorrect_answers:["Hip dysplasia","Bloat","Cataracts"]},
+    {category:"Frenchies",question:"What is the average lifespan of a French Bulldog?",correct_answer:"10-12 years",incorrect_answers:["5-7 years","15-18 years","3-4 years"]},
+    {category:"Frenchies",question:"Which of these coat colors is NOT standard for French Bulldogs?",correct_answer:"Merle",incorrect_answers:["Brindle","Fawn","White"]},
+    {category:"Frenchies",question:"French Bulldogs were originally bred as companions for which group of workers in England?",correct_answer:"Lace makers",incorrect_answers:["Coal miners","Fishermen","Blacksmiths"]},
+    {category:"Frenchies",question:"Why are French Bulldogs unable to swim well?",correct_answer:"Their heavy front body and short legs",incorrect_answers:["They are afraid of water","Their fur is too thick","They have no webbed feet"]},
+    {category:"Frenchies",question:"What is the French Bulldog's rank among the most popular dog breeds in the USA (as of 2024)?",correct_answer:"#1",incorrect_answers:["#5","#10","#3"]},
+    {category:"Frenchies",question:"How many puppies does a French Bulldog typically have in a litter?",correct_answer:"2-4",incorrect_answers:["6-8","8-12","1"]},
+    {category:"Frenchies",question:"Why do most French Bulldogs require cesarean sections for birth?",correct_answer:"Their puppies' heads are too large for the birth canal",incorrect_answers:["They are too small","Their hips are weak","It is a breed regulation"]},
+    {category:"Frenchies",question:"What temperature sensitivity is common in French Bulldogs?",correct_answer:"They overheat easily in hot weather",incorrect_answers:["They are sensitive to cold only","They tolerate all temperatures well","They prefer humid climates"]},
+    {category:"Frenchies",question:"What group does the AKC classify French Bulldogs in?",correct_answer:"Non-Sporting Group",incorrect_answers:["Toy Group","Terrier Group","Working Group"]},
+    {category:"Frenchies",question:"Which celebrity is NOT known for owning a French Bulldog?",correct_answer:"Oprah Winfrey",incorrect_answers:["Lady Gaga","Dwayne 'The Rock' Johnson","Hugh Jackman"]},
+    {category:"Frenchies",question:"What is the typical personality trait most associated with French Bulldogs?",correct_answer:"Clownish and affectionate",incorrect_answers:["Aggressive and territorial","Independent and aloof","Hyperactive and restless"]},
+    {category:"Frenchies",question:"What sound do French Bulldogs commonly make that other breeds don't?",correct_answer:"A unique 'talking' or yodeling sound",incorrect_answers:["A high-pitched whistle","A deep howl","A clicking noise"]},
+    {category:"Frenchies",question:"What is 'cherry eye,' a condition French Bulldogs are prone to?",correct_answer:"Prolapse of the third eyelid gland",incorrect_answers:["A red nose","Bloodshot eyes from allergies","A type of ear infection"]},
+    {category:"Frenchies",question:"In what decade did French Bulldogs first arrive in America?",correct_answer:"1880s",incorrect_answers:["1920s","1950s","1770s"]},
+    {category:"Frenchies",question:"What is the correct way to clean a French Bulldog's facial wrinkles?",correct_answer:"Gently wipe with a damp cloth and dry thoroughly",incorrect_answers:["Use rubbing alcohol","Leave them alone","Apply baby powder daily"]},
+    {category:"Frenchies",question:"Which of these activities is LEAST suitable for a French Bulldog?",correct_answer:"Long-distance running",incorrect_answers:["Short walks","Indoor play","Trick training"]},
+    {category:"Frenchies",question:"What distinctive feature besides bat ears makes Frenchies easy to identify?",correct_answer:"A short, stumpy corkscrew tail",incorrect_answers:["A long fluffy tail","Blue eyes","Extra-long legs"]},
+    {category:"Frenchies",question:"What is the most expensive French Bulldog color?",correct_answer:"Blue",incorrect_answers:["Black","White","Brindle"]},
+    {category:"Frenchies",question:"French Bulldogs are known to be particularly good at which of these?",correct_answer:"Being apartment dogs",incorrect_answers:["Guarding livestock","Hunting rabbits","Pulling sleds"]},
+    {category:"Frenchies",question:"What is 'reverse sneezing,' common in French Bulldogs?",correct_answer:"Rapid inward pulling of air through the nose",incorrect_answers:["Sneezing while walking backward","A type of cough","Breathing through the mouth only"]},
+    {category:"Frenchies",question:"What was the original English ancestor breed of the French Bulldog?",correct_answer:"Toy Bulldog",incorrect_answers:["Pug","Boston Terrier","English Mastiff"]},
+
+    // ── HIKING ──
+    {category:"Hiking",question:"What does 'Leave No Trace' mean in hiking?",correct_answer:"Minimize your impact on the natural environment",incorrect_answers:["Don't leave your hiking group","Never stop on the trail","Always hike in the dark"]},
+    {category:"Hiking",question:"What is the highest peak in the Drakensberg Mountains of South Africa?",correct_answer:"Thabana Ntlenyana",incorrect_answers:["Cathedral Peak","Giant's Castle","Champagne Castle"]},
+    {category:"Hiking",question:"What is the '10 Essentials' in hiking terminology?",correct_answer:"A list of essential survival items for any hike",incorrect_answers:["10 rules for trail etiquette","The 10 hardest hikes in the world","A 10-mile training plan"]},
+    {category:"Hiking",question:"Which type of footwear is generally recommended for rocky mountain trails?",correct_answer:"Ankle-supporting hiking boots",incorrect_answers:["Running shoes","Sandals","Wellington boots"]},
+    {category:"Hiking",question:"What does 'cairn' mean on a hiking trail?",correct_answer:"A stack of rocks used as a trail marker",incorrect_answers:["A type of shelter","A water source","A resting bench"]},
+    {category:"Hiking",question:"What is the approximate length of the Appalachian Trail in the USA?",correct_answer:"2,190 miles",incorrect_answers:["500 miles","5,000 miles","800 miles"]},
+    {category:"Hiking",question:"What is altitude sickness typically caused by?",correct_answer:"Reduced oxygen at high elevations",incorrect_answers:["Dehydration","Eating too much","Cold temperatures"]},
+    {category:"Hiking",question:"What is the most important item to bring on any hike?",correct_answer:"Water",incorrect_answers:["A camera","Snacks","A compass"]},
+    {category:"Hiking",question:"What does 'switchback' mean on a trail?",correct_answer:"A zigzag path used to climb steep terrain",incorrect_answers:["Hiking backward","Returning to the trailhead","A type of bridge"]},
+    {category:"Hiking",question:"What is the famous Table Mountain hiking trail in Cape Town called?",correct_answer:"Platteklip Gorge",incorrect_answers:["Lion's Head Loop","Devil's Peak Path","Kirstenbosch Trail"]},
+    {category:"Hiking",question:"What is the rule of thumb for water consumption while hiking?",correct_answer:"About half a liter per hour of moderate hiking",incorrect_answers:["1 cup per day","5 liters per hour","Only drink when thirsty"]},
+    {category:"Hiking",question:"What is 'thru-hiking'?",correct_answer:"Completing an entire long-distance trail in one continuous journey",incorrect_answers:["Hiking through water","Hiking at night","Hiking without breaks"]},
+    {category:"Hiking",question:"What are trekking poles primarily used for?",correct_answer:"Balance and reducing strain on knees",incorrect_answers:["Measuring distance","Fighting off animals","Testing water depth"]},
+    {category:"Hiking",question:"What is the Otter Trail in South Africa known for?",correct_answer:"A famous multi-day coastal hike in Tsitsikamma",incorrect_answers:["A trail through the Kalahari Desert","A mountain bike route","A river rafting experience"]},
+    {category:"Hiking",question:"What does it mean when a trail is marked as 'Class 3'?",correct_answer:"Scrambling with hands needed, exposure to falls",incorrect_answers:["Easy flat walking","Wheelchair accessible","Technical rock climbing with ropes"]},
+    {category:"Hiking",question:"What time of day is generally best to start a mountain hike?",correct_answer:"Early morning",incorrect_answers:["Midday","Late afternoon","Midnight"]},
+    {category:"Hiking",question:"What is a 'blaze' in trail terminology?",correct_answer:"A painted mark on a tree or rock indicating the trail",incorrect_answers:["A fast hiking pace","A clearing caused by wildfire","A type of hiking boot"]},
+    {category:"Hiking",question:"Which famous trail runs along the rim of the Grand Canyon?",correct_answer:"Bright Angel Trail",incorrect_answers:["Pacific Crest Trail","John Muir Trail","Continental Divide Trail"]},
+    {category:"Hiking",question:"What is the recommended action if you encounter a bear on a trail?",correct_answer:"Stay calm, make yourself look big, and back away slowly",incorrect_answers:["Run as fast as possible","Climb the nearest tree","Play dead immediately"]},
+    {category:"Hiking",question:"What material are the best hiking socks made from?",correct_answer:"Merino wool",incorrect_answers:["Cotton","Silk","Nylon only"]},
+    {category:"Hiking",question:"What is 'bushwhacking' in hiking?",correct_answer:"Hiking through dense vegetation without a trail",incorrect_answers:["Cutting down bushes","A type of machete","Camping in the bush"]},
+    {category:"Hiking",question:"How do you estimate remaining daylight using your hand?",correct_answer:"Each finger width between the sun and horizon equals about 15 minutes",incorrect_answers:["Count your fingers and multiply by one hour","Hold your palm over the sun","Measure your shadow length"]},
+    {category:"Hiking",question:"What is the longest hiking trail in the world?",correct_answer:"The Great Trail (Trans Canada Trail)",incorrect_answers:["The Appalachian Trail","The Pacific Crest Trail","The Camino de Santiago"]},
+    {category:"Hiking",question:"What is a 'saddle' in mountain hiking terminology?",correct_answer:"A low point between two peaks",incorrect_answers:["A type of backpack","A resting spot","Equipment for horseback riding"]},
+    {category:"Hiking",question:"What is the primary danger of cotton clothing while hiking?",correct_answer:"It retains moisture and loses insulation when wet",incorrect_answers:["It attracts insects","It is too heavy","It tears easily"]},
+
+    // ── SOUTH AFRICAN WINES ──
+    {category:"SA Wines",question:"What is the most widely planted red grape variety in South Africa?",correct_answer:"Cabernet Sauvignon",incorrect_answers:["Merlot","Pinot Noir","Shiraz"]},
+    {category:"SA Wines",question:"Which South African wine region is considered the oldest in the country?",correct_answer:"Constantia",incorrect_answers:["Stellenbosch","Franschhoek","Paarl"]},
+    {category:"SA Wines",question:"What unique South African grape is a cross between Pinot Noir and Cinsault?",correct_answer:"Pinotage",incorrect_answers:["Chenin Noir","Cape Blend","Steen"]},
+    {category:"SA Wines",question:"What is Chenin Blanc also traditionally known as in South Africa?",correct_answer:"Steen",incorrect_answers:["Colombar","Hanepoot","Muscat"]},
+    {category:"SA Wines",question:"Which South African wine estate is the oldest, established in 1685?",correct_answer:"Groot Constantia",incorrect_answers:["Vergelegen","Boschendal","Spier"]},
+    {category:"SA Wines",question:"What is the name of South Africa's wine classification system?",correct_answer:"Wine of Origin (WO)",incorrect_answers:["Appellation d'Origine","Denominazione","Grand Cru"]},
+    {category:"SA Wines",question:"Which town is known as the 'French Corner' of the Cape Winelands?",correct_answer:"Franschhoek",incorrect_answers:["Stellenbosch","Paarl","Robertson"]},
+    {category:"SA Wines",question:"What famous dessert wine from Constantia was favored by Napoleon?",correct_answer:"Vin de Constance",incorrect_answers:["Cape Ruby","Muscadel","Jerepigo"]},
+    {category:"SA Wines",question:"Which South African wine region is known for its exceptional Sauvignon Blanc?",correct_answer:"Elgin",incorrect_answers:["Swartland","Klein Karoo","Olifants River"]},
+    {category:"SA Wines",question:"What is a 'Cape Blend'?",correct_answer:"A red blend that must contain 30-70% Pinotage",incorrect_answers:["Any wine from the Cape","A white wine blend","A rosé style"]},
+    {category:"SA Wines",question:"Which wine route is the oldest in South Africa, established in 1971?",correct_answer:"Stellenbosch Wine Route",incorrect_answers:["Franschhoek Wine Route","Paarl Wine Route","Robertson Wine Route"]},
+    {category:"SA Wines",question:"What is the Swartland region increasingly known for?",correct_answer:"Old-vine Chenin Blanc and Rhône-style blends",incorrect_answers:["Sparkling wine","Dessert wine","Pinot Noir"]},
+    {category:"SA Wines",question:"What is 'Méthode Cap Classique' (MCC)?",correct_answer:"South African traditional method sparkling wine",incorrect_answers:["A wine scoring system","A type of fortified wine","A vineyard pruning technique"]},
+    {category:"SA Wines",question:"Which ocean current has a significant cooling effect on South African coastal vineyards?",correct_answer:"The Benguela Current",incorrect_answers:["The Gulf Stream","The Agulhas Current","The Humboldt Current"]},
+    {category:"SA Wines",question:"What is the Hemel-en-Aarde Valley near Hermanus famous for producing?",correct_answer:"Pinot Noir and Chardonnay",incorrect_answers:["Pinotage","Cabernet Sauvignon","Chenin Blanc"]},
+    {category:"SA Wines",question:"What is the most planted white grape variety in South Africa?",correct_answer:"Chenin Blanc",incorrect_answers:["Sauvignon Blanc","Chardonnay","Colombard"]},
+    {category:"SA Wines",question:"Which South African wine region is the largest by area?",correct_answer:"The Breede River Valley",incorrect_answers:["Stellenbosch","Constantia","Walker Bay"]},
+    {category:"SA Wines",question:"What does BWI stand for in South African wine?",correct_answer:"Biodiversity and Wine Initiative",incorrect_answers:["Best Wine Institute","Blended Wine International","Bureau of Wine Inspection"]},
+    {category:"SA Wines",question:"In what century did wine production first begin in South Africa?",correct_answer:"17th century (1659)",incorrect_answers:["15th century","19th century","18th century"]},
+    {category:"SA Wines",question:"What is 'Hanepoot' in South African wine terminology?",correct_answer:"Muscat d'Alexandrie grape",incorrect_answers:["A type of wine press","A vineyard pest","A wine storage container"]},
+    {category:"SA Wines",question:"Which South African wine often has a distinctive smoke/braai character?",correct_answer:"Pinotage",incorrect_answers:["Merlot","Sauvignon Blanc","Riesling"]},
+    {category:"SA Wines",question:"What is the Robertson Valley particularly well-suited for due to its lime-rich soils?",correct_answer:"Chardonnay",incorrect_answers:["Pinotage","Malbec","Shiraz"]},
+    {category:"SA Wines",question:"Which award is considered the most prestigious for South African wines?",correct_answer:"Platter's Wine Guide 5 Stars",incorrect_answers:["The Cape Gold Medal","The Winemaker's Choice","The Stellenbosch Trophy"]},
+    {category:"SA Wines",question:"What percentage of South Africa's wine production is white wine?",correct_answer:"About 55%",incorrect_answers:["About 20%","About 80%","About 35%"]},
+    {category:"SA Wines",question:"Approximately how many wine producers are there in South Africa?",correct_answer:"Around 560",incorrect_answers:["Around 50","Around 2,000","Around 100"]},
+
+    // ── PARIS ──
+    {category:"Paris",question:"In what year was the Eiffel Tower completed?",correct_answer:"1889",incorrect_answers:["1900","1875","1920"]},
+    {category:"Paris",question:"What river runs through the center of Paris?",correct_answer:"The Seine",incorrect_answers:["The Loire","The Rhône","The Thames"]},
+    {category:"Paris",question:"How many arrondissements (districts) does Paris have?",correct_answer:"20",incorrect_answers:["12","16","25"]},
+    {category:"Paris",question:"What is the most visited museum in the world, located in Paris?",correct_answer:"The Louvre",incorrect_answers:["Musée d'Orsay","Centre Pompidou","Musée Rodin"]},
+    {category:"Paris",question:"What was the original purpose of the Eiffel Tower?",correct_answer:"Temporary entrance arch for the 1889 World's Fair",incorrect_answers:["A military watchtower","A radio tower","A monument to Napoleon"]},
+    {category:"Paris",question:"Which Parisian landmark was originally a medieval fortress before becoming a museum?",correct_answer:"The Louvre",incorrect_answers:["Notre-Dame","Sacré-Cœur","The Panthéon"]},
+    {category:"Paris",question:"What is the famous Parisian boulevard known for luxury shopping and the Arc de Triomphe?",correct_answer:"Champs-Élysées",incorrect_answers:["Boulevard Haussmann","Rue de Rivoli","Boulevard Saint-Germain"]},
+    {category:"Paris",question:"How tall is the Eiffel Tower including its antenna?",correct_answer:"330 meters",incorrect_answers:["200 meters","450 meters","150 meters"]},
+    {category:"Paris",question:"What Parisian cathedral suffered a devastating fire in 2019?",correct_answer:"Notre-Dame de Paris",incorrect_answers:["Sacré-Cœur","Saint-Sulpice","La Madeleine"]},
+    {category:"Paris",question:"What is the Parisian underground ossuary that holds the remains of over 6 million people?",correct_answer:"The Catacombs",incorrect_answers:["The Panthéon","Père Lachaise","The Sewer Museum"]},
+    {category:"Paris",question:"Which Parisian train station serves as the Eurostar terminal to London?",correct_answer:"Gare du Nord",incorrect_answers:["Gare de Lyon","Gare Montparnasse","Gare de l'Est"]},
+    {category:"Paris",question:"Who redesigned much of Paris's boulevards in the 1850s-1870s?",correct_answer:"Baron Haussmann",incorrect_answers:["Napoleon Bonaparte","Gustave Eiffel","Le Corbusier"]},
+    {category:"Paris",question:"What is the name of Paris's famous flea market, one of the largest in the world?",correct_answer:"Marché aux Puces de Saint-Ouen",incorrect_answers:["Marché Bastille","Les Halles","Marché d'Aligre"]},
+    {category:"Paris",question:"Which Paris landmark sits at the highest natural point in the city?",correct_answer:"Sacré-Cœur Basilica (Montmartre)",incorrect_answers:["The Eiffel Tower","Arc de Triomphe","Tour Montparnasse"]},
+    {category:"Paris",question:"What famous cemetery in Paris is the final resting place of Jim Morrison and Oscar Wilde?",correct_answer:"Père Lachaise",incorrect_answers:["Montmartre Cemetery","Montparnasse Cemetery","Passy Cemetery"]},
+    {category:"Paris",question:"What is the name of the famous Parisian cabaret known for the can-can dance?",correct_answer:"Moulin Rouge",incorrect_answers:["Lido","Crazy Horse","Folies Bergère"]},
+    {category:"Paris",question:"How many bridges cross the Seine in Paris?",correct_answer:"37",incorrect_answers:["12","50","25"]},
+    {category:"Paris",question:"What is the oldest bridge in Paris, despite its name meaning 'New Bridge'?",correct_answer:"Pont Neuf",incorrect_answers:["Pont des Arts","Pont Alexandre III","Pont Royal"]},
+    {category:"Paris",question:"Which Parisian park was originally a royal hunting ground?",correct_answer:"Bois de Boulogne",incorrect_answers:["Jardin du Luxembourg","Tuileries Garden","Parc des Buttes-Chaumont"]},
+    {category:"Paris",question:"What is the French name for the Paris subway system?",correct_answer:"Le Métro",incorrect_answers:["Le RER","Le TGV","Le Tramway"]},
+    {category:"Paris",question:"In which arrondissement is the Eiffel Tower located?",correct_answer:"7th",incorrect_answers:["1st","16th","15th"]},
+    {category:"Paris",question:"What famous art museum is housed in a converted railway station?",correct_answer:"Musée d'Orsay",incorrect_answers:["Centre Pompidou","Musée de l'Orangerie","Palais de Tokyo"]},
+    {category:"Paris",question:"What is the Latin Quarter in Paris named after?",correct_answer:"Latin was the language spoken at the medieval university there",incorrect_answers:["A large Latin American community","A Roman temple discovered there","A famous Latin inscription on a building"]},
+    {category:"Paris",question:"What year did Paris host the Summer Olympics for the third time?",correct_answer:"2024",incorrect_answers:["2012","2028","2020"]},
+    {category:"Paris",question:"What is the Marais district in Paris known for?",correct_answer:"Historic architecture, art galleries, and LGBTQ+ culture",incorrect_answers:["The financial district","Industrial warehouses","The airport area"]},
+
+    // ── CHEESES ──
+    {category:"Cheeses",question:"What country produces the most cheese in the world?",correct_answer:"United States",incorrect_answers:["France","Italy","Netherlands"]},
+    {category:"Cheeses",question:"What is the most consumed cheese in the world?",correct_answer:"Mozzarella",incorrect_answers:["Cheddar","Brie","Gouda"]},
+    {category:"Cheeses",question:"What type of milk is traditionally used to make Roquefort?",correct_answer:"Sheep's milk",incorrect_answers:["Cow's milk","Goat's milk","Buffalo milk"]},
+    {category:"Cheeses",question:"What gives blue cheese its distinctive blue-green veins?",correct_answer:"Penicillium mold",incorrect_answers:["Food coloring","Blue algae","Copper minerals"]},
+    {category:"Cheeses",question:"Which Italian cheese is traditionally aged for at least 12 months?",correct_answer:"Parmigiano-Reggiano",incorrect_answers:["Mozzarella","Ricotta","Mascarpone"]},
+    {category:"Cheeses",question:"What is the rind of Brie cheese made from?",correct_answer:"Edible white mold (Penicillium camemberti)",incorrect_answers:["Wax","Cloth wrapping","Dried herbs"]},
+    {category:"Cheeses",question:"What country is Gouda cheese originally from?",correct_answer:"Netherlands",incorrect_answers:["Germany","Belgium","Switzerland"]},
+    {category:"Cheeses",question:"What is the main difference between Brie and Camembert?",correct_answer:"Brie is larger and milder; Camembert is smaller and more intense",incorrect_answers:["They are made from different milks","One is blue and one is white","Brie is hard and Camembert is soft"]},
+    {category:"Cheeses",question:"Which Swiss cheese is famous for its large holes?",correct_answer:"Emmental",incorrect_answers:["Gruyère","Raclette","Appenzeller"]},
+    {category:"Cheeses",question:"What causes the holes in Swiss cheese?",correct_answer:"Carbon dioxide gas produced by bacteria during aging",incorrect_answers:["Air bubbles from stirring","Worms that are later removed","Mechanical pressing"]},
+    {category:"Cheeses",question:"What is fresh mozzarella traditionally made from?",correct_answer:"Water buffalo milk",incorrect_answers:["Cow's milk","Goat's milk","Sheep's milk"]},
+    {category:"Cheeses",question:"Which French cheese is legally required to be aged in the caves of Combalou?",correct_answer:"Roquefort",incorrect_answers:["Brie de Meaux","Comté","Reblochon"]},
+    {category:"Cheeses",question:"What does 'affinage' mean in cheese-making?",correct_answer:"The process of aging and maturing cheese",incorrect_answers:["Adding salt","Cutting the curds","Pasteurizing the milk"]},
+    {category:"Cheeses",question:"What is the world's most expensive cheese?",correct_answer:"Pule (made from donkey milk)",incorrect_answers:["White Stilton Gold","Bitto Storico","Epoisses"]},
+    {category:"Cheeses",question:"Which cheese is traditionally used in a classic Italian tiramisu?",correct_answer:"Mascarpone",incorrect_answers:["Ricotta","Cream cheese","Brie"]},
+    {category:"Cheeses",question:"What is 'rennet' used for in cheese-making?",correct_answer:"Coagulating milk to separate curds from whey",incorrect_answers:["Adding flavor","Coloring the cheese","Preserving the cheese"]},
+    {category:"Cheeses",question:"Which English cheese is traditionally eaten with port wine?",correct_answer:"Stilton",incorrect_answers:["Cheddar","Red Leicester","Wensleydale"]},
+    {category:"Cheeses",question:"What is Halloumi cheese known for?",correct_answer:"Its high melting point — it can be grilled or fried",incorrect_answers:["Its extremely strong smell","Its blue color","Its liquid center"]},
+    {category:"Cheeses",question:"Where does Feta cheese originate from?",correct_answer:"Greece",incorrect_answers:["Turkey","Italy","Bulgaria"]},
+    {category:"Cheeses",question:"What type of cheese is Gruyère?",correct_answer:"A hard Swiss cheese with a slightly sweet, nutty flavor",incorrect_answers:["A soft French cheese","A blue Italian cheese","A smoked Dutch cheese"]},
+    {category:"Cheeses",question:"What is the traditional cheese used in a French onion soup?",correct_answer:"Gruyère",incorrect_answers:["Brie","Camembert","Roquefort"]},
+    {category:"Cheeses",question:"What does PDO (Protected Designation of Origin) mean for cheese?",correct_answer:"It can only be made in a specific region using traditional methods",incorrect_answers:["It is pasteurized","It is organic","It is dairy-free"]},
+    {category:"Cheeses",question:"What cheese is made by stretching and pulling the curds in hot water?",correct_answer:"Mozzarella (pasta filata method)",incorrect_answers:["Cheddar","Brie","Gouda"]},
+    {category:"Cheeses",question:"Which country consumes the most cheese per capita?",correct_answer:"France",incorrect_answers:["United States","Italy","Switzerland"]},
+    {category:"Cheeses",question:"What is the 'king of cheeses' as designated by tradition?",correct_answer:"Parmigiano-Reggiano",incorrect_answers:["Gruyère","Stilton","Brie"]},
+  ];
+
+  // ═══════════════════════════════════════
+  //  STATE
+  // ═══════════════════════════════════════
+  let settings = { timer: 15, category: '', rounds: 10 };
+  let questions = [];
+  let currentQ = 0;
+
+  // Two-player state
+  let players = {
+    burden: { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 },
+    stu: { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 }
+  };
+  let currentPlayer = 'burden';
+
+  let timerInterval = null;
+  let timeLeft = 0;
+  let prevTimeLeft = 0;
+  let answered = false;
+  let gameLoading = false;
+  let ttsPlaying = false;
+  let voiceEnabled = false;
+  let lifetimeStats = null;
+
+  // ═══════════════════════════════════════
+  //  NAVIGATION
+  // ═══════════════════════════════════════
+  function showScreen(id) {
+    sfxWhoosh();
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    // Clear confetti when leaving results
+    if (id !== 'results') {
+      const confetti = document.getElementById('confetti-container');
+      if (confetti) confetti.innerHTML = '';
+    }
+    // Focus first button
+    setTimeout(() => {
+      const btn = document.querySelector('#screen-' + id + ' .btn, #screen-' + id + ' .pill, #screen-' + id + ' .answer-btn');
+      if (btn) btn.focus();
+    }, 100);
+  }
+
+  function selectPill(el, group) {
+    el.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    sfxTick();
+  }
+
+  function getSelected(groupId) {
+    const pill = document.querySelector('#' + groupId + '-pills .pill.selected');
+    return pill ? pill.dataset.val : '';
+  }
+
+  function showError(msg) {
+    document.getElementById('error-message').textContent = msg;
+    showScreen('error');
+  }
+
+  // ═══════════════════════════════════════
+  //  CONFETTI
+  // ═══════════════════════════════════════
+  function createConfetti() {
+    const container = document.getElementById('confetti-container');
+    container.innerHTML = '';
+    const colors = ['#00f0ff', '#ff2d78', '#ffe600', '#00ff88', '#b44dff', '#ffd700'];
+    for (let i = 0; i < 60; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDelay = (Math.random() * 3) + 's';
+      piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+      piece.style.width = (6 + Math.random() * 8) + 'px';
+      piece.style.height = (6 + Math.random() * 8) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      container.appendChild(piece);
+    }
+  }
+
+  // ═══════════════════════════════════════
+  //  GAME LOGIC
+  // ═══════════════════════════════════════
+  async function startGame() {
+    if (gameLoading) return;
+    gameLoading = true;
+
+    try {
+      settings.timer = parseInt(getSelected('timer')) || 15;
+      settings.category = getSelected('cat');
+      settings.rounds = parseInt(getSelected('rounds')) || 10;
+      voiceEnabled = getSelected('voice') === 'on';
+
+      // Reset both players
+      players.burden = { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
+      players.stu = { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
+      currentPlayer = 'burden';
+      currentQ = 0;
+
+      selectQuestions();
+
+      if (questions.length === 0) {
+        showError('Not enough questions for that category. Try fewer rounds or "Any" category.');
+        return;
+      }
+
+      sfxStart();
+      showScreen('game');
+      showRoundSplash(1, () => loadQuestion());
+    } finally {
+      gameLoading = false;
+    }
+  }
+
+  function selectQuestions() {
+    let pool = [...QUESTION_BANK];
+    if (settings.category) {
+      pool = pool.filter(q => q.category === settings.category ||
+        q.category.toLowerCase() === settings.category.toLowerCase());
+    }
+    // Shuffle and pick the requested number of rounds
+    shuffleArray(pool);
+    questions = pool.slice(0, settings.rounds);
+  }
+
+  function decodeHTML(html) {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  }
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function showRoundSplash(num, cb) {
+    const splash = document.getElementById('round-splash');
+    document.getElementById('round-number').textContent = num;
+    splash.classList.add('show');
+    sfxTick();
+    setTimeout(() => {
+      splash.classList.remove('show');
+      if (cb) cb();
+    }, 1200);
+  }
+
+  async function loadQuestion() {
+    if (currentQ >= questions.length) {
+      endGame();
+      return;
+    }
+
+    answered = false;
+    ttsPlaying = false;
+    const q = questions[currentQ];
+    const answers = shuffleArray([
+      ...q.incorrect_answers.map(a => ({ text: decodeHTML(a), correct: false })),
+      { text: decodeHTML(q.correct_answer), correct: true }
+    ]);
+
+    document.getElementById('hud-question').textContent = `${currentQ + 1}/${questions.length}`;
+
+    // Update current player display
+    const playerEl = document.getElementById('hud-player');
+    playerEl.innerHTML = players[currentPlayer].name +
+      (voiceEnabled ? '<span id="hud-speaker" class="hud-speaker">&#128264;</span>' : '');
+    playerEl.style.color = currentPlayer === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+
+    document.getElementById('hud-burden-score').textContent = players.burden.score;
+    document.getElementById('hud-stu-score').textContent = players.stu.score;
+    document.getElementById('q-category').textContent = decodeHTML(q.category);
+    document.getElementById('q-text').textContent = decodeHTML(q.question);
+
+    // Update turn indicator
+    document.getElementById('hud-burden-section').classList.remove('active-turn', 'stu-turn');
+    document.getElementById('hud-stu-section').classList.remove('active-turn', 'stu-turn');
+    if (currentPlayer === 'burden') {
+      document.getElementById('hud-burden-section').classList.add('active-turn');
+    } else {
+      document.getElementById('hud-stu-section').classList.add('active-turn', 'stu-turn');
+    }
+
+    const grid = document.getElementById('answers-grid');
+    const letters = ['A', 'B', 'C', 'D'];
+    grid.innerHTML = answers.map((a, i) => `
+      <button class="answer-btn" data-correct="${a.correct}" data-index="${i}" onclick="selectAnswer(this)">
+        <span class="letter">${letters[i]}</span>
+        <span>${a.text}</span>
+      </button>
+    `).join('');
+
+    // TTS: read question aloud if enabled
+    if (voiceEnabled) {
+      ttsPlaying = true;
+      const questionText = decodeHTML(q.question);
+      await playQuestionTTS(questionText);
+      ttsPlaying = false;
+    }
+
+    // Start timer AFTER TTS finishes
+    startQuestionTimer();
+
+    // Focus first answer for keyboard nav
+    setTimeout(() => {
+      const first = grid.querySelector('.answer-btn');
+      if (first) first.focus();
+    }, 100);
+  }
+
+  function startQuestionTimer() {
+    timeLeft = settings.timer;
+    prevTimeLeft = settings.timer;
+    const fill = document.getElementById('timer-fill');
+    fill.style.width = '100%';
+    fill.classList.remove('danger');
+
+    clearInterval(timerInterval);
+    const startTime = Date.now();
+    timerInterval = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      timeLeft = Math.max(0, settings.timer - elapsed);
+      const pct = (timeLeft / settings.timer) * 100;
+      fill.style.width = pct + '%';
+
+      if (pct < 30 && !fill.classList.contains('danger')) {
+        fill.classList.add('danger');
+      }
+      // Fixed: compare prevTimeLeft vs timeLeft for countdown beeps
+      if (timeLeft <= 3 && timeLeft > 0 && Math.floor(prevTimeLeft) !== Math.floor(timeLeft)) {
+        sfxCountdown();
+      }
+      prevTimeLeft = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        if (!answered) timeUp();
+      }
+    }, 50);
+  }
+
+  function selectAnswer(btn) {
+    if (answered || ttsPlaying) return;
+    answered = true;
+    clearInterval(timerInterval);
+    ensureAudio();
+
+    const isCorrect = btn.dataset.correct === 'true';
+    const elapsed = settings.timer - timeLeft;
+    const player = players[currentPlayer];
+    player.totalTime += elapsed;
+
+    // Disable all buttons + enhanced animations
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      b.classList.add('disabled');
+      if (b.dataset.correct === 'true') {
+        b.classList.add('correct', 'pulse-correct');
+      } else if (b !== btn) {
+        b.classList.add('dimmed');
+      }
+    });
+
+    if (isCorrect) {
+      sfxCorrect();
+      player.streak++;
+      if (player.streak > player.bestStreak) player.bestStreak = player.streak;
+      player.correctCount++;
+
+      // Score: base 100 + speed bonus + streak bonus
+      const speedBonus = Math.round((timeLeft / settings.timer) * 100);
+      const streakBonus = Math.min(player.streak, 5) * 20;
+      const points = 100 + speedBonus + streakBonus;
+      player.score += points;
+
+      showFeedback('correct');
+      if (player.streak >= 3) {
+        const streakMsgs = [
+          `🔥 ${player.streak}x STREAK! Jy's op Vuur! +${streakBonus}`,
+          `🔥 ${player.streak}x STREAK! Moerse Lekker! +${streakBonus}`,
+          `🔥 ${player.streak}x STREAK! Nou Gaan Ons Braai! +${streakBonus}`,
+          `🔥 ${player.streak}x STREAK! Hou So! +${streakBonus}`
+        ];
+        showBonus(streakMsgs[Math.floor(Math.random() * streakMsgs.length)]);
+      }
+    } else {
+      btn.classList.add('wrong', 'shake-wrong');
+      sfxWrong();
+      player.streak = 0;
+      showFeedback('wrong');
+    }
+
+    // Update HUD
+    document.getElementById('hud-burden-score').textContent = players.burden.score;
+    document.getElementById('hud-stu-score').textContent = players.stu.score;
+
+    // Alternate players
+    currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
+
+    // Next question
+    setTimeout(() => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        showRoundSplash(currentQ + 1, () => loadQuestion());
+      } else {
+        endGame();
+      }
+    }, 2000);
+  }
+
+  function timeUp() {
+    answered = true;
+    const player = players[currentPlayer];
+    player.streak = 0;
+    player.totalTime += settings.timer;
+
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      b.classList.add('disabled');
+      if (b.dataset.correct === 'true') {
+        b.classList.add('correct', 'pulse-correct');
+      } else {
+        b.classList.add('dimmed');
+      }
+    });
+
+    sfxWrong();
+    showFeedback('timeout');
+
+    // Alternate players
+    currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
+
+    setTimeout(() => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        showRoundSplash(currentQ + 1, () => loadQuestion());
+      } else {
+        endGame();
+      }
+    }, 2000);
+  }
+
+  function showFeedback(type) {
+    const overlay = document.getElementById('feedback-overlay');
+    const text = document.getElementById('feedback-text');
+    text.className = 'feedback-text';
+
+    if (type === 'correct') {
+      const msgs = ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Yoh Nailed It!', 'Eish, Too Easy!', 'Baie Mooi!', 'Jy\'s \'n Bees!', 'Sharp Sharp!'];
+      text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+      text.classList.add('correct-fb');
+    } else if (type === 'wrong') {
+      const msgs = ['Eina!', 'Ag Nee!', 'Haibo!', 'Shame Man!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!'];
+      text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+      text.classList.add('wrong-fb');
+    } else {
+      text.textContent = "Tyd Op, Bru!";
+      text.classList.add('timeout-fb');
+    }
+
+    overlay.classList.add('show');
+    // Force re-trigger animation
+    text.style.animation = 'none';
+    text.offsetHeight;
+    text.style.animation = '';
+
+    setTimeout(() => overlay.classList.remove('show'), 1500);
+  }
+
+  function showBonus(msg) {
+    const el = document.getElementById('bonus-popup');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1500);
+  }
+
+  function endGame() {
+    clearInterval(timerInterval);
+
+    // Display Burden's stats
+    document.getElementById('res-burden-score').textContent = players.burden.score;
+    document.getElementById('res-burden-correct').textContent = players.burden.correctCount;
+    document.getElementById('res-burden-streak').textContent = players.burden.bestStreak;
+
+    // Display Stu's stats
+    document.getElementById('res-stu-score').textContent = players.stu.score;
+    document.getElementById('res-stu-correct').textContent = players.stu.correctCount;
+    document.getElementById('res-stu-streak').textContent = players.stu.bestStreak;
+
+    // Reset column classes
+    const burdenCol = document.getElementById('res-burden-col');
+    const stuCol = document.getElementById('res-stu-col');
+    burdenCol.className = 'result-column';
+    stuCol.className = 'result-column';
+    burdenCol.style.textAlign = 'center';
+    stuCol.style.textAlign = 'center';
+
+    const trophy = document.getElementById('res-trophy');
+
+    // Determine winner
+    let winnerText = '';
+    if (players.burden.score > players.stu.score) {
+      winnerText = 'BURDEN WINS! Lekker Gespeel!';
+      burdenCol.classList.add('winner-column');
+      stuCol.classList.add('loser-column');
+      trophy.style.display = 'block';
+      sfxVictory();
+      createConfetti();
+    } else if (players.stu.score > players.burden.score) {
+      winnerText = 'STU WINS! Jy\'s die Boss!';
+      stuCol.classList.add('winner-column');
+      burdenCol.classList.add('loser-column');
+      trophy.style.display = 'block';
+      sfxVictory();
+      createConfetti();
+    } else {
+      winnerText = 'IT\'S A DRAW! Sharp Sharp!';
+      trophy.style.display = 'none';
+      sfxDraw();
+    }
+    document.getElementById('res-winner').textContent = winnerText;
+
+    // Save result (fire-and-forget)
+    saveGameResult();
+
+    showScreen('results');
+  }
+
+  // ═══════════════════════════════════════
+  //  PERSISTENCE (Cloudflare KV)
+  // ═══════════════════════════════════════
+  async function loadLifetimeStats() {
+    try {
+      const res = await fetch('/api/scores', { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        lifetimeStats = await res.json();
+        updateTitleWins();
+        updateLeaderboard();
+      }
+    } catch(e) {
+      // Game works without persistence
+    }
+  }
+
+  function updateTitleWins() {
+    if (!lifetimeStats) return;
+    const bWins = lifetimeStats.burden?.wins || 0;
+    const sWins = lifetimeStats.stu?.wins || 0;
+    document.getElementById('title-burden-wins').textContent = `BURDEN: ${bWins}`;
+    document.getElementById('title-stu-wins').textContent = `STU: ${sWins}`;
+    document.getElementById('lifetime-wins').style.opacity = '1';
+  }
+
+  function updateLeaderboard() {
+    if (!lifetimeStats) {
+      document.getElementById('lb-content').style.display = 'none';
+      document.getElementById('lb-no-data').style.display = 'block';
+      return;
+    }
+
+    const b = lifetimeStats.burden || {};
+    const s = lifetimeStats.stu || {};
+
+    const hasData = (b.gamesPlayed || 0) > 0 || (s.gamesPlayed || 0) > 0;
+    document.getElementById('lb-content').style.display = hasData ? 'flex' : 'none';
+    document.getElementById('lb-no-data').style.display = hasData ? 'none' : 'block';
+
+    document.getElementById('lb-burden-wins').textContent = b.wins || 0;
+    document.getElementById('lb-burden-games').textContent = b.gamesPlayed || 0;
+    document.getElementById('lb-burden-draws').textContent = b.draws || 0;
+    document.getElementById('lb-burden-total').textContent = b.totalScore || 0;
+    document.getElementById('lb-burden-correct').textContent = b.totalCorrect || 0;
+    document.getElementById('lb-burden-best').textContent = b.bestGameScore || 0;
+    document.getElementById('lb-burden-streak').textContent = b.bestStreak || 0;
+
+    document.getElementById('lb-stu-wins').textContent = s.wins || 0;
+    document.getElementById('lb-stu-games').textContent = s.gamesPlayed || 0;
+    document.getElementById('lb-stu-draws').textContent = s.draws || 0;
+    document.getElementById('lb-stu-total').textContent = s.totalScore || 0;
+    document.getElementById('lb-stu-correct').textContent = s.totalCorrect || 0;
+    document.getElementById('lb-stu-best').textContent = s.bestGameScore || 0;
+    document.getElementById('lb-stu-streak').textContent = s.bestStreak || 0;
+  }
+
+  async function saveGameResult() {
+    const isDraw = players.burden.score === players.stu.score;
+    const burdenWon = players.burden.score > players.stu.score;
+
+    try {
+      await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player: 'burden',
+          won: burdenWon && !isDraw,
+          draw: isDraw,
+          score: players.burden.score,
+          correct: players.burden.correctCount,
+          bestStreak: players.burden.bestStreak
+        }),
+        signal: AbortSignal.timeout(5000)
+      });
+
+      await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player: 'stu',
+          won: !burdenWon && !isDraw,
+          draw: isDraw,
+          score: players.stu.score,
+          correct: players.stu.correctCount,
+          bestStreak: players.stu.bestStreak
+        }),
+        signal: AbortSignal.timeout(5000)
+      });
+
+      // Refresh stats after saving
+      await loadLifetimeStats();
+    } catch(e) {
+      // Silently fail — game works without persistence
+    }
+  }
+
+  // ═══════════════════════════════════════
+  //  TTS (ElevenLabs via Cloudflare proxy)
+  // ═══════════════════════════════════════
+  async function playQuestionTTS(text) {
+    if (!voiceEnabled) return false;
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!res.ok) return false;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      return new Promise(resolve => {
+        audio.onended = () => { URL.revokeObjectURL(url); resolve(true); };
+        audio.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
+        audio.play().catch(() => { URL.revokeObjectURL(url); resolve(false); });
+      });
+    } catch(e) {
+      return false;
+    }
+  }
+
+  // ═══════════════════════════════════════
+  //  KEYBOARD & REMOTE SUPPORT
+  // ═══════════════════════════════════════
+  document.addEventListener('keydown', (e) => {
+    const key = e.key;
+
+    // LG Back button (keyCode 461) or Escape
+    if (e.keyCode === 461 || key === 'GoBack' || key === 'Escape') {
+      e.preventDefault();
+      handleBack();
+      return;
+    }
+
+    // Arrow navigation
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+      e.preventDefault();
+      handleArrowNav(key);
+      return;
+    }
+
+    // Enter/OK triggers focused element
+    if (key === 'Enter') {
+      const focused = document.activeElement;
+      if (focused && (focused.classList.contains('answer-btn') || focused.classList.contains('btn') || focused.classList.contains('pill'))) {
+        focused.click();
+      }
+      return;
+    }
+
+    // A/B/C/D to select answers during game
+    const upperKey = key.toUpperCase();
+    if (['A','B','C','D'].includes(upperKey) && document.getElementById('screen-game').classList.contains('active') && !answered && !ttsPlaying) {
+      const idx = upperKey.charCodeAt(0) - 65;
+      const btn = document.querySelector(`.answer-btn[data-index="${idx}"]`);
+      if (btn) selectAnswer(btn);
+    }
+  });
+
+  function handleBack() {
+    const active = document.querySelector('.screen.active');
+    if (!active) return;
+    switch(active.id) {
+      case 'screen-howto':
+      case 'screen-settings':
+      case 'screen-leaderboard':
+      case 'screen-results':
+      case 'screen-error':
+        showScreen('title');
+        break;
+      // During game — don't navigate back (prevent accidental exit)
+    }
+  }
+
+  function handleArrowNav(key) {
+    const active = document.activeElement;
+    const gameActive = document.getElementById('screen-game').classList.contains('active');
+
+    // Navigate 2x2 answer grid during game
+    if (gameActive && !answered && !ttsPlaying) {
+      const btns = [...document.querySelectorAll('.answer-btn')];
+      const idx = btns.indexOf(active);
+      if (idx === -1) { btns[0]?.focus(); return; }
+
+      let newIdx = idx;
+      switch(key) {
+        case 'ArrowRight': newIdx = idx % 2 === 0 && idx + 1 < btns.length ? idx + 1 : idx; break;
+        case 'ArrowLeft': newIdx = idx % 2 === 1 ? idx - 1 : idx; break;
+        case 'ArrowDown': newIdx = idx + 2 < btns.length ? idx + 2 : idx; break;
+        case 'ArrowUp': newIdx = idx - 2 >= 0 ? idx - 2 : idx; break;
+      }
+      if (btns[newIdx]) btns[newIdx].focus();
+      return;
+    }
+
+    // For other screens: navigate between focusable elements
+    const activeScreen = document.querySelector('.screen.active');
+    if (!activeScreen) return;
+    const focusables = [...activeScreen.querySelectorAll('.btn, .pill, .answer-btn')];
+    const curIdx = focusables.indexOf(active);
+    if (curIdx === -1) { focusables[0]?.focus(); return; }
+
+    let next = curIdx;
+    if (key === 'ArrowDown' || key === 'ArrowRight') next = Math.min(curIdx + 1, focusables.length - 1);
+    if (key === 'ArrowUp' || key === 'ArrowLeft') next = Math.max(curIdx - 1, 0);
+    focusables[next]?.focus();
+  }
+
+  // Wire click sound to all menu buttons
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.btn')) sfxClick();
+  });
+
+  // Init: show cursor on mouse move
+  document.addEventListener('mousemove', () => document.body.classList.add('show-cursor'));
+
+  // Load lifetime stats on page load
+  loadLifetimeStats();
+</script>
+
+</body>
+</html>
