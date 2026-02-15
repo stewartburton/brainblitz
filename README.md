@@ -16,12 +16,14 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 - **Streak multiplier** — 3+ correct in a row gives bonus points
 - **Winner celebration** — Confetti, trophy animation, and victory fanfare
 - **Sound effects** — Web Audio API synth sounds, no files needed
-- **Configurable** — Timer, categories, rounds, and voice selection
-- **Voice mode** — Two ElevenLabs voices (Rachel & Butcher) read questions aloud
-- **Synth music** — Web Audio API step sequencer with mute toggle
-- **Leaderboard** — Lifetime stats persisted via Cloudflare KV
+- **Configurable** — Timer, categories, rounds, and voice selection (persisted across sessions)
+- **Voice mode** — Two ElevenLabs voices (Rachel & Butcher) using fast Turbo v2.5 model
+- **Synth music** — Web Audio API step sequencer with mute toggle and dynamics compressor
+- **Leaderboard** — Lifetime stats persisted via Cloudflare KV with counter animations
 - **SA Expressions** — Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
 - **Custom categories** — Frenchies, Hiking, SA Wines, Paris, Cheeses (125 built-in questions)
+- **Polish** — Score pop animation, timer danger pulse, particle bursts, turn switch countdown
+- **TTS cost tracking** — Character usage tracked in KV, check via `GET /api/tts-usage`
 
 ## How to Play on Your LG TV
 
@@ -75,8 +77,10 @@ brainblitz/
 │   └── api/
 │       ├── _middleware.js   # CORS headers for API routes
 │       ├── scores.js        # GET/POST player stats (Cloudflare KV)
-│       └── tts.js           # ElevenLabs TTS proxy
+│       ├── tts.js           # ElevenLabs TTS proxy (Turbo v2.5)
+│       └── tts-usage.js     # GET TTS character usage stats
 ├── CHANGELOG.md
+├── wrangler.toml            # KV namespace binding config
 └── README.md
 ```
 
