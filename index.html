@@ -60,8 +60,8 @@
     opacity: 0;
     pointer-events: none;
     width: 100%; height: 100%;
-    transform: translateY(20px) scale(0.98);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(12px) scale(0.99);
+    transition: opacity 0.2s ease, transform 0.2s ease;
     will-change: opacity, transform;
   }
   .screen.active {
@@ -71,8 +71,8 @@
   }
   .screen.screen-leaving {
     opacity: 0;
-    transform: translateY(0) scale(0.97);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(0) scale(0.98);
+    transition: opacity 0.15s ease, transform 0.15s ease;
     pointer-events: none;
   }
 
@@ -1059,17 +1059,25 @@
     position: absolute;
     bottom: 20px;
     right: 20px;
-    font-size: 22px;
-    color: rgba(255,255,255,0.15);
+    font-size: 28px;
+    color: rgba(255,255,255,0.35);
     background: none;
-    border: none;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 10px;
-    transition: color 0.3s ease;
+    padding: 0;
+    transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     z-index: 5;
   }
   .admin-gear:hover, .admin-gear:focus {
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(0,240,255,0.4);
+    box-shadow: 0 0 15px rgba(0,240,255,0.2);
     outline: none;
   }
   .pin-entry {
@@ -1206,7 +1214,7 @@
   <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
     <span id="title-burden-wins">BURDEN: 0</span> &nbsp;|&nbsp; <span id="title-stu-wins">STU: 0</span>
   </div>
-  <button class="admin-gear" onclick="showScreen('pin')" title="Admin">&#9881;</button>
+  <button class="admin-gear" onclick="showScreen('pin')" title="Admin" style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.1em;">ADMIN</button>
 </div>
 
 <!-- ═══ HOW TO PLAY ═══ -->
@@ -2429,7 +2437,7 @@
     if (current && current !== next) {
       current.classList.remove('active');
       current.classList.add('screen-leaving');
-      setTimeout(function() { current.classList.remove('screen-leaving'); }, 350);
+      setTimeout(function() { current.classList.remove('screen-leaving'); }, 200);
     } else {
       document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     }
@@ -2682,7 +2690,7 @@
     nameEl.style.color = color;
     nameEl.style.textShadow = `0 0 40px ${playerKey === 'burden' ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)'}`;
 
-    let count = 3;
+    let count = 2;
     countEl.textContent = count;
     overlay.classList.add('show');
     sfxTick();
@@ -2698,7 +2706,7 @@
         overlay.classList.remove('show');
         if (cb) cb();
       }
-    }, 600);
+    }, 400);
   }
 
   function showRoundSplash(num, cb) {
@@ -2709,7 +2717,7 @@
     setTimeout(() => {
       splash.classList.remove('show');
       if (cb) cb();
-    }, 800);
+    }, 500);
   }
 
   async function loadQuestion() {
@@ -2890,17 +2898,17 @@
     // Shuffle the wrong buttons for variety
     shuffleArray(wrongBtns);
 
-    // Step 2: After 300ms, start dimming wrong answers one by one (200ms each)
+    // Step 2: After 150ms, start dimming wrong answers one by one (120ms each)
     setTimeout(function() {
       var delay = 0;
       wrongBtns.forEach(function(wb) {
         setTimeout(function() {
           wb.classList.add('cascade-dim');
         }, delay);
-        delay += 200;
+        delay += 120;
       });
 
-      // Step 3: After all wrongs dimmed, give correct answer its full glow (200ms)
+      // Step 3: After all wrongs dimmed, give correct answer its full glow (100ms)
       setTimeout(function() {
         if (correctBtn && correctBtn !== selectedBtn) {
           correctBtn.classList.add('cascade-correct', 'pulse-correct');
@@ -2909,8 +2917,8 @@
         }
         cascadeInProgress = false;
         if (callback) callback();
-      }, delay + 200);
-    }, 300);
+      }, delay + 100);
+    }, 150);
   }
 
   // =======================================
@@ -2999,7 +3007,7 @@
     // After feedback delay: advance to next question
     setTimeout(function() {
       advanceAfterAnswer();
-    }, 1200);
+    }, 800);
   }
 
   // =======================================
@@ -3027,7 +3035,7 @@
 
     setTimeout(function() {
       advanceAfterAnswer();
-    }, 1200);
+    }, 800);
   }
 
 
@@ -3111,14 +3119,14 @@
     text.offsetHeight;
     text.style.animation = '';
 
-    setTimeout(() => overlay.classList.remove('show'), 1500);
+    setTimeout(() => overlay.classList.remove('show'), 700);
   }
 
   function showBonus(msg) {
     const el = document.getElementById('bonus-popup');
     el.textContent = msg;
     el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 1500);
+    setTimeout(() => el.classList.remove('show'), 900);
   }
 
   function endGame() {
