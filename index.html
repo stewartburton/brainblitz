@@ -37,7 +37,7 @@
 
   /* ─── BACKGROUND ─── */
   .bg-grid {
-    position: fixed; inset: 0;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background-image:
       linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
@@ -45,7 +45,7 @@
     z-index: 0;
   }
   .bg-glow {
-    position: fixed; inset: 0; z-index: 0;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
     background: radial-gradient(ellipse at 50% 0%, rgba(0,240,255,0.08) 0%, transparent 60%),
                 radial-gradient(ellipse at 80% 100%, rgba(255,45,120,0.06) 0%, transparent 50%);
   }
@@ -382,7 +382,7 @@
 
   /* ─── FEEDBACK OVERLAY ─── */
   .feedback-overlay {
-    position: fixed; inset: 0; z-index: 10;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
     pointer-events: none;
     opacity: 0;
@@ -513,7 +513,7 @@
   /* ─── CONFETTI ─── */
   .confetti-container {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none;
     z-index: 15;
     overflow: hidden;
@@ -880,9 +880,9 @@
     </div>
   </div>
 
-  <div class="btn-group" style="flex-direction:row; gap:30px;">
-    <button class="btn" onclick="startGame()">Play Again!</button>
-    <button class="btn pink" onclick="showScreen('title')">Home</button>
+  <div class="btn-group" style="flex-direction:row; gap:50px;">
+    <button class="btn" onclick="startGame()" style="min-width:260px; padding:20px 40px;">Play Again!</button>
+    <button class="btn pink" onclick="showScreen('title')" style="min-width:200px; padding:20px 40px;">Home</button>
   </div>
 </div>
 
@@ -968,8 +968,19 @@
   // ═══════════════════════════════════════
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let audioCtx;
+  let masterCompressor;
   function ensureAudio() {
-    if (!audioCtx) audioCtx = new AudioCtx();
+    if (!audioCtx) {
+      audioCtx = new AudioCtx();
+      // Master compressor to prevent clipping/crackle
+      masterCompressor = audioCtx.createDynamicsCompressor();
+      masterCompressor.threshold.value = -12;
+      masterCompressor.knee.value = 10;
+      masterCompressor.ratio.value = 8;
+      masterCompressor.attack.value = 0.003;
+      masterCompressor.release.value = 0.15;
+      masterCompressor.connect(audioCtx.destination);
+    }
     if (audioCtx.state === 'suspended') audioCtx.resume();
   }
 
@@ -982,16 +993,17 @@
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(vol, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-      osc.connect(gain).connect(audioCtx.destination);
+      osc.connect(gain);
+      gain.connect(masterCompressor);
       osc.start();
       osc.stop(audioCtx.currentTime + dur);
     } catch(e) {}
   }
 
   function sfxCorrect() {
-    playTone(523, 0.12, 'sine', 0.15);
-    setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 80);
-    setTimeout(() => playTone(784, 0.25, 'sine', 0.15), 160);
+    playTone(523, 0.12, 'sine', 0.10);
+    setTimeout(() => playTone(659, 0.12, 'sine', 0.10), 80);
+    setTimeout(() => playTone(784, 0.25, 'sine', 0.10), 160);
   }
   function sfxWrong() {
     playTone(200, 0.3, 'sawtooth', 0.1);
@@ -1021,7 +1033,8 @@
       osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
       gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-      osc.connect(gain).connect(audioCtx.destination);
+      osc.connect(gain);
+      gain.connect(masterCompressor);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.2);
     } catch(e) {}
@@ -1071,7 +1084,7 @@
       ensureAudio();
       this.masterGain = audioCtx.createGain();
       this.masterGain.gain.value = musicMuted ? 0 : vol;
-      this.masterGain.connect(audioCtx.destination);
+      this.masterGain.connect(masterCompressor);
       this.playing = true;
       this._step = 0;
       this._nextNoteTime = audioCtx.currentTime + 0.05;
@@ -1080,12 +1093,25 @@
 
     _startScheduler(callback) {
       if (this._intervalId) clearInterval(this._intervalId);
+      let cleanupCounter = 0;
       this._intervalId = setInterval(() => {
         if (!this.playing) return;
         while (this._nextNoteTime < audioCtx.currentTime + 0.1) {
           callback(this._nextNoteTime, this._step);
           this._step++;
           this._nextNoteTime += 60 / this._bpm / 4; // 16th notes
+        }
+        // Periodic cleanup of ended nodes to prevent memory buildup
+        if (++cleanupCounter % 40 === 0) {
+          this._scheduledNodes = this._scheduledNodes.filter(n => {
+            try {
+              if (n.playbackState === 3 || (n.context && n.context.currentTime > (n._endTime || Infinity))) {
+                n.disconnect();
+                return false;
+              }
+            } catch(e) { return false; }
+            return true;
+          });
         }
       }, 25);
     },
@@ -1099,6 +1125,8 @@
         g.gain.exponentialRampToValueAtTime(0.001, time + dur);
         o.connect(g); g.connect(dest);
         o.start(time); o.stop(time + dur + 0.05);
+        o._endTime = time + dur + 0.1;
+        if (this._scheduledNodes.length > 100) this._scheduledNodes.splice(0, 20);
         this._scheduledNodes.push(o);
       } catch(e) {}
     },
@@ -1109,10 +1137,12 @@
         const g = audioCtx.createGain();
         o.frequency.setValueAtTime(150, time);
         o.frequency.exponentialRampToValueAtTime(30, time + 0.12);
-        g.gain.setValueAtTime(0.25, time);
+        g.gain.setValueAtTime(0.20, time);
         g.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
         o.connect(g); g.connect(dest);
         o.start(time); o.stop(time + 0.25);
+        o._endTime = time + 0.3;
+        if (this._scheduledNodes.length > 100) this._scheduledNodes.splice(0, 20);
         this._scheduledNodes.push(o);
       } catch(e) {}
     },
@@ -1560,6 +1590,10 @@
     if (['title', 'settings', 'howto', 'leaderboard'].includes(id)) {
       Music.title();
     }
+    // Refresh stats when entering leaderboard or title
+    if (id === 'leaderboard' || id === 'title') {
+      loadLifetimeStats();
+    }
     // Focus first button
     setTimeout(() => {
       const btn = document.querySelector('#screen-' + id + ' .btn, #screen-' + id + ' .pill, #screen-' + id + ' .answer-btn');
@@ -1635,7 +1669,9 @@
       sfxStart();
       Music.game();
       showScreen('game');
-      showRoundSplash(1, () => loadQuestion());
+      showTurnSwitch(currentPlayer, () => {
+        showRoundSplash(1, () => loadQuestion());
+      });
     } finally {
       gameLoading = false;
     }

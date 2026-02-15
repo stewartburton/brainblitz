@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.3.0] - 2026-02-15
+
+### Bug Fixes
+- **Audio crackle**: Added master dynamics compressor to prevent clipping — all audio (SFX + music) routes through compressor. Added periodic cleanup of ended Web Audio nodes and array cap to prevent memory buildup
+- **webOS CSS**: Replaced all remaining `inset: 0` (4 instances in bg-grid, bg-glow, feedback-overlay, confetti-container) with explicit `top/left/right/bottom` for older webOS browsers
+- **Button overlap on results**: Increased gap between "Play Again!" and "Home" buttons (30px → 50px) and reduced button padding to prevent neon glow overlap
+- **sfxCorrect too loud**: Reduced from 0.15 to 0.10 gain to not overpower the music
+- **Stale leaderboard**: Stats now refresh when navigating to leaderboard or title screen (not just on page load)
+
+### New Features
+- **First question countdown**: "Get Ready" turn switch overlay now shows before the very first question too
+- **Kick volume balanced**: Reduced kick gain from 0.25 to 0.20 to sit better in the mix
+
 ## [2.2.0] - 2026-02-15
 
 ### New Features
