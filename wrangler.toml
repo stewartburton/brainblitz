@@ -1,0 +1,6 @@
+name = "brainblitz"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "BRAINBLITZ_KV"
+id = "900363433b3e446e9a7097bcfb796b80"

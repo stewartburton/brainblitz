@@ -58,13 +58,22 @@
     align-items: center; justify-content: center;
     padding: 40px;
     opacity: 0;
-    transition: opacity 0.5s ease;
     pointer-events: none;
     width: 100%; height: 100%;
+    transform: translateY(20px) scale(0.98);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    will-change: opacity, transform;
   }
   .screen.active {
     opacity: 1;
     pointer-events: all;
+    transform: translateY(0) scale(1);
+  }
+  .screen.screen-leaving {
+    opacity: 0;
+    transform: translateY(0) scale(0.97);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
   }
 
   /* ─── TITLE SCREEN ─── */
@@ -271,14 +280,29 @@
   }
   .timer-fill {
     height: 100%;
+    width: 100%;
     background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
-    transition: width 0.1s linear;
     box-shadow: 0 0 20px rgba(0,240,255,0.4);
+    transform-origin: left center;
+    will-change: transform;
+    /* CSS animation drives the shrink — set dynamically via JS */
+  }
+  .timer-fill.timer-running {
+    animation: timerShrink var(--timer-duration, 15s) linear forwards;
+  }
+  @keyframes timerShrink {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
   }
   .timer-fill.danger {
     background: linear-gradient(90deg, var(--neon-pink), var(--neon-yellow));
     box-shadow: 0 0 20px rgba(255,45,120,0.4);
-    animation: timerPulse 0.5s ease infinite;
+  }
+  .timer-fill.timer-pulse {
+    animation: timerShrink var(--timer-duration, 15s) linear forwards, timerPulse 0.5s ease infinite;
+  }
+  .timer-fill.timer-pulse-tense {
+    animation: timerShrink var(--timer-duration, 15s) linear forwards, timerPulse 0.25s ease infinite;
   }
   @keyframes timerPulse {
     0%, 100% { opacity: 1; }
@@ -684,12 +708,125 @@
     margin-bottom: 40px;
   }
 
+  /* ─── STREAK CELEBRATION (5+ streak) ─── */
+  @keyframes streakBorderGlow {
+    0% { box-shadow: inset 0 0 30px rgba(255,215,0,0.4), 0 0 40px rgba(255,215,0,0.2); }
+    25% { box-shadow: inset 0 0 30px rgba(255,45,120,0.4), 0 0 40px rgba(255,45,120,0.2); }
+    50% { box-shadow: inset 0 0 30px rgba(0,240,255,0.4), 0 0 40px rgba(0,240,255,0.2); }
+    75% { box-shadow: inset 0 0 30px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2); }
+    100% { box-shadow: inset 0 0 30px rgba(255,215,0,0.4), 0 0 40px rgba(255,215,0,0.2); }
+  }
+  .streak-fire-border {
+    animation: streakBorderGlow 2s linear infinite;
+    border: 3px solid rgba(255,215,0,0.5);
+  }
+
+  /* ON FIRE overlay */
+  .on-fire-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 12;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .on-fire-overlay.show { opacity: 1; }
+  .on-fire-text {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(60px, 10vw, 140px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #ffd700;
+    text-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,100,0,0.4);
+    animation: onFirePop 1s ease forwards;
+  }
+  @keyframes onFirePop {
+    0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+    30% { transform: scale(1.2) rotate(2deg); opacity: 1; }
+    60% { transform: scale(0.95) rotate(-1deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 0; }
+  }
+
+  /* Streak bonus emphasis in popup */
+  .bonus-popup.streak-fire {
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 60px rgba(255,100,0,0.3);
+    font-size: clamp(24px, 3.5vw, 44px);
+  }
+
+  /* ─── CLOSE GAME TENSION ─── */
+  .bg-glow.tense {
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,80,0,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(255,45,120,0.10) 0%, transparent 50%);
+    transition: background 1s ease;
+  }
+  .hud-value.score.score-tense {
+    animation: tensePulse 1s ease infinite;
+  }
+  @keyframes tensePulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(255,100,0,0.3); }
+    50% { text-shadow: 0 0 25px rgba(255,100,0,0.7), 0 0 50px rgba(255,45,120,0.3); }
+  }
+
   /* Responsive for smaller screens */
   @media (max-width: 800px) {
     .answers-grid { grid-template-columns: 1fr; }
     .settings-grid { grid-template-columns: 1fr; gap: 30px; }
     .stats-row { gap: 30px; }
     .lb-columns { flex-direction: column; gap: 40px; }
+  }
+
+  /* ─── DIFFICULTY INDICATOR ─── */
+  .difficulty-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(12px, 1.3vw, 18px);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .difficulty-badge.diff-easy {
+    color: var(--neon-green);
+    border: 1px solid rgba(0,255,136,0.3);
+    background: rgba(0,255,136,0.08);
+  }
+  .difficulty-badge.diff-medium {
+    color: var(--neon-yellow);
+    border: 1px solid rgba(255,230,0,0.3);
+    background: rgba(255,230,0,0.08);
+  }
+  .difficulty-badge.diff-hard {
+    color: var(--neon-pink);
+    border: 1px solid rgba(255,45,120,0.3);
+    background: rgba(255,45,120,0.08);
+  }
+  .difficulty-stars {
+    font-size: clamp(14px, 1.5vw, 22px);
+    margin-left: 6px;
+  }
+
+  /* ─── CASCADE ANIMATION HELPERS ─── */
+  .answer-btn.cascade-hide {
+    opacity: 1;
+    transition: none;
+  }
+  .answer-btn.cascade-dim {
+    opacity: 0.2;
+    transform: scale(0.97);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+  .answer-btn.cascade-correct {
+    border-color: var(--correct) !important;
+    background: rgba(0,255,136,0.15) !important;
+    box-shadow: 0 0 40px rgba(0,255,136,0.3);
+    transition: all 0.2s ease;
+  }
+  .answer-btn.cascade-correct .letter {
+    border-color: var(--correct);
+    color: var(--correct);
+    background: rgba(0,255,136,0.2);
   }
 
   /* Focus visible for remote/keyboard nav */
@@ -746,6 +883,309 @@
     letter-spacing: 0.1em;
     margin-bottom: 40px;
   }
+
+  /* ─── ACHIEVEMENT TOAST ─── */
+  .achievement-toast-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+    align-items: center;
+    pointer-events: none;
+  }
+  .achievement-toast {
+    background: rgba(15, 15, 40, 0.95);
+    border: 2px solid var(--neon-yellow);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 340px;
+    max-width: 550px;
+    box-shadow: 0 0 30px rgba(255,230,0,0.3), inset 0 0 20px rgba(255,230,0,0.05);
+    backdrop-filter: blur(10px);
+    transform: translateY(120px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+    pointer-events: auto;
+  }
+  .achievement-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .achievement-toast.hide {
+    transform: translateY(-30px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .achievement-toast-icon {
+    font-size: 36px;
+    flex-shrink: 0;
+    animation: achievementBounce 0.6s ease 0.3s both;
+  }
+  @keyframes achievementBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+  .achievement-toast-info {
+    flex: 1;
+  }
+  .achievement-toast-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--neon-yellow);
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+  .achievement-toast-name {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 18px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 15px rgba(255,230,0,0.4);
+    margin-bottom: 4px;
+  }
+  .achievement-toast-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(13px, 1.3vw, 16px);
+    color: rgba(255,255,255,0.6);
+    line-height: 1.3;
+  }
+
+  /* ─── ACHIEVEMENTS SCREEN ─── */
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: 10px;
+    margin-bottom: 30px;
+  }
+  .achievements-grid::-webkit-scrollbar {
+    width: 6px;
+  }
+  .achievements-grid::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.03);
+  }
+  .achievements-grid::-webkit-scrollbar-thumb {
+    background: rgba(0,240,255,0.2);
+    border-radius: 3px;
+  }
+  .achievement-card {
+    background: var(--bg-card);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .achievement-card.earned {
+    border-color: var(--neon-yellow);
+    box-shadow: 0 0 20px rgba(255,230,0,0.15);
+  }
+  .achievement-card.earned::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,230,0,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .achievement-card.locked {
+    opacity: 0.35;
+  }
+  .achievement-card-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .achievement-card.locked .achievement-card-icon {
+    filter: grayscale(1);
+  }
+  .achievement-card-name {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(12px, 1.2vw, 15px);
+    font-weight: 700;
+    color: var(--neon-yellow);
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+  .achievement-card.locked .achievement-card-name {
+    color: rgba(255,255,255,0.4);
+  }
+  .achievement-card-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    color: rgba(255,255,255,0.5);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .achievement-card-players {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .achievement-card-player {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .achievement-card-player.burden-badge {
+    color: var(--neon-cyan);
+    border: 1px solid rgba(0,240,255,0.3);
+    background: rgba(0,240,255,0.08);
+  }
+  .achievement-card-player.stu-badge {
+    color: var(--neon-pink);
+    border: 1px solid rgba(255,45,120,0.3);
+    background: rgba(255,45,120,0.08);
+  }
+
+  /* ─── ADMIN PIN ENTRY ─── */
+  .admin-gear {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 22px;
+    color: rgba(255,255,255,0.15);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    transition: color 0.3s ease;
+    z-index: 5;
+  }
+  .admin-gear:hover, .admin-gear:focus {
+    color: rgba(255,255,255,0.5);
+    outline: none;
+  }
+  .pin-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+  .pin-dots {
+    display: flex;
+    gap: 18px;
+  }
+  .pin-dot {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  .pin-dot.filled {
+    background: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(0,240,255,0.5);
+  }
+  .pin-dot.error {
+    background: var(--neon-pink);
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 12px rgba(255,45,120,0.5);
+    animation: pinShake 0.4s ease;
+  }
+  @keyframes pinShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .pin-numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 280px;
+  }
+  .pin-numpad button {
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pin-numpad button:hover, .pin-numpad button:focus {
+    background: rgba(0,240,255,0.12);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0,240,255,0.2);
+    outline: none;
+  }
+  .pin-hint {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── ADMIN PANEL ─── */
+  .admin-section {
+    background: var(--bg-card);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    padding: 30px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 20px;
+  }
+  .admin-section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 1.5vw, 18px);
+    font-weight: 700;
+    color: var(--neon-cyan);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0,240,255,0.15);
+  }
+  .admin-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .admin-stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(16px, 1.6vw, 20px);
+    color: rgba(255,255,255,0.6);
+  }
+  .admin-stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 1.6vw, 20px);
+    font-weight: 700;
+    color: var(--neon-green);
+  }
+  .admin-stat-value.cost {
+    color: var(--neon-yellow);
+  }
+  .admin-content {
+    width: 100%;
+    max-width: 750px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  .admin-content::-webkit-scrollbar { width: 6px; }
+  .admin-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+  .admin-content::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.2); border-radius: 3px; }
 </style>
 </head>
 <body class="show-cursor">
@@ -761,10 +1201,12 @@
     <button class="btn" onclick="showScreen('settings')" autofocus>Let's Play!</button>
     <button class="btn pink" onclick="showScreen('howto')">How to Play</button>
     <button class="btn pink" onclick="showScreen('leaderboard')">Leaderboard</button>
+    <button class="btn pink" onclick="showScreen('achievements')">Achievements</button>
   </div>
   <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
     <span id="title-burden-wins">BURDEN: 0</span> &nbsp;|&nbsp; <span id="title-stu-wins">STU: 0</span>
   </div>
+  <button class="admin-gear" onclick="showScreen('pin')" title="Admin">&#9881;</button>
 </div>
 
 <!-- ═══ HOW TO PLAY ═══ -->
@@ -794,6 +1236,10 @@
         <button class="pill" data-val="SA Wines" onclick="selectPill(this,'cat')">SA Wines</button>
         <button class="pill" data-val="Paris" onclick="selectPill(this,'cat')">Paris</button>
         <button class="pill" data-val="Cheeses" onclick="selectPill(this,'cat')">Cheeses</button>
+        <button class="pill" data-val="Braai Culture" onclick="selectPill(this,'cat')">Braai Culture</button>
+        <button class="pill" data-val="90s Pop Culture" onclick="selectPill(this,'cat')">90s Pop Culture</button>
+        <button class="pill" data-val="SA Food & Slang" onclick="selectPill(this,'cat')">SA Food & Slang</button>
+        <button class="pill" data-val="True or False" onclick="selectPill(this,'cat')">True or False</button>
       </div>
     </div>
     <div class="setting-group">
@@ -835,6 +1281,10 @@
     <div class="hud-item">
       <div class="hud-label">Question</div>
       <div class="hud-value" id="hud-question">1/10</div>
+    </div>
+    <div class="hud-item" id="hud-difficulty-section">
+      <div class="hud-label">Difficulty</div>
+      <div id="hud-difficulty"><span class="difficulty-badge diff-easy">EASY <span class="difficulty-stars">&#9733;</span></span></div>
     </div>
     <div class="hud-item">
       <div class="hud-label">Current Player</div>
@@ -949,11 +1399,97 @@
   <button class="btn" onclick="showScreen('title')">Home</button>
 </div>
 
+<!-- ═══ ACHIEVEMENTS SCREEN ═══ -->
+<div id="screen-achievements" class="screen">
+  <div class="screen-title">Achievements</div>
+  <div id="achievements-grid" class="achievements-grid"></div>
+  <button class="btn" onclick="showScreen('title')">Home</button>
+</div>
+
+<!-- ═══ PIN ENTRY SCREEN ═══ -->
+<div id="screen-pin" class="screen">
+  <div class="screen-title">Admin Access</div>
+  <div class="pin-entry">
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pin-dot-0"></div>
+      <div class="pin-dot" id="pin-dot-1"></div>
+      <div class="pin-dot" id="pin-dot-2"></div>
+      <div class="pin-dot" id="pin-dot-3"></div>
+    </div>
+    <div class="pin-numpad" id="pin-numpad">
+      <button onclick="pinDigit(1)">1</button>
+      <button onclick="pinDigit(2)">2</button>
+      <button onclick="pinDigit(3)">3</button>
+      <button onclick="pinDigit(4)">4</button>
+      <button onclick="pinDigit(5)">5</button>
+      <button onclick="pinDigit(6)">6</button>
+      <button onclick="pinDigit(7)">7</button>
+      <button onclick="pinDigit(8)">8</button>
+      <button onclick="pinDigit(9)">9</button>
+      <button style="visibility:hidden;"></button>
+      <button onclick="pinDigit(0)">0</button>
+      <button onclick="pinClear()" style="font-size:18px;">&#9003;</button>
+    </div>
+    <div class="pin-hint">Enter 4-digit code</div>
+    <button class="btn pink" onclick="showScreen('title')" style="margin-top:10px;">Back</button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL SCREEN ═══ -->
+<div id="screen-admin" class="screen">
+  <div class="screen-title">Admin Panel</div>
+  <div class="admin-content">
+    <div class="admin-section">
+      <div class="admin-section-title">ElevenLabs TTS Usage</div>
+      <div id="admin-tts-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
+      <div id="admin-tts-stats" style="display:none;">
+        <div class="admin-stat-row">
+          <span class="admin-stat-label">Total Characters</span>
+          <span class="admin-stat-value" id="admin-tts-chars">0</span>
+        </div>
+        <div class="admin-stat-row">
+          <span class="admin-stat-label">Total Requests</span>
+          <span class="admin-stat-value" id="admin-tts-requests">0</span>
+        </div>
+        <div class="admin-stat-row">
+          <span class="admin-stat-label">Est. Cost</span>
+          <span class="admin-stat-value cost" id="admin-tts-cost">$0.00</span>
+        </div>
+        <div class="admin-stat-row">
+          <span class="admin-stat-label">Avg Chars/Request</span>
+          <span class="admin-stat-value" id="admin-tts-avg">0</span>
+        </div>
+      </div>
+      <div id="admin-tts-error" style="display:none; color:var(--neon-pink); font-family:'Rajdhani',sans-serif; font-size:16px; text-align:center; padding:15px;">Could not load TTS data</div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Language</div>
+      <div class="pill-group" id="lang-pills">
+        <button class="pill selected" data-val="en" onclick="selectPill(this,'lang')">English (SA)</button>
+        <button class="pill" data-val="af" onclick="selectPill(this,'lang')">Afrikaans</button>
+      </div>
+      <div style="margin-top:15px; font-family:'Rajdhani',sans-serif; font-size:clamp(14px,1.4vw,17px); color:rgba(255,255,255,0.35); line-height:1.5;">
+        Changes game UI labels and feedback expressions.
+      </div>
+    </div>
+  </div>
+  <button class="btn" onclick="showScreen('title')" style="margin-top:20px;">Home</button>
+</div>
+
+<!-- Achievement toast container -->
+<div id="achievement-toast-container" class="achievement-toast-container"></div>
+
 <!-- Feedback overlay -->
 <div class="feedback-overlay" id="feedback-overlay">
   <div class="feedback-text" id="feedback-text"></div>
 </div>
 <div class="bonus-popup" id="bonus-popup"></div>
+
+<!-- ON FIRE streak overlay -->
+<div class="on-fire-overlay" id="on-fire-overlay">
+  <div class="on-fire-text">ON FIRE!</div>
+</div>
 
 <!-- Turn switch overlay -->
 <div class="turn-switch" id="turn-switch">
@@ -1071,6 +1607,99 @@
   function sfxDraw() {
     playTone(440, 0.3, 'sine', 0.1);
     setTimeout(() => playTone(440, 0.3, 'triangle', 0.08), 300);
+  }
+
+  // ═══════════════════════════════════════
+  //  STREAK CELEBRATION SFX & TENSION ENGINE
+  // ═══════════════════════════════════════
+  function sfxCrowdCheer() {
+    try {
+      ensureAudio();
+      var bufSize = Math.floor(audioCtx.sampleRate * 0.8);
+      var buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufSize; i++) {
+        var env = i < bufSize * 0.1 ? (i / (bufSize * 0.1)) : (i < bufSize * 0.6 ? 1 : 1 - ((i - bufSize * 0.6) / (bufSize * 0.4)));
+        data[i] = (Math.random() * 2 - 1) * env;
+      }
+      var noise = audioCtx.createBufferSource();
+      noise.buffer = buf;
+      var bp = audioCtx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 1200; bp.Q.value = 0.5;
+      var g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.10, audioCtx.currentTime);
+      g.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 0.8);
+      noise.connect(bp); bp.connect(g); g.connect(masterCompressor);
+      noise.start(); noise.stop(audioCtx.currentTime + 0.8);
+      var cheerNotes = [523, 659, 784, 1047, 1319];
+      cheerNotes.forEach(function(f, idx) {
+        setTimeout(function() { playTone(f, 0.25, 'sine', 0.08); }, idx * 80);
+      });
+    } catch(e) {}
+  }
+
+  var isTenseActive = false;
+
+  function triggerStreakCelebration() {
+    var gameScreen = document.getElementById('screen-game');
+    gameScreen.classList.add('streak-fire-border');
+    setTimeout(function() { gameScreen.classList.remove('streak-fire-border'); }, 3000);
+
+    // ON FIRE overlay — force animation re-trigger
+    var fireOverlay = document.getElementById('on-fire-overlay');
+    var fireText = fireOverlay.querySelector('.on-fire-text');
+    fireOverlay.classList.remove('show');
+    if (fireText) { fireText.style.animation = 'none'; void fireText.offsetHeight; fireText.style.animation = ''; }
+    fireOverlay.classList.add('show');
+    setTimeout(function() { fireOverlay.classList.remove('show'); }, 1200);
+
+    // Crowd cheer SFX
+    sfxCrowdCheer();
+
+    // Extra emphasis on bonus popup
+    var bonusEl = document.getElementById('bonus-popup');
+    bonusEl.classList.add('streak-fire');
+    setTimeout(function() { bonusEl.classList.remove('streak-fire'); }, 1500);
+  }
+
+  function checkTension() {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    if (currentQ < Math.floor(settings.rounds / 2)) {
+      if (isTenseActive) clearTension();
+      return;
+    }
+    var bScore = players.burden.score;
+    var sScore = players.stu.score;
+    var maxScore = Math.max(bScore, sScore, 1);
+    var diff = Math.abs(bScore - sScore);
+    var diffPct = diff / maxScore;
+    if (diffPct <= 0.15) {
+      if (!isTenseActive) {
+        isTenseActive = true;
+        var bgGlow = document.querySelector('.bg-glow');
+        if (bgGlow) bgGlow.classList.add('tense');
+        var bScoreEl = document.getElementById('hud-burden-score');
+        var sScoreEl = document.getElementById('hud-stu-score');
+        if (bScoreEl) bScoreEl.classList.add('score-tense');
+        if (sScoreEl) sScoreEl.classList.add('score-tense');
+        if (Music.playing && Music.masterGain) {
+          try { Music.masterGain.gain.setTargetAtTime(0.28, audioCtx.currentTime, 0.5); } catch(e) {}
+        }
+      }
+    } else {
+      if (isTenseActive) clearTension();
+    }
+  }
+
+  function clearTension() {
+    if (!isTenseActive) return;
+    isTenseActive = false;
+    var bgGlow = document.querySelector('.bg-glow');
+    if (bgGlow) bgGlow.classList.remove('tense');
+    var bScoreEl = document.getElementById('hud-burden-score');
+    var sScoreEl = document.getElementById('hud-stu-score');
+    if (bScoreEl) bScoreEl.classList.remove('score-tense');
+    if (sScoreEl) sScoreEl.classList.remove('score-tense');
   }
 
   // ═══════════════════════════════════════
@@ -1571,6 +2200,184 @@
     {category:"Cheeses",question:"What cheese is made by stretching and pulling the curds in hot water?",correct_answer:"Mozzarella (pasta filata method)",incorrect_answers:["Cheddar","Brie","Gouda"]},
     {category:"Cheeses",question:"Which country consumes the most cheese per capita?",correct_answer:"France",incorrect_answers:["United States","Italy","Switzerland"]},
     {category:"Cheeses",question:"What is the 'king of cheeses' as designated by tradition?",correct_answer:"Parmigiano-Reggiano",incorrect_answers:["Gruyère","Stilton","Brie"]},
+
+    // ── BRAAI CULTURE ──
+    {category:"Braai Culture",question:"What date is National Braai Day (Heritage Day) celebrated in South Africa?",correct_answer:"24 September",incorrect_answers:["16 June","27 April","1 May"],difficulty:1},
+    {category:"Braai Culture",question:"What is the most popular type of meat to braai in South Africa?",correct_answer:"Boerewors",incorrect_answers:["Chicken wings","Pork chops","Lamb shanks"],difficulty:1},
+    {category:"Braai Culture",question:"What is boerewors?",correct_answer:"A traditional South African spiced sausage",incorrect_answers:["A braai sauce","A side dish of corn","A type of bread roll"],difficulty:1},
+    {category:"Braai Culture",question:"What does the word 'braai' literally mean in Afrikaans?",correct_answer:"Roast or grill",incorrect_answers:["Fire","Meat","Party"],difficulty:1},
+    {category:"Braai Culture",question:"What is the most common fuel used for a traditional South African braai?",correct_answer:"Wood or charcoal",incorrect_answers:["Gas","Electric coils","Paraffin"],difficulty:1},
+    {category:"Braai Culture",question:"What is 'pap' that is commonly served with braai meat?",correct_answer:"A stiff maize meal porridge",incorrect_answers:["A bread roll","A potato dish","A type of rice"],difficulty:1},
+    {category:"Braai Culture",question:"What is a 'braaibroodjie'?",correct_answer:"A toasted sandwich made on the braai",incorrect_answers:["A bread roll for boerewors","A type of flatbread","A dessert grilled on coals"],difficulty:1},
+    {category:"Braai Culture",question:"What filling typically goes inside a braaibroodjie?",correct_answer:"Cheese, tomato, and onion",incorrect_answers:["Ham and mustard","Peanut butter and jam","Egg and bacon"],difficulty:1},
+    {category:"Braai Culture",question:"What is a 'potjie' in South African braai culture?",correct_answer:"A cast-iron pot used to slow-cook stew over coals",incorrect_answers:["A braai grid","A meat thermometer","A type of marinade"],difficulty:1},
+    {category:"Braai Culture",question:"In traditional braai etiquette, who typically manages the fire?",correct_answer:"The braai master (usually the host or a designated person)",incorrect_answers:["Everyone takes turns","Only women manage the fire","The youngest guest"],difficulty:1},
+    {category:"Braai Culture",question:"Who is credited with starting the campaign to rename Heritage Day as National Braai Day?",correct_answer:"Jan Scannell (Jan Braai)",incorrect_answers:["Desmond Tutu","Nelson Mandela","Ernie Els"],difficulty:2},
+    {category:"Braai Culture",question:"What type of South African wood is considered premium for braaing due to its long-lasting coals?",correct_answer:"Kameeldoring (camel thorn)",incorrect_answers:["Pine","Eucalyptus","Jacaranda"],difficulty:2},
+    {category:"Braai Culture",question:"What is 'sosatie' in South African braai culture?",correct_answer:"Marinated meat kebabs on skewers",incorrect_answers:["A type of braai sauce","Grilled corn on the cob","A dessert served at braais"],difficulty:2},
+    {category:"Braai Culture",question:"What spice blend is traditionally used in boerewors?",correct_answer:"Coriander, cloves, nutmeg, and allspice",incorrect_answers:["Cumin, turmeric, and chili","Paprika, garlic, and oregano","Cinnamon, cardamom, and ginger"],difficulty:2},
+    {category:"Braai Culture",question:"What is 'shisa nyama'?",correct_answer:"A Zulu term meaning 'burn the meat' — a communal braai gathering",incorrect_answers:["A braai marinade","A type of braai grid","A beer brand"],difficulty:2},
+    {category:"Braai Culture",question:"What is 'rooikrans' wood often used for in the Western Cape?",correct_answer:"Braai fuel — it is an invasive species cleared for firewood",incorrect_answers:["Building furniture","Making wine barrels","Roofing material"],difficulty:2},
+    {category:"Braai Culture",question:"What cut of lamb is a popular braai choice in South Africa?",correct_answer:"Lamb chops (rib or loin)",incorrect_answers:["Lamb shank","Lamb neck","Leg of lamb"],difficulty:2},
+    {category:"Braai Culture",question:"What is the main difference between a braai and a barbecue in South African culture?",correct_answer:"A braai uses wood coals; a barbecue often uses gas or charcoal briquettes",incorrect_answers:["There is no difference","A braai is indoors","A barbecue is bigger"],difficulty:2},
+    {category:"Braai Culture",question:"What is 'mielies' on the braai?",correct_answer:"Corn on the cob grilled over coals",incorrect_answers:["Grilled pumpkin","Roasted potatoes","Toasted bread"],difficulty:2},
+    {category:"Braai Culture",question:"What does 'wors' mean in Afrikaans?",correct_answer:"Sausage",incorrect_answers:["Fire","Meat","Smoke"],difficulty:2},
+    {category:"Braai Culture",question:"What type of salad is most traditionally served alongside braai meat?",correct_answer:"A braaislaai (coleslaw-style salad)",incorrect_answers:["Caesar salad","Greek salad","Waldorf salad"],difficulty:2},
+    {category:"Braai Culture",question:"What South African beer brand uses a braai theme heavily in its marketing?",correct_answer:"Castle Lager",incorrect_answers:["Heineken","Windhoek","Amstel"],difficulty:2},
+    {category:"Braai Culture",question:"What is the minimum percentage of meat required in boerewors by South African law?",correct_answer:"90%",incorrect_answers:["70%","50%","80%"],difficulty:3},
+    {category:"Braai Culture",question:"Which wood should you NEVER use for a braai because it produces toxic smoke?",correct_answer:"Oleander",incorrect_answers:["Rooikrans","Sekelbos","Kameeldoring"],difficulty:3},
+    {category:"Braai Culture",question:"What is 'skilpadjies' or 'vlermuise' — a traditional braai delicacy?",correct_answer:"Lamb liver wrapped in caul fat (netvet)",incorrect_answers:["Chicken hearts on skewers","Grilled tortoise meat","Deep-fried bat wings"],difficulty:3},
+    {category:"Braai Culture",question:"According to boerewors regulations, which type of meat is NOT allowed in traditional boerewors?",correct_answer:"Mechanically recovered meat",incorrect_answers:["Beef","Pork","Lamb"],difficulty:3},
+    {category:"Braai Culture",question:"What is the traditional Afrikaans term for the braai grid?",correct_answer:"Rooster",incorrect_answers:["Vuurherd","Kole","Griller"],difficulty:3},
+    {category:"Braai Culture",question:"What is 'sekelbos' in braai terminology?",correct_answer:"A type of hardwood favored for braais in the Northern Cape and Free State",incorrect_answers:["A braai tong","A fire starter gel","A braai seasoning"],difficulty:3},
+    {category:"Braai Culture",question:"What is 'stywepap' commonly served at a braai?",correct_answer:"A firm, sliceable version of maize porridge",incorrect_answers:["A spicy relish","A potato bake","A cream-based sauce"],difficulty:3},
+    {category:"Braai Culture",question:"What is the Cape Malay influence on sosaties?",correct_answer:"A sweet-and-sour marinade with apricot jam, curry, and vinegar",incorrect_answers:["Using fish instead of meat","Wrapping in banana leaves","Adding coconut milk"],difficulty:3},
+
+    // ── 90s POP CULTURE ──
+    {category:"90s Pop Culture",question:"What toy was the must-have craze of Christmas 1996?",correct_answer:"Tickle Me Elmo",incorrect_answers:["Tamagotchi","Furby","Beanie Babies"],difficulty:1},
+    {category:"90s Pop Culture",question:"Which band performed the hit song 'Wannabe' in 1996?",correct_answer:"Spice Girls",incorrect_answers:["Destiny's Child","TLC","All Saints"],difficulty:1},
+    {category:"90s Pop Culture",question:"What was the name of the virtual pet keychain toy that became a worldwide craze in 1997?",correct_answer:"Tamagotchi",incorrect_answers:["Digimon","Giga Pet","Nano Baby"],difficulty:1},
+    {category:"90s Pop Culture",question:"Which 1997 film became the highest-grossing movie of the decade?",correct_answer:"Titanic",incorrect_answers:["Jurassic Park","The Lion King","Forrest Gump"],difficulty:1},
+    {category:"90s Pop Culture",question:"What was the name of the Fresh Prince's cousin in 'The Fresh Prince of Bel-Air'?",correct_answer:"Carlton Banks",incorrect_answers:["Geoffrey Butler","Jazz","Philip Banks"],difficulty:1},
+    {category:"90s Pop Culture",question:"Which video game console did Sony launch in 1994?",correct_answer:"PlayStation",incorrect_answers:["Nintendo 64","Sega Saturn","Dreamcast"],difficulty:1},
+    {category:"90s Pop Culture",question:"What sitcom featured six friends hanging out at Central Perk coffee shop?",correct_answer:"Friends",incorrect_answers:["Seinfeld","Frasier","Will & Grace"],difficulty:1},
+    {category:"90s Pop Culture",question:"Which boy band released the album 'Millennium' in 1999?",correct_answer:"Backstreet Boys",incorrect_answers:["NSYNC","98 Degrees","Westlife"],difficulty:1},
+    {category:"90s Pop Culture",question:"What was the name of the cloned sheep announced in 1997?",correct_answer:"Dolly",incorrect_answers:["Molly","Polly","Holly"],difficulty:1},
+    {category:"90s Pop Culture",question:"Which 1993 movie featured dinosaurs brought back to life from DNA in amber?",correct_answer:"Jurassic Park",incorrect_answers:["The Lost World","Congo","Godzilla"],difficulty:1},
+    {category:"90s Pop Culture",question:"Which 1999 sci-fi movie features the line 'There is no spoon'?",correct_answer:"The Matrix",incorrect_answers:["The Sixth Sense","Fight Club","Dark City"],difficulty:2},
+    {category:"90s Pop Culture",question:"What was the name of the search engine that dominated the early internet before Google?",correct_answer:"AltaVista",incorrect_answers:["Bing","Yahoo","Ask Jeeves"],difficulty:2},
+    {category:"90s Pop Culture",question:"What was the highest-selling video game console of the 1990s?",correct_answer:"PlayStation (PS1)",incorrect_answers:["Super Nintendo","Nintendo 64","Sega Genesis"],difficulty:2},
+    {category:"90s Pop Culture",question:"What handheld electronic device did Palm release in 1997 that became a must-have gadget?",correct_answer:"PalmPilot",incorrect_answers:["Blackberry","Newton","iPod"],difficulty:2},
+    {category:"90s Pop Culture",question:"Which South African kwaito artist released the massive hit 'Nkalakatha' in 1999?",correct_answer:"Mandoza",incorrect_answers:["Arthur Mafokate","Zola","Doc Shebeleza"],difficulty:2},
+    {category:"90s Pop Culture",question:"What was the name of the operating system Microsoft launched on August 24, 1995?",correct_answer:"Windows 95",incorrect_answers:["Windows 98","Windows NT","Windows 3.1"],difficulty:2},
+    {category:"90s Pop Culture",question:"What 1990s collectible card game was created by Richard Garfield and published by Wizards of the Coast?",correct_answer:"Magic: The Gathering",incorrect_answers:["Yu-Gi-Oh!","Pokemon TCG","Dungeons & Dragons"],difficulty:2},
+    {category:"90s Pop Culture",question:"Which rap artist released the album 'All Eyez on Me' in 1996?",correct_answer:"2Pac (Tupac Shakur)",incorrect_answers:["The Notorious B.I.G.","Snoop Dogg","Nas"],difficulty:2},
+    {category:"90s Pop Culture",question:"What was the popular 90s fashion trend of wearing jeans extremely wide at the bottom called?",correct_answer:"JNCO jeans (wide-leg/baggy jeans)",incorrect_answers:["Bell-bottoms","Skinny jeans","Cargo pants"],difficulty:2},
+    {category:"90s Pop Culture",question:"What was the name of the software used by millions to play MP3 files, launched in 1997?",correct_answer:"Winamp",incorrect_answers:["iTunes","RealPlayer","Napster"],difficulty:2},
+    {category:"90s Pop Culture",question:"Which South African TV show, launched in 1994, became the country's most-watched soap opera?",correct_answer:"Generations",incorrect_answers:["Isidingo","Egoli","7de Laan"],difficulty:2},
+    {category:"90s Pop Culture",question:"What was the Y2K bug that caused worldwide panic at the end of the 90s?",correct_answer:"Fear that computers would malfunction when the date changed to 2000",incorrect_answers:["A deadly computer virus","A millennium-themed video game","A new species of insect discovered in 1999"],difficulty:2},
+    {category:"90s Pop Culture",question:"What Nokia phone model, released in 1998, was one of the first to feature the game Snake?",correct_answer:"Nokia 6110",incorrect_answers:["Nokia 3310","Nokia 5110","Nokia 8210"],difficulty:3},
+    {category:"90s Pop Culture",question:"Which South African kwaito group released 'It's About Time' and helped popularize the genre?",correct_answer:"Boom Shaka",incorrect_answers:["TKZee","Bongo Maffin","Trompies"],difficulty:3},
+    {category:"90s Pop Culture",question:"What was the name of the Sega console released in 1999 that was the first to include a built-in modem?",correct_answer:"Dreamcast",incorrect_answers:["Saturn","Genesis","Game Gear"],difficulty:3},
+    {category:"90s Pop Culture",question:"Which 1994 Quentin Tarantino film revived John Travolta's career?",correct_answer:"Pulp Fiction",incorrect_answers:["Reservoir Dogs","Kill Bill","Jackie Brown"],difficulty:3},
+    {category:"90s Pop Culture",question:"What was the original name of the instant messaging service launched by Mirabilis in 1996?",correct_answer:"ICQ",incorrect_answers:["AIM","MSN Messenger","mIRC"],difficulty:3},
+    {category:"90s Pop Culture",question:"Which band released the 90s hit 'Creep' and the album 'OK Computer'?",correct_answer:"Radiohead",incorrect_answers:["Oasis","Blur","Coldplay"],difficulty:3},
+    {category:"90s Pop Culture",question:"What was the first commercially successful web browser, released in 1994?",correct_answer:"Netscape Navigator",incorrect_answers:["Internet Explorer","Mosaic","Opera"],difficulty:3},
+    {category:"90s Pop Culture",question:"Which South African TV channel launched on October 1, 1998, bringing multi-channel digital satellite television to the country?",correct_answer:"DStv (Digital Satellite Television)",incorrect_answers:["e.tv","M-Net Series","SABC 3"],difficulty:3},
+
+    // ── SA FOOD & SLANG ──
+    {category:"SA Food & Slang",question:"What is bobotie?",correct_answer:"A spiced minced meat dish with an egg custard topping",incorrect_answers:["A type of sausage","A vegetable stew","A deep-fried pastry"],difficulty:1},
+    {category:"SA Food & Slang",question:"What does the South African slang word 'lekker' mean?",correct_answer:"Nice, good, or great",incorrect_answers:["Ugly","Expensive","Tired"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is biltong?",correct_answer:"Dried, cured meat — a South African snack",incorrect_answers:["A type of bread","A spicy relish","A fermented drink"],difficulty:1},
+    {category:"SA Food & Slang",question:"What does 'howzit' mean in South African slang?",correct_answer:"Hello / How are you?",incorrect_answers:["Goodbye","Thank you","I'm sorry"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is a 'bunny chow'?",correct_answer:"A hollowed-out loaf of bread filled with curry",incorrect_answers:["A rabbit stew","A vegetarian salad","A type of sandwich"],difficulty:1},
+    {category:"SA Food & Slang",question:"What does 'ja' mean in South African English/Afrikaans?",correct_answer:"Yes",incorrect_answers:["No","Maybe","Hello"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is a koeksister?",correct_answer:"A syrup-coated twisted doughnut",incorrect_answers:["A chocolate cake","A meat pie","A biscuit"],difficulty:1},
+    {category:"SA Food & Slang",question:"What does the slang word 'eish' express?",correct_answer:"Surprise, frustration, or disbelief",incorrect_answers:["Happiness","Agreement","Hunger"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is 'potjiekos'?",correct_answer:"A slow-cooked stew made in a cast-iron pot over coals",incorrect_answers:["A fried potato dish","A type of porridge","A baked pudding"],difficulty:1},
+    {category:"SA Food & Slang",question:"What does 'braai' mean?",correct_answer:"To grill or barbecue meat over an open flame",incorrect_answers:["To bake bread","To fry in oil","To boil soup"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is 'melktert'?",correct_answer:"A traditional South African milk tart with cinnamon",incorrect_answers:["A cheese pie","A cream soda drink","A yoghurt dessert"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does the Afrikaans expression 'mooi' mean?",correct_answer:"Beautiful or pretty",incorrect_answers:["Ugly","Tall","Fast"],difficulty:2},
+    {category:"SA Food & Slang",question:"What is 'chakalaka'?",correct_answer:"A spicy vegetable relish often served with pap and braai",incorrect_answers:["A type of dance","A brand of hot sauce","A grilled chicken dish"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does 'now now' mean in South African English?",correct_answer:"Soon, but not immediately",incorrect_answers:["Right this instant","Never","Yesterday"],difficulty:2},
+    {category:"SA Food & Slang",question:"What is 'vetkoek'?",correct_answer:"Deep-fried dough bread, often filled with mince or jam",incorrect_answers:["A type of biscuit","A grilled sandwich","A dried fruit snack"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does 'sarmie' mean in South African slang?",correct_answer:"A sandwich",incorrect_answers:["A friend","A warm jacket","A small car"],difficulty:2},
+    {category:"SA Food & Slang",question:"What is the origin city of the bunny chow?",correct_answer:"Durban",incorrect_answers:["Cape Town","Johannesburg","Pretoria"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does 'jol' mean in South African slang?",correct_answer:"To have a good time or party",incorrect_answers:["To run fast","To cook food","To sleep late"],difficulty:2},
+    {category:"SA Food & Slang",question:"What is 'beskuit'?",correct_answer:"South African rusks — hard, dried biscuits for dipping in coffee or tea",incorrect_answers:["A type of cheese","A braai side dish","A breakfast cereal"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does the expression 'shame' often mean in South African English?",correct_answer:"An expression of sympathy or endearment (like 'oh, how sweet')",incorrect_answers:["Embarrassment only","An insult","Disappointment"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does 'dof' mean in Afrikaans slang?",correct_answer:"Stupid or dim-witted",incorrect_answers:["Clever","Angry","Hungry"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does 'voetsek' mean?",correct_answer:"Go away (a rude dismissal)",incorrect_answers:["Come here","Sit down","Eat up"],difficulty:2},
+    {category:"SA Food & Slang",question:"What is 'umqombothi'?",correct_answer:"A traditional African beer made from maize and sorghum",incorrect_answers:["A type of bread","A spicy meat stew","A dried fruit snack"],difficulty:3},
+    {category:"SA Food & Slang",question:"What is the Cape Malay origin dish 'denningvleis'?",correct_answer:"A sweet-and-sour lamb stew with tamarind",incorrect_answers:["A fish curry","A chicken stir-fry","A beef biltong recipe"],difficulty:3},
+    {category:"SA Food & Slang",question:"What is the difference between a koeksister and a Cape Malay koesister?",correct_answer:"The Cape Malay version is spiced, coated in coconut, and not twisted",incorrect_answers:["There is no difference","One uses chocolate","The Cape Malay version is savoury"],difficulty:3},
+    {category:"SA Food & Slang",question:"What does 'babbelas' mean in South African slang?",correct_answer:"A hangover",incorrect_answers:["A party","A nap","A headache medicine"],difficulty:3},
+    {category:"SA Food & Slang",question:"What is 'waterblommetjiebredie'?",correct_answer:"A Cape stew made with water lily flowers and lamb",incorrect_answers:["A flower salad","A type of soup with seaweed","A vegetarian pasta dish"],difficulty:3},
+    {category:"SA Food & Slang",question:"What does 'bakgat' mean in Afrikaans slang?",correct_answer:"Awesome or fantastic",incorrect_answers:["Terrible","Expensive","Boring"],difficulty:3},
+    {category:"SA Food & Slang",question:"What is a 'gatsby' in Cape Town food culture?",correct_answer:"A massive sandwich filled with chips, meat, and sauce",incorrect_answers:["A fine-dining steak","A type of sushi roll","A cocktail"],difficulty:3},
+    {category:"SA Food & Slang",question:"What does 'kif' or 'kief' mean in South African slang?",correct_answer:"Cool, great, or awesome",incorrect_answers:["Ugly","Broken","Slow"],difficulty:3},
+
+    // ── FRENCHIES (Additional) ──
+    {category:"Frenchies",question:"What is the term for the rare French Bulldog coat pattern with tan markings above the eyes, on cheeks, and legs?",correct_answer:"Black and tan",incorrect_answers:["Sable","Tuxedo","Harlequin"],difficulty:3},
+    {category:"Frenchies",question:"At what age is a French Bulldog typically considered fully grown?",correct_answer:"Around 12-14 months",incorrect_answers:["6 months","3 years","2 years"],difficulty:2},
+    {category:"Frenchies",question:"What is a common skin condition in French Bulldogs caused by their wrinkles?",correct_answer:"Skin fold dermatitis",incorrect_answers:["Mange","Ringworm","Eczema"],difficulty:2},
+    {category:"Frenchies",question:"Which famous fashion designer was known for always having French Bulldogs as companions?",correct_answer:"Yves Saint Laurent",incorrect_answers:["Karl Lagerfeld","Coco Chanel","Giorgio Armani"],difficulty:3},
+    {category:"Frenchies",question:"What is the ideal daily exercise duration for a French Bulldog?",correct_answer:"About 30-60 minutes of moderate activity",incorrect_answers:["2-3 hours of intense exercise","No exercise needed","4-5 short walks totaling 3 hours"],difficulty:2},
+    {category:"Frenchies",question:"Why are French Bulldogs particularly sensitive to heat?",correct_answer:"Their short snouts make it hard to pant efficiently to cool down",incorrect_answers:["Their fur is too thick","They have no sweat glands at all","Their skin absorbs sunlight"],difficulty:1},
+    {category:"Frenchies",question:"What is 'cherry eye' that commonly affects French Bulldogs?",correct_answer:"A prolapsed tear gland that appears as a red mass in the corner of the eye",incorrect_answers:["Red-colored eyes","An allergy to cherries","A type of eye infection"],difficulty:2},
+    {category:"Frenchies",question:"What genetic test is recommended for French Bulldog breeders to check for a common spinal condition?",correct_answer:"Hemivertebrae screening",incorrect_answers:["Hip scoring","Elbow grading","Cardiac ultrasound"],difficulty:3},
+    {category:"Frenchies",question:"How much does a French Bulldog puppy typically cost from a reputable breeder?",correct_answer:"$2,000 - $5,000 or more",incorrect_answers:["$100 - $300","$500 - $800","$10,000 - $20,000"],difficulty:2},
+    {category:"Frenchies",question:"What is the French word for French Bulldog?",correct_answer:"Bouledogue Français",incorrect_answers:["Chien Français","Petit Taureau","Dogue de France"],difficulty:3},
+
+    // ── HIKING (Additional) ──
+    {category:"Hiking",question:"What is the name of the famous five-day hike through the Tsitsikamma forest to Storms River?",correct_answer:"The Otter Trail",incorrect_answers:["The Dolphin Trail","The Whale Trail","The Garden Route Trail"],difficulty:1},
+    {category:"Hiking",question:"What is 'bonking' or 'hitting the wall' in hiking terminology?",correct_answer:"Sudden fatigue from depleted glycogen (energy) stores",incorrect_answers:["Bumping into a tree","Reaching the summit","Getting lost on the trail"],difficulty:2},
+    {category:"Hiking",question:"Which South African hiking trail runs along the coast from Kalk Bay to Cape Point?",correct_answer:"The Hoerikwaggo Trail",incorrect_answers:["The Rim of Africa","The Otter Trail","The Whale Trail"],difficulty:3},
+    {category:"Hiking",question:"What is the 'golden rule' of river crossings while hiking?",correct_answer:"Unbuckle your pack's hip belt so you can ditch it if you fall",incorrect_answers:["Always cross at the widest point","Only cross at night","Run across as fast as possible"],difficulty:2},
+    {category:"Hiking",question:"What does HYOH stand for in long-distance hiking culture?",correct_answer:"Hike Your Own Hike",incorrect_answers:["Help Yourself On Hills","Have Your Own Headlamp","Hydrate Yourself On Hikes"],difficulty:3},
+    {category:"Hiking",question:"What is the Rim of Africa trail?",correct_answer:"A 650 km trail along the mountain rim of the Western Cape",incorrect_answers:["A trail around the rim of a volcano in Tanzania","A coastal walk in Mozambique","A trail along Victoria Falls"],difficulty:3},
+    {category:"Hiking",question:"What does a white blaze on a tree indicate on the Appalachian Trail?",correct_answer:"You are on the main trail",incorrect_answers:["Water source nearby","Campsite ahead","Trail closed"],difficulty:2},
+    {category:"Hiking",question:"What is the name of the popular day hike to the top of Lion's Head in Cape Town?",correct_answer:"Lion's Head Trail",incorrect_answers:["Signal Hill Path","Devil's Peak Route","Kloof Corner Trail"],difficulty:1},
+    {category:"Hiking",question:"What is a 'false summit' in mountaineering?",correct_answer:"A point that appears to be the peak but reveals more climbing beyond it",incorrect_answers:["A man-made platform","A summit that has been incorrectly measured","A hallucination at altitude"],difficulty:2},
+    {category:"Hiking",question:"What is the highest point on the Drakensberg Grand Traverse?",correct_answer:"Thabana Ntlenyana at 3,482 metres",incorrect_answers:["Cathedral Peak at 3,004 metres","Giant's Castle at 3,315 metres","Champagne Castle at 3,377 metres"],difficulty:3},
+
+    // ── SA WINES (Additional) ──
+    {category:"SA Wines",question:"What is the Walker Bay wine region particularly renowned for?",correct_answer:"Cool-climate Pinot Noir and Chardonnay",incorrect_answers:["Fortified dessert wines","Pinotage only","Sparkling Chenin Blanc"],difficulty:2},
+    {category:"SA Wines",question:"Which South African wine estate is famous for its red blend called 'Rubicon'?",correct_answer:"Meerlust",incorrect_answers:["Kanonkop","Rust en Vrede","Vergelegen"],difficulty:3},
+    {category:"SA Wines",question:"What grape variety is Kanonkop estate most celebrated for?",correct_answer:"Pinotage",incorrect_answers:["Cabernet Sauvignon","Merlot","Shiraz"],difficulty:2},
+    {category:"SA Wines",question:"What is the Tulbagh wine region known for apart from wine?",correct_answer:"Its historic Cape Dutch architecture and MCC sparkling wines",incorrect_answers:["Diamond mining","Ostrich farming","Surfing competitions"],difficulty:3},
+    {category:"SA Wines",question:"Which South African wine estate produces the famous 'FMC' Chenin Blanc?",correct_answer:"Ken Forrester Wines",incorrect_answers:["Mullineux","DeMorgenzon","Raats Family"],difficulty:3},
+    {category:"SA Wines",question:"What percentage Pinotage must a Cape Blend contain?",correct_answer:"30% to 70%",incorrect_answers:["At least 85%","10% to 20%","Exactly 50%"],difficulty:2},
+    {category:"SA Wines",question:"What is the Durbanville wine region in Cape Town known for producing?",correct_answer:"Sauvignon Blanc and Merlot cooled by sea breezes",incorrect_answers:["Only dessert wines","Exclusively red wines","Brandy and port"],difficulty:2},
+    {category:"SA Wines",question:"Which South African wine producer pioneered the natural wine movement in Swartland?",correct_answer:"Eben Sadie (Sadie Family Wines)",incorrect_answers:["Johan Reyneke","Charles Back","Adi Badenhorst"],difficulty:3},
+    {category:"SA Wines",question:"What does 'old vine' (ou wingerd) typically mean for South African Chenin Blanc?",correct_answer:"Vines that are at least 35-40 years old, producing more concentrated wine",incorrect_answers:["Vines older than 5 years","Vines that produce white wine only","Vines planted by the Dutch settlers"],difficulty:2},
+    {category:"SA Wines",question:"What is the Klein Karoo region most famous for in South African wine?",correct_answer:"Fortified wines, Muscadel, and port-style wines",incorrect_answers:["Sparkling MCC wine","Pinot Noir","Riesling"],difficulty:2},
+
+    // ── PARIS (Additional) ──
+    {category:"Paris",question:"What is the name of the large park on the eastern edge of Paris that contains a zoo and a lake?",correct_answer:"Bois de Vincennes",incorrect_answers:["Bois de Boulogne","Jardin des Tuileries","Parc Monceau"],difficulty:2},
+    {category:"Paris",question:"What famous Parisian department store has a spectacular stained-glass dome and rooftop terrace?",correct_answer:"Galeries Lafayette",incorrect_answers:["Le Bon Marché","Printemps","Samaritaine"],difficulty:1},
+    {category:"Paris",question:"How many steps does it take to climb to the second floor of the Eiffel Tower?",correct_answer:"674 steps",incorrect_answers:["300 steps","1,200 steps","450 steps"],difficulty:3},
+    {category:"Paris",question:"Which Parisian neighborhood is known as the city's Chinatown?",correct_answer:"The 13th arrondissement (Quartier Asiatique)",incorrect_answers:["The 5th arrondissement","Montmartre","Belleville"],difficulty:2},
+    {category:"Paris",question:"What painting is the most famous work housed in the Louvre?",correct_answer:"The Mona Lisa by Leonardo da Vinci",incorrect_answers:["The Winged Victory of Samothrace","Liberty Leading the People","The Wedding at Cana"],difficulty:1},
+    {category:"Paris",question:"What is the name of the Parisian covered passages built in the 19th century for upscale shopping?",correct_answer:"Les Passages Couverts",incorrect_answers:["Les Grands Boulevards","Les Arcades","Les Halles"],difficulty:3},
+    {category:"Paris",question:"Which French king built the Palace of Versailles outside Paris?",correct_answer:"Louis XIV",incorrect_answers:["Louis XVI","Napoleon Bonaparte","Louis XV"],difficulty:2},
+    {category:"Paris",question:"What is the Place de la Concorde known for historically?",correct_answer:"It was the site of many guillotine executions during the French Revolution",incorrect_answers:["It was Napoleon's military headquarters","It was a Roman amphitheatre","It was a medieval marketplace"],difficulty:2},
+    {category:"Paris",question:"What is the tallest skyscraper in Paris proper as of 2024?",correct_answer:"Tour Montparnasse",incorrect_answers:["The Eiffel Tower","Tour First","The Louvre Pyramid"],difficulty:3},
+    {category:"Paris",question:"What is the famous Parisian literary café on Boulevard Saint-Germain frequented by Sartre and de Beauvoir?",correct_answer:"Café de Flore",incorrect_answers:["Le Procope","Les Deux Magots","La Coupole"],difficulty:3},
+
+    // ── CHEESES (Additional) ──
+    {category:"Cheeses",question:"What South African cheese brand is well-known for its range of Gouda and Cheddar?",correct_answer:"Lancewood",incorrect_answers:["Clover","Parmalat","Woolworths"],difficulty:1},
+    {category:"Cheeses",question:"What is 'queso' simply the Spanish word for?",correct_answer:"Cheese",incorrect_answers:["Milk","Cream","Butter"],difficulty:1},
+    {category:"Cheeses",question:"What type of cheese is Manchego, and which country does it come from?",correct_answer:"A firm sheep's milk cheese from Spain",incorrect_answers:["A soft cow's milk cheese from Mexico","A blue cheese from Portugal","A goat cheese from Italy"],difficulty:2},
+    {category:"Cheeses",question:"What is the Danish cheese with a mild, creamy taste often used in sandwiches?",correct_answer:"Havarti",incorrect_answers:["Danbo","Esrom","Maribo"],difficulty:2},
+    {category:"Cheeses",question:"What cheese is traditionally used in a Greek spanakopita?",correct_answer:"Feta",incorrect_answers:["Halloumi","Kasseri","Mozzarella"],difficulty:2},
+    {category:"Cheeses",question:"How is ricotta cheese traditionally made?",correct_answer:"From the whey left over from making other cheeses",incorrect_answers:["From buffalo milk only","By aging fresh mozzarella","By smoking cheddar curds"],difficulty:2},
+    {category:"Cheeses",question:"What is Epoisses de Bourgogne famous for?",correct_answer:"Being one of the smelliest cheeses in the world, washed in brandy",incorrect_answers:["Being the hardest cheese ever made","Having a bright blue rind","Being made from reindeer milk"],difficulty:3},
+    {category:"Cheeses",question:"What cheese is produced on the Italian island of Sardinia and is known for containing live insect larvae?",correct_answer:"Casu marzu",incorrect_answers:["Pecorino Sardo","Fiore Sardo","Canestrato"],difficulty:3},
+    {category:"Cheeses",question:"What is the Italian term for a cheese shop or cheese seller?",correct_answer:"Formaggeria",incorrect_answers:["Salumeria","Panetteria","Gelateria"],difficulty:3},
+    {category:"Cheeses",question:"Which Japanese cheese variety is made with sake lees and won international awards?",correct_answer:"Sakura cheese",incorrect_answers:["Tofu cheese","Miso cheese","Wasabi Gouda"],difficulty:3},
+
+    // ── TRUE OR FALSE ──
+    {category:"True or False",question:"An octopus has three hearts -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"The Great Wall of China is visible from space with the naked eye -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:1},
+    {category:"True or False",question:"Honey never spoils and has been found edible in ancient Egyptian tombs -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"Lightning never strikes the same place twice -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:1},
+    {category:"True or False",question:"South Africa has three capital cities -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"Table Mountain in Cape Town is one of the New7Wonders of Nature -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"A group of flamingos is called a 'flamboyance' -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"Goldfish have a memory span of only three seconds -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+    {category:"True or False",question:"Bananas are technically berries -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"Mount Everest is the tallest mountain in the solar system -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+    {category:"True or False",question:"Venus is the hottest planet in our solar system -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"The Amazon River is the longest river in the world -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+    {category:"True or False",question:"Coca-Cola was originally green in color -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+    {category:"True or False",question:"Biltong and jerky are made using the same process -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+    {category:"True or False",question:"A crocodile cannot stick its tongue out -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"Humans share about 60% of their DNA with bananas -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:3},
+    {category:"True or False",question:"Sharks are older than trees in evolutionary terms -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:3},
+    {category:"True or False",question:"The human body contains enough iron to make a small nail -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:3},
+    {category:"True or False",question:"Australia is wider than the Moon's diameter -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:3},
+    {category:"True or False",question:"Ostriches bury their heads in the sand when scared -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:1},
   ];
 
   // ═══════════════════════════════════════
@@ -1593,35 +2400,78 @@
   let answered = false;
   let gameLoading = false;
   let ttsPlaying = false;
+
+  // ── Cascade state (to track ongoing cascade animations) ──
+  let cascadeInProgress = false;
   let voiceEnabled = false;
   let voiceId = '21m00Tcm4TlvDq8ikWAM';
   let lifetimeStats = null;
+  // ── Achievement tracking state ──
+  var gameTracker = {
+    answerTimes: { burden: [], stu: [] },
+    scoreDiffs: [],
+    secondAnswerers: [],
+    fastAnswers: { burden: 0, stu: 0 },
+    blitzAnswers: { burden: false, stu: false },
+    previousScores: { burden: null, stu: null }
+  };
+  var achievementCache = { burden: null, stu: null };
 
   // ═══════════════════════════════════════
   //  NAVIGATION
   // ═══════════════════════════════════════
   function showScreen(id) {
     sfxWhoosh();
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + id).classList.add('active');
+    var current = document.querySelector('.screen.active');
+    var next = document.getElementById('screen-' + id);
+
+    // Animate the leaving screen with scale-down + fade
+    if (current && current !== next) {
+      current.classList.remove('active');
+      current.classList.add('screen-leaving');
+      setTimeout(function() { current.classList.remove('screen-leaving'); }, 350);
+    } else {
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    }
+
+    // Slight delay so leaving animation starts, then entering overlaps
+    setTimeout(function() {
+      document.querySelectorAll('.screen').forEach(function(s) {
+        if (s !== next) s.classList.remove('active');
+      });
+      next.classList.add('active');
+    }, 50);
     // Clear confetti when leaving results
     if (id !== 'results') {
-      const confetti = document.getElementById('confetti-container');
+      var confetti = document.getElementById('confetti-container');
       if (confetti) confetti.innerHTML = '';
     }
     // Music transitions — title music for menu screens
-    if (['title', 'settings', 'howto', 'leaderboard'].includes(id)) {
+    if (['title', 'settings', 'howto', 'leaderboard', 'achievements', 'pin', 'admin'].indexOf(id) !== -1) {
       Music.title();
     }
     // Refresh stats when entering leaderboard or title
     if (id === 'leaderboard' || id === 'title') {
       loadLifetimeStats();
     }
+    // Render achievements screen when entering it
+    if (id === 'achievements') {
+      renderAchievementsScreen();
+    }
+    // Clear tension state when leaving game
+    if (id !== 'game') {
+      clearTension();
+    }
+    // Reset PIN entry when entering pin screen
+    if (id === 'pin') {
+      pinBuffer = '';
+      updatePinDots();
+    }
     // Focus first button
-    setTimeout(() => {
-      const btn = document.querySelector('#screen-' + id + ' .btn, #screen-' + id + ' .pill, #screen-' + id + ' .answer-btn');
+    setTimeout(function() {
+      var btn = document.querySelector('#screen-' + id + ' .btn, #screen-' + id + ' .pill, #screen-' + id + ' .answer-btn');
       if (btn) btn.focus();
-    }, 100);
+    }, 150);
   }
 
   function selectPill(el, group) {
@@ -1634,6 +2484,11 @@
       saved[group] = el.dataset.val;
       localStorage.setItem('brainblitz_settings', JSON.stringify(saved));
     } catch(e) {}
+    // Language change — apply immediately
+    if (group === 'lang') {
+      gameLang = el.dataset.val;
+      applyLanguage();
+    }
   }
 
   function getSelected(groupId) {
@@ -1703,6 +2558,23 @@
       players.stu = { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
       currentPlayer = 'burden';
       currentQ = 0;
+      // Reset cascade state
+      cascadeInProgress = false;
+
+      // Reset achievement tracker for this game
+      gameTracker.answerTimes = { burden: [], stu: [] };
+      gameTracker.scoreDiffs = [0];
+      gameTracker.secondAnswerers = [];
+      gameTracker.fastAnswers = { burden: 0, stu: 0 };
+      gameTracker.blitzAnswers = { burden: false, stu: false };
+      // Load previous scores for "Consistent" achievement
+      try {
+        var prevScores = JSON.parse(localStorage.getItem('brainblitz_prev_scores') || '{}');
+        gameTracker.previousScores.burden = (prevScores.burden !== undefined) ? prevScores.burden : null;
+        gameTracker.previousScores.stu = (prevScores.stu !== undefined) ? prevScores.stu : null;
+      } catch(e) {
+        gameTracker.previousScores = { burden: null, stu: null };
+      }
 
       selectQuestions();
 
@@ -1726,15 +2598,60 @@
     }
   }
 
+  // === DIFFICULTY-AWARE QUESTION SELECTION ===
   function selectQuestions() {
-    let pool = [...QUESTION_BANK];
+    var pool = [], i;
+    for (i = 0; i < QUESTION_BANK.length; i++) pool.push(Object.assign({}, QUESTION_BANK[i]));
     if (settings.category) {
-      pool = pool.filter(q => q.category === settings.category ||
-        q.category.toLowerCase() === settings.category.toLowerCase());
+      pool = pool.filter(function(q) {
+        return q.category === settings.category || q.category.toLowerCase() === settings.category.toLowerCase();
+      });
     }
-    // Shuffle and pick the requested number of rounds
     shuffleArray(pool);
-    questions = pool.slice(0, settings.rounds);
+    // Auto-assign difficulty to questions that lack it
+    var third = Math.ceil(pool.length / 3);
+    for (i = 0; i < pool.length; i++) {
+      if (!(pool[i].difficulty >= 1 && pool[i].difficulty <= 3)) {
+        pool[i].difficulty = i < third ? 1 : (i < third * 2 ? 2 : 3);
+      }
+    }
+    // Bucket by difficulty
+    var easy = [], medium = [], hard = [];
+    for (i = 0; i < pool.length; i++) {
+      if (pool[i].difficulty === 1) easy.push(pool[i]);
+      else if (pool[i].difficulty === 2) medium.push(pool[i]);
+      else hard.push(pool[i]);
+    }
+    shuffleArray(easy); shuffleArray(medium); shuffleArray(hard);
+    // First third easy, middle third medium, final third hard
+    var total = Math.min(settings.rounds, pool.length);
+    var ec = Math.round(total / 3), mc = Math.round(total / 3), hc = total - ec - mc;
+    if (ec > easy.length) { mc += ec - easy.length; ec = easy.length; }
+    if (mc > medium.length) { hc += mc - medium.length; mc = medium.length; }
+    if (hc > hard.length) {
+      var ov = hc - hard.length; hc = hard.length;
+      var em = Math.min(ov, medium.length - mc); mc += em; ov -= em;
+      ec += Math.min(ov, easy.length - ec);
+    }
+    questions = easy.slice(0, ec).concat(medium.slice(0, mc)).concat(hard.slice(0, hc));
+  }
+
+  // Get difficulty multiplier for base scoring
+  function getDifficultyMultiplier(q) {
+    var d = (q && q.difficulty) || 1;
+    return d === 2 ? 1.5 : (d === 3 ? 2 : 1);
+  }
+
+  // Update difficulty badge in HUD
+  function updateDifficultyHUD(q) {
+    var d = (q && q.difficulty) || 1;
+    var el = document.getElementById('hud-difficulty');
+    if (!el) return;
+    var label = d === 1 ? 'EASY' : (d === 2 ? 'MEDIUM' : 'HARD');
+    var cls = d === 1 ? 'diff-easy' : (d === 2 ? 'diff-medium' : 'diff-hard');
+    var stars = d === 1 ? '★' : (d === 2 ? '★★' : '★★★');
+    el.innerHTML = '<span class="difficulty-badge ' + cls + '">' + label +
+      ' <span class="difficulty-stars">' + stars + '</span></span>';
   }
 
   function decodeHTML(html) {
@@ -1822,6 +2739,9 @@
     document.getElementById('q-category').textContent = decodeHTML(q.category);
     document.getElementById('q-text').textContent = decodeHTML(q.question);
 
+    // Update difficulty badge in HUD
+    updateDifficultyHUD(q);
+
     // Update turn indicator
     document.getElementById('hud-burden-section').classList.remove('active-turn', 'stu-turn');
     document.getElementById('hud-stu-section').classList.remove('active-turn', 'stu-turn');
@@ -1861,58 +2781,172 @@
     }, 100);
   }
 
+  var timerRAF = null;
+
   function startQuestionTimer() {
     timeLeft = settings.timer;
     prevTimeLeft = settings.timer;
-    const fill = document.getElementById('timer-fill');
-    fill.style.width = '100%';
-    fill.classList.remove('danger');
+    var fill = document.getElementById('timer-fill');
 
-    clearInterval(timerInterval);
-    const startTime = Date.now();
-    timerInterval = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
+    // Reset: remove all animation classes and force reflow
+    fill.classList.remove('timer-running', 'timer-pulse', 'timer-pulse-tense', 'danger');
+    fill.style.animation = 'none';
+    fill.style.transform = 'scaleX(1)';
+    void fill.offsetHeight; // force reflow
+
+    // Set CSS custom property for duration and start CSS animation
+    fill.style.setProperty('--timer-duration', settings.timer + 's');
+    fill.style.animation = '';
+    fill.classList.add('timer-running');
+
+    // Cancel any previous rAF loop
+    if (timerRAF) { cancelAnimationFrame(timerRAF); timerRAF = null; }
+
+    // rAF loop only handles: countdown beeps, danger class, music intensity, timeout
+    // The actual bar animation is driven purely by CSS for GPU-accelerated smoothness
+    var startTime = Date.now();
+    var dangerTriggered = false;
+
+    function timerTick() {
+      var elapsed = (Date.now() - startTime) / 1000;
       timeLeft = Math.max(0, settings.timer - elapsed);
-      const pct = (timeLeft / settings.timer) * 100;
-      fill.style.width = pct + '%';
+      var pct = (timeLeft / settings.timer) * 100;
 
-      if (pct < 30 && !fill.classList.contains('danger')) {
+      // Add danger styling at 30%
+      if (pct < 30 && !dangerTriggered) {
+        dangerTriggered = true;
         fill.classList.add('danger');
+        // Switch to pulsing animation (keeps shrink + adds pulse)
+        var isTense = document.querySelector('.bg-glow.tense');
+        fill.classList.remove('timer-running');
+        fill.classList.add(isTense ? 'timer-pulse-tense' : 'timer-pulse');
       }
-      // Fixed: compare prevTimeLeft vs timeLeft for countdown beeps
+
+      // Countdown beeps at 3, 2, 1
       if (timeLeft <= 3 && timeLeft > 0 && Math.floor(prevTimeLeft) !== Math.floor(timeLeft)) {
         sfxCountdown();
       }
       prevTimeLeft = timeLeft;
+
       // Ramp up music intensity as timer runs down
       Music.setIntensity(1 - (timeLeft / settings.timer));
+
+      // Check close game tension each frame
+      checkTension();
+
       if (timeLeft <= 0) {
-        clearInterval(timerInterval);
+        timerRAF = null;
+        fill.classList.remove('timer-running', 'timer-pulse', 'timer-pulse-tense');
         if (!answered) timeUp();
+        return;
       }
-    }, 50);
+
+      timerRAF = requestAnimationFrame(timerTick);
+    }
+
+    timerRAF = requestAnimationFrame(timerTick);
   }
 
+  function stopQuestionTimer() {
+    if (timerRAF) { cancelAnimationFrame(timerRAF); timerRAF = null; }
+    var fill = document.getElementById('timer-fill');
+    // Freeze the CSS animation at current position
+    var computed = window.getComputedStyle(fill);
+    var currentTransform = computed.transform || computed.webkitTransform || 'scaleX(1)';
+    fill.classList.remove('timer-running', 'timer-pulse', 'timer-pulse-tense');
+    fill.style.animation = 'none';
+    fill.style.transform = currentTransform;
+  }
+
+  // =======================================
+  //  ANSWER CASCADE ANIMATION
+  // =======================================
+  // Reveals answers one-by-one for dramatic effect.
+  // selectedBtn: the button the player clicked (or null for timeout)
+  // callback: called when cascade is complete
+  function runCascade(selectedBtn, callback) {
+    cascadeInProgress = true;
+    var allBtns = [].slice.call(document.querySelectorAll('#answers-grid .answer-btn'));
+    var isCorrect = selectedBtn && selectedBtn.dataset.correct === 'true';
+
+    // Step 1: Disable all buttons immediately, light up selected (300ms)
+    allBtns.forEach(function(b) { b.classList.add('disabled'); });
+
+    if (selectedBtn) {
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+      } else {
+        selectedBtn.classList.add('wrong', 'shake-wrong');
+      }
+    }
+
+    // Collect wrong answers that were NOT the selected button
+    var wrongBtns = [];
+    var correctBtn = null;
+    allBtns.forEach(function(b) {
+      if (b.dataset.correct === 'true') { correctBtn = b; }
+      else if (b !== selectedBtn) { wrongBtns.push(b); }
+    });
+    // Shuffle the wrong buttons for variety
+    shuffleArray(wrongBtns);
+
+    // Step 2: After 300ms, start dimming wrong answers one by one (200ms each)
+    setTimeout(function() {
+      var delay = 0;
+      wrongBtns.forEach(function(wb) {
+        setTimeout(function() {
+          wb.classList.add('cascade-dim');
+        }, delay);
+        delay += 200;
+      });
+
+      // Step 3: After all wrongs dimmed, give correct answer its full glow (200ms)
+      setTimeout(function() {
+        if (correctBtn && correctBtn !== selectedBtn) {
+          correctBtn.classList.add('cascade-correct', 'pulse-correct');
+        } else if (correctBtn && isCorrect) {
+          correctBtn.classList.add('pulse-correct');
+        }
+        cascadeInProgress = false;
+        if (callback) callback();
+      }, delay + 200);
+    }, 300);
+  }
+
+  // =======================================
+  //  ADVANCE TO NEXT QUESTION (shared)
+  // =======================================
+  function advanceAfterAnswer() {
+    currentQ++;
+    if (currentQ < questions.length) {
+      showTurnSwitch(currentPlayer, function() {
+        showRoundSplash(currentQ + 1, function() { loadQuestion(); });
+      });
+    } else {
+      endGame();
+    }
+  }
+
+  // =======================================
+  //  SELECT ANSWER (cascade + difficulty)
+  // =======================================
   function selectAnswer(btn) {
     if (answered || ttsPlaying) return;
     answered = true;
-    clearInterval(timerInterval);
+    stopQuestionTimer();
     ensureAudio();
 
-    const isCorrect = btn.dataset.correct === 'true';
-    const elapsed = settings.timer - timeLeft;
-    const player = players[currentPlayer];
+    var isCorrect = btn.dataset.correct === 'true';
+    var elapsed = settings.timer - timeLeft;
+    var player = players[currentPlayer];
     player.totalTime += elapsed;
 
-    // Disable all buttons + enhanced animations
-    document.querySelectorAll('.answer-btn').forEach(b => {
-      b.classList.add('disabled');
-      if (b.dataset.correct === 'true') {
-        b.classList.add('correct', 'pulse-correct');
-      } else if (b !== btn) {
-        b.classList.add('dimmed');
-      }
-    });
+    // Get current question's difficulty multiplier
+    var q = questions[currentQ];
+    var diffMult = getDifficultyMultiplier(q);
+
+    // Run the cascade reveal animation
+    runCascade(btn, null);
 
     if (isCorrect) {
       sfxCorrect();
@@ -1920,81 +2954,82 @@
       if (player.streak > player.bestStreak) player.bestStreak = player.streak;
       player.correctCount++;
 
-      // Score: base 100 + speed bonus + streak bonus
-      const speedBonus = Math.round((timeLeft / settings.timer) * 100);
-      const streakBonus = Math.min(player.streak, 5) * 20;
-      const points = 100 + speedBonus + streakBonus;
+      // Score: (base * difficulty multiplier) + speed bonus + streak bonus
+      var basePoints = Math.round(100 * diffMult);
+      var speedBonus = Math.round((timeLeft / settings.timer) * 100);
+      var streakBonus = Math.min(player.streak, 5) * 20;
+      var points = basePoints + speedBonus + streakBonus;
       player.score += points;
 
       spawnParticles(btn, 12);
       showFeedback('correct');
       if (player.streak >= 3) {
-        const streakMsgs = [
-          `🔥 ${player.streak}x STREAK! Jy's op Vuur! +${streakBonus}`,
-          `🔥 ${player.streak}x STREAK! Moerse Lekker! +${streakBonus}`,
-          `🔥 ${player.streak}x STREAK! Nou Gaan Ons Braai! +${streakBonus}`,
-          `🔥 ${player.streak}x STREAK! Hou So! +${streakBonus}`
+        var streakMsgs = [
+          '\ud83d\udd25 ' + player.streak + "x STREAK! Jy's op Vuur! +" + streakBonus,
+          '\ud83d\udd25 ' + player.streak + 'x STREAK! Moerse Lekker! +' + streakBonus,
+          '\ud83d\udd25 ' + player.streak + 'x STREAK! Nou Gaan Ons Braai! +' + streakBonus,
+          '\ud83d\udd25 ' + player.streak + 'x STREAK! Hou So! +' + streakBonus
         ];
         showBonus(streakMsgs[Math.floor(Math.random() * streakMsgs.length)]);
+        // 5+ streak: full celebration with border glow, ON FIRE overlay, crowd cheer
+        if (player.streak >= 5) {
+          triggerStreakCelebration();
+        }
       }
     } else {
-      btn.classList.add('wrong', 'shake-wrong');
       sfxWrong();
       player.streak = 0;
       showFeedback('wrong');
     }
 
-    // Update HUD with score pop animation
+    // Update HUD scores
     updateScoreDisplay('hud-burden-score', players.burden.score);
     updateScoreDisplay('hud-stu-score', players.stu.score);
 
-    // Alternate players and go to next question
+    // Track data for achievements
+    gameTracker.answerTimes[currentPlayer].push(elapsed);
+    if (isCorrect && elapsed < 3) gameTracker.fastAnswers[currentPlayer]++;
+    if (isCorrect && elapsed < 1) gameTracker.blitzAnswers[currentPlayer] = true;
+    gameTracker.scoreDiffs.push(players.burden.score - players.stu.score);
+    if (currentQ % 2 === 1) gameTracker.secondAnswerers.push(currentPlayer);
+
+    // Alternate turn for the NEXT question
     currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
 
-    setTimeout(() => {
-      currentQ++;
-      if (currentQ < questions.length) {
-        showTurnSwitch(currentPlayer, () => {
-          showRoundSplash(currentQ + 1, () => loadQuestion());
-        });
-      } else {
-        endGame();
-      }
+    // After feedback delay: advance to next question
+    setTimeout(function() {
+      advanceAfterAnswer();
     }, 1200);
   }
 
+  // =======================================
+  //  TIME UP (cascade)
+  // =======================================
   function timeUp() {
     answered = true;
-    const player = players[currentPlayer];
+    var player = players[currentPlayer];
     player.streak = 0;
     player.totalTime += settings.timer;
 
-    document.querySelectorAll('.answer-btn').forEach(b => {
-      b.classList.add('disabled');
-      if (b.dataset.correct === 'true') {
-        b.classList.add('correct', 'pulse-correct');
-      } else {
-        b.classList.add('dimmed');
-      }
-    });
+    // Run cascade animation (no selected button — just reveals correct)
+    runCascade(null, null);
 
     sfxWrong();
     showFeedback('timeout');
 
+    // Track timeout for achievements
+    gameTracker.answerTimes[currentPlayer].push(settings.timer);
+    gameTracker.scoreDiffs.push(players.burden.score - players.stu.score);
+    if (currentQ % 2 === 1) gameTracker.secondAnswerers.push(currentPlayer);
+
     // Alternate players
     currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
 
-    setTimeout(() => {
-      currentQ++;
-      if (currentQ < questions.length) {
-        showTurnSwitch(currentPlayer, () => {
-          showRoundSplash(currentQ + 1, () => loadQuestion());
-        });
-      } else {
-        endGame();
-      }
+    setTimeout(function() {
+      advanceAfterAnswer();
     }, 1200);
   }
+
 
   // Format number with commas
   function formatScore(n) {
@@ -2058,15 +3093,15 @@
     text.className = 'feedback-text';
 
     if (type === 'correct') {
-      const msgs = ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Yoh Nailed It!', 'Eish, Too Easy!', 'Baie Mooi!', 'Jy\'s \'n Bees!', 'Sharp Sharp!'];
+      var msgs = t('correctFb');
       text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
       text.classList.add('correct-fb');
     } else if (type === 'wrong') {
-      const msgs = ['Eina!', 'Ag Nee!', 'Haibo!', 'Shame Man!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!'];
+      var msgs = t('wrongFb');
       text.textContent = msgs[Math.floor(Math.random() * msgs.length)];
       text.classList.add('wrong-fb');
     } else {
-      text.textContent = "Tyd Op, Bru!";
+      text.textContent = t('timeoutFb');
       text.classList.add('timeout-fb');
     }
 
@@ -2087,7 +3122,7 @@
   }
 
   function endGame() {
-    clearInterval(timerInterval);
+    stopQuestionTimer();
 
     // Display Burden's stats
     document.getElementById('res-burden-score').textContent = players.burden.score;
@@ -2112,7 +3147,7 @@
     // Determine winner
     let winnerText = '';
     if (players.burden.score > players.stu.score) {
-      winnerText = 'BURDEN WINS! Lekker Gespeel!';
+      winnerText = t('burdenWins');
       burdenCol.classList.add('winner-column');
       stuCol.classList.add('loser-column');
       trophy.style.display = 'block';
@@ -2120,7 +3155,7 @@
       Music.victory();
       createConfetti();
     } else if (players.stu.score > players.burden.score) {
-      winnerText = 'STU WINS! Jy\'s die Boss!';
+      winnerText = t('stuWins');
       stuCol.classList.add('winner-column');
       burdenCol.classList.add('loser-column');
       trophy.style.display = 'block';
@@ -2128,7 +3163,7 @@
       Music.victory();
       createConfetti();
     } else {
-      winnerText = 'IT\'S A DRAW! Sharp Sharp!';
+      winnerText = t('draw');
       trophy.style.display = 'none';
       sfxDraw();
       Music.draw();
@@ -2137,6 +3172,17 @@
 
     // Save result (fire-and-forget)
     saveGameResult();
+
+    // Save scores for "Consistent" achievement in next game
+    try {
+      localStorage.setItem('brainblitz_prev_scores', JSON.stringify({
+        burden: players.burden.score,
+        stu: players.stu.score
+      }));
+    } catch(e) {}
+
+    // Check and display achievements (fire-and-forget)
+    checkAndShowAchievements();
 
     showScreen('results');
   }
@@ -2159,8 +3205,8 @@
 
   function updateTitleWins() {
     if (!lifetimeStats) return;
-    const bWins = lifetimeStats.burden?.wins || 0;
-    const sWins = lifetimeStats.stu?.wins || 0;
+    const bWins = (lifetimeStats.burden && lifetimeStats.burden.wins) || 0;
+    const sWins = (lifetimeStats.stu && lifetimeStats.stu.wins) || 0;
     document.getElementById('title-burden-wins').textContent = `BURDEN: ${bWins}`;
     document.getElementById('title-stu-wins').textContent = `STU: ${sWins}`;
     document.getElementById('lifetime-wins').style.opacity = '1';
@@ -2275,6 +3321,603 @@
   }
 
   // ═══════════════════════════════════════
+  //  ACHIEVEMENTS SYSTEM
+  // ═══════════════════════════════════════
+  var ACHIEVEMENTS = [
+    {
+      id: 'perfect_game',
+      name: 'Perfect Game',
+      icon: '\u2B50',
+      description: 'Answer all questions correctly in one game',
+      check: function(player, opponent, sett, stats, playerKey) {
+        var totalPlayerQs = Math.ceil(sett.rounds / 2);
+        if (playerKey === 'stu') totalPlayerQs = Math.floor(sett.rounds / 2);
+        return player.correctCount === totalPlayerQs && totalPlayerQs > 0;
+      }
+    },
+    {
+      id: 'comeback_kid',
+      name: 'Comeback Kid',
+      icon: '\uD83D\uDD25',
+      description: 'Win after being behind by 200+ points',
+      check: function(player, opponent, sett, stats, playerKey) {
+        var won = player.score > opponent.score;
+        if (!won) return false;
+        var isBurden = playerKey === 'burden';
+        for (var i = 0; i < gameTracker.scoreDiffs.length; i++) {
+          var diff = gameTracker.scoreDiffs[i];
+          if (isBurden && diff <= -200) return true;
+          if (!isBurden && diff >= 200) return true;
+        }
+        return false;
+      }
+    },
+    {
+      id: 'speed_demon',
+      name: 'Speed Demon',
+      icon: '\u26A1',
+      description: 'Answer 5+ questions correctly in under 3 seconds each',
+      check: function(player, opponent, sett, stats, playerKey) {
+        return gameTracker.fastAnswers[playerKey] >= 5;
+      }
+    },
+    {
+      id: 'streak_master',
+      name: 'Streak Master',
+      icon: '\uD83D\uDD25',
+      description: 'Get a streak of 7 or more in a single game',
+      check: function(player, opponent, sett, stats) {
+        return player.bestStreak >= 7;
+      }
+    },
+    {
+      id: 'shut_out',
+      name: 'Shut Out',
+      icon: '\uD83D\uDEAB',
+      description: 'Win with your opponent scoring 0 points',
+      check: function(player, opponent, sett, stats) {
+        return player.score > 0 && opponent.score === 0;
+      }
+    },
+    {
+      id: 'sharp_shooter',
+      name: 'Sharp Shooter',
+      icon: '\uD83C\uDFAF',
+      description: 'Win with 90%+ accuracy',
+      check: function(player, opponent, sett, stats, playerKey) {
+        var totalPlayerQs = Math.ceil(sett.rounds / 2);
+        if (playerKey === 'stu') totalPlayerQs = Math.floor(sett.rounds / 2);
+        if (totalPlayerQs < 3) return false;
+        var accuracy = player.correctCount / totalPlayerQs;
+        return accuracy >= 0.9 && player.score > opponent.score;
+      }
+    },
+    {
+      id: 'century',
+      name: 'Century',
+      icon: '\uD83D\uDCAF',
+      description: 'Score 1000+ points in a single game',
+      check: function(player, opponent, sett, stats) {
+        return player.score >= 1000;
+      }
+    },
+    {
+      id: 'veteran',
+      name: 'Veteran',
+      icon: '\uD83C\uDF96\uFE0F',
+      description: 'Play 10 games total',
+      check: function(player, opponent, sett, stats) {
+        return stats && stats.gamesPlayed >= 10;
+      }
+    },
+    {
+      id: 'braai_master',
+      name: 'Braai Master',
+      icon: '\uD83E\uDD69',
+      description: 'Win 5 games total',
+      check: function(player, opponent, sett, stats) {
+        return stats && stats.wins >= 5;
+      }
+    },
+    {
+      id: 'underdog',
+      name: 'Underdog',
+      icon: '\uD83D\uDC15',
+      description: 'Win as the player who answered second more often',
+      check: function(player, opponent, sett, stats, playerKey) {
+        var won = player.score > opponent.score;
+        if (!won) return false;
+        var secondCount = 0;
+        for (var i = 0; i < gameTracker.secondAnswerers.length; i++) {
+          if (gameTracker.secondAnswerers[i] === playerKey) secondCount++;
+        }
+        return secondCount > (gameTracker.secondAnswerers.length / 2);
+      }
+    },
+    {
+      id: 'blitz',
+      name: 'Blitz',
+      icon: '\uD83D\uDCA8',
+      description: 'Answer a question correctly in under 1 second',
+      check: function(player, opponent, sett, stats, playerKey) {
+        return gameTracker.blitzAnswers[playerKey] === true;
+      }
+    },
+    {
+      id: 'consistent',
+      name: 'Consistent',
+      icon: '\uD83D\uDD01',
+      description: 'Get the same score in two consecutive games',
+      check: function(player, opponent, sett, stats, playerKey) {
+        var prevScore = gameTracker.previousScores[playerKey];
+        return prevScore !== null && prevScore === player.score && player.score > 0;
+      }
+    },
+    {
+      id: 'marathon',
+      name: 'Marathon',
+      icon: '\uD83C\uDFC3',
+      description: 'Play a 20-round game',
+      check: function(player, opponent, sett, stats) {
+        return sett.rounds >= 20;
+      }
+    },
+    {
+      id: 'nail_biter',
+      name: 'Nail Biter',
+      icon: '\uD83D\uDE2C',
+      description: 'Win a game by less than 50 points',
+      check: function(player, opponent, sett, stats) {
+        var diff = player.score - opponent.score;
+        return diff > 0 && diff < 50;
+      }
+    },
+    {
+      id: 'domination',
+      name: 'Domination',
+      icon: '\uD83D\uDC51',
+      description: 'Win by 500+ points',
+      check: function(player, opponent, sett, stats) {
+        return (player.score - opponent.score) >= 500;
+      }
+    }
+  ];
+
+  // Sound effect for achievement unlock
+  function sfxAchievement() {
+    playTone(880, 0.15, 'sine', 0.10);
+    setTimeout(function() { playTone(1109, 0.15, 'sine', 0.10); }, 100);
+    setTimeout(function() { playTone(1319, 0.25, 'sine', 0.12); }, 200);
+    setTimeout(function() { playTone(1760, 0.4, 'sine', 0.10); }, 350);
+  }
+
+  // Load achievements from KV for both players
+  function loadAchievements(callback) {
+    fetch('/api/achievements', { signal: AbortSignal.timeout(5000) })
+      .then(function(res) {
+        if (res.ok) return res.json();
+        throw new Error('Failed');
+      })
+      .then(function(data) {
+        achievementCache.burden = data.burden || { earned: [], history: [] };
+        achievementCache.stu = data.stu || { earned: [], history: [] };
+        if (callback) callback();
+      })
+      .catch(function() {
+        if (!achievementCache.burden) achievementCache.burden = { earned: [], history: [] };
+        if (!achievementCache.stu) achievementCache.stu = { earned: [], history: [] };
+        if (callback) callback();
+      });
+  }
+
+  // Check achievements for one player, return array of newly earned achievement objects
+  function checkPlayerAchievements(playerKey) {
+    var player = players[playerKey];
+    var opponentKey = playerKey === 'burden' ? 'stu' : 'burden';
+    var opponent = players[opponentKey];
+    var cached = achievementCache[playerKey];
+    var earned = (cached && cached.earned) ? cached.earned : [];
+    var stats = lifetimeStats ? lifetimeStats[playerKey] : null;
+    var newlyEarned = [];
+
+    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+      var ach = ACHIEVEMENTS[i];
+      if (earned.indexOf(ach.id) !== -1) continue;
+      try {
+        if (ach.check(player, opponent, settings, stats, playerKey)) {
+          newlyEarned.push(ach);
+        }
+      } catch(e) {
+        // Skip check errors
+      }
+    }
+
+    return newlyEarned;
+  }
+
+  // Save newly earned achievements to KV
+  function saveAchievements(playerKey, achievementIds) {
+    if (achievementIds.length === 0) return;
+    fetch('/api/achievements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player: playerKey, achievements: achievementIds }),
+      signal: AbortSignal.timeout(5000)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.achievements) {
+        achievementCache[playerKey] = data.achievements;
+      }
+    })
+    .catch(function() {
+      // Silently fail
+    });
+  }
+
+  // Master function: check both players and show toasts
+  function checkAndShowAchievements() {
+    setTimeout(function() {
+      var allNew = [];
+
+      var burdenNew = checkPlayerAchievements('burden');
+      var burdenIds = [];
+      for (var i = 0; i < burdenNew.length; i++) {
+        burdenIds.push(burdenNew[i].id);
+        allNew.push({ achievement: burdenNew[i], playerKey: 'burden' });
+        if (achievementCache.burden) achievementCache.burden.earned.push(burdenNew[i].id);
+      }
+      saveAchievements('burden', burdenIds);
+
+      var stuNew = checkPlayerAchievements('stu');
+      var stuIds = [];
+      for (var j = 0; j < stuNew.length; j++) {
+        stuIds.push(stuNew[j].id);
+        allNew.push({ achievement: stuNew[j], playerKey: 'stu' });
+        if (achievementCache.stu) achievementCache.stu.earned.push(stuNew[j].id);
+      }
+      saveAchievements('stu', stuIds);
+
+      for (var k = 0; k < allNew.length; k++) {
+        (function(item, delay) {
+          setTimeout(function() {
+            showAchievementToast(item.achievement, item.playerKey);
+          }, delay);
+        })(allNew[k], k * 800);
+      }
+    }, 1500);
+  }
+
+  // Show a single achievement toast notification
+  function showAchievementToast(achievement, playerKey) {
+    sfxAchievement();
+
+    var container = document.getElementById('achievement-toast-container');
+    var toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+
+    var playerName = playerKey === 'burden' ? 'Burden' : 'Stu';
+    var playerColor = playerKey === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+
+    toast.innerHTML =
+      '<div class="achievement-toast-icon">' + achievement.icon + '</div>' +
+      '<div class="achievement-toast-info">' +
+        '<div class="achievement-toast-label">Achievement Unlocked \u2022 <span style="color:' + playerColor + ';">' + playerName + '</span></div>' +
+        '<div class="achievement-toast-name">' + achievement.name + '</div>' +
+        '<div class="achievement-toast-desc">' + achievement.description + '</div>' +
+      '</div>';
+
+    container.appendChild(toast);
+
+    setTimeout(function() { toast.classList.add('show'); }, 50);
+
+    setTimeout(function() {
+      toast.classList.remove('show');
+      toast.classList.add('hide');
+      setTimeout(function() {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 400);
+    }, 4000);
+  }
+
+  // Render the achievements gallery screen
+  function renderAchievementsScreen() {
+    var grid = document.getElementById('achievements-grid');
+    grid.innerHTML = '';
+
+    var burdenEarned = (achievementCache.burden && achievementCache.burden.earned) ? achievementCache.burden.earned : [];
+    var stuEarned = (achievementCache.stu && achievementCache.stu.earned) ? achievementCache.stu.earned : [];
+
+    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+      var ach = ACHIEVEMENTS[i];
+      var bHas = burdenEarned.indexOf(ach.id) !== -1;
+      var sHas = stuEarned.indexOf(ach.id) !== -1;
+      var isEarned = bHas || sHas;
+
+      var card = document.createElement('div');
+      card.className = 'achievement-card ' + (isEarned ? 'earned' : 'locked');
+
+      var playersHtml = '';
+      if (bHas) playersHtml += '<span class="achievement-card-player burden-badge">Burden</span>';
+      if (sHas) playersHtml += '<span class="achievement-card-player stu-badge">Stu</span>';
+      if (!isEarned) playersHtml = '<span style="font-family:Orbitron,monospace;font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:0.1em;">\uD83D\uDD12 LOCKED</span>';
+
+      card.innerHTML =
+        '<span class="achievement-card-icon">' + (isEarned ? ach.icon : '\uD83D\uDD12') + '</span>' +
+        '<div class="achievement-card-name">' + ach.name + '</div>' +
+        '<div class="achievement-card-desc">' + ach.description + '</div>' +
+        '<div class="achievement-card-players">' + playersHtml + '</div>';
+
+      grid.appendChild(card);
+    }
+
+    if (!achievementCache.burden && !achievementCache.stu) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);font-family:Rajdhani,sans-serif;font-size:20px;">Loading achievements...</div>';
+      loadAchievements(function() { renderAchievementsScreen(); });
+    }
+  }
+
+
+  // ═══════════════════════════════════════
+  //  ADMIN PIN & PANEL
+  // ═══════════════════════════════════════
+  var PIN_CODE = '1945';
+  var pinBuffer = '';
+
+  function pinDigit(d) {
+    if (pinBuffer.length >= 4) return;
+    pinBuffer += String(d);
+    updatePinDots();
+    sfxClick();
+
+    if (pinBuffer.length === 4) {
+      if (pinBuffer === PIN_CODE) {
+        // Correct PIN — go to admin
+        setTimeout(function() {
+          pinBuffer = '';
+          updatePinDots();
+          showScreen('admin');
+          loadAdminTTS();
+        }, 250);
+      } else {
+        // Wrong PIN — shake and reset
+        var dots = [].slice.call(document.querySelectorAll('.pin-dot'));
+        dots.forEach(function(d) { d.classList.add('error'); });
+        sfxWrong();
+        setTimeout(function() {
+          pinBuffer = '';
+          dots.forEach(function(d) {
+            d.classList.remove('error');
+            d.classList.remove('filled');
+          });
+        }, 600);
+      }
+    }
+  }
+
+  function pinClear() {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots();
+  }
+
+  function updatePinDots() {
+    for (var i = 0; i < 4; i++) {
+      var dot = document.getElementById('pin-dot-' + i);
+      if (i < pinBuffer.length) {
+        dot.classList.add('filled');
+      } else {
+        dot.classList.remove('filled');
+      }
+    }
+  }
+
+  function loadAdminTTS() {
+    var loadingEl = document.getElementById('admin-tts-loading');
+    var statsEl = document.getElementById('admin-tts-stats');
+    var errorEl = document.getElementById('admin-tts-error');
+
+    loadingEl.style.display = 'block';
+    statsEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    fetch('/api/tts-usage', { signal: AbortSignal.timeout(5000) })
+      .then(function(res) { return res.ok ? res.json() : Promise.reject('bad response'); })
+      .then(function(data) {
+        loadingEl.style.display = 'none';
+        statsEl.style.display = 'block';
+
+        var totalChars = data.totalChars || 0;
+        var totalReqs = data.totalRequests || 0;
+        // ElevenLabs pricing: ~$0.18 per 1000 chars (Turbo v2.5)
+        var estCost = (totalChars / 1000) * 0.18;
+        var avgChars = totalReqs > 0 ? Math.round(totalChars / totalReqs) : 0;
+
+        document.getElementById('admin-tts-chars').textContent = formatScore(totalChars);
+        document.getElementById('admin-tts-requests').textContent = formatScore(totalReqs);
+        document.getElementById('admin-tts-cost').textContent = '$' + estCost.toFixed(2);
+        document.getElementById('admin-tts-avg').textContent = formatScore(avgChars);
+      })
+      .catch(function() {
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+      });
+  }
+
+  // ═══════════════════════════════════════
+  //  LANGUAGE SYSTEM
+  // ═══════════════════════════════════════
+  var gameLang = 'en';
+  var LANG = {
+    en: {
+      titleSub: 'Lekker TV Trivia',
+      letsPlay: "Let's Play!",
+      howToPlay: 'How to Play',
+      leaderboard: 'Leaderboard',
+      achievements: 'Achievements',
+      gameSetup: 'Game Setup',
+      category: 'Category',
+      timer: 'Timer',
+      rounds: 'Rounds',
+      voice: 'Voice',
+      play: 'Play!',
+      back: 'Back',
+      home: 'Home',
+      question: 'Question',
+      difficulty: 'Difficulty',
+      currentPlayer: 'Current Player',
+      correct: 'Correct',
+      bestStreak: 'Best Streak',
+      finalScore: 'Final Score',
+      playAgain: 'Play Again!',
+      loadingQuestions: 'LOADING QUESTIONS...',
+      correctFb: ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Yoh Nailed It!', 'Eish, Too Easy!', 'Baie Mooi!', "Jy's 'n Bees!", 'Sharp Sharp!'],
+      wrongFb: ['Eina!', 'Ag Nee!', 'Haibo!', 'Shame Man!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!'],
+      timeoutFb: 'Tyd Op, Bru!',
+      burdenWins: 'BURDEN WINS! Lekker Gespeel!',
+      stuWins: "STU WINS! Jy's die Boss!",
+      draw: "IT'S A DRAW! Sharp Sharp!",
+      gamesPlayed: 'Games Played',
+      wins: 'Wins',
+      draws: 'Draws',
+      totalScore: 'Total Score',
+      bestGame: 'Best Game',
+      onFire: 'ON FIRE!'
+    },
+    af: {
+      titleSub: 'Lekker TV-Vasvra',
+      letsPlay: 'Kom Ons Speel!',
+      howToPlay: 'Hoe Om Te Speel',
+      leaderboard: 'Puntestand',
+      achievements: 'Prestasies',
+      gameSetup: 'Spel-Instellings',
+      category: 'Kategorie',
+      timer: 'Tydhouer',
+      rounds: 'Rondtes',
+      voice: 'Stem',
+      play: 'Speel!',
+      back: 'Terug',
+      home: 'Huis Toe',
+      question: 'Vraag',
+      difficulty: 'Moeilikheid',
+      currentPlayer: 'Huidige Speler',
+      correct: 'Korrek',
+      bestStreak: 'Beste Reeks',
+      finalScore: 'Finale Telling',
+      playAgain: 'Speel Weer!',
+      loadingQuestions: 'LAAI VRAE...',
+      correctFb: ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Mooi Man!', 'Te Maklik!', 'Baie Mooi!', "Jy's 'n Bees!", 'Sharp Sharp!', "Nou Gaan Ons Braai!"],
+      wrongFb: ['Eina!', 'Ag Nee!', 'Haibo!', 'Skande!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!', 'Sies Man!'],
+      timeoutFb: 'Tyd Op, Bru!',
+      burdenWins: 'BURDEN WEN! Lekker Gespeel!',
+      stuWins: "STU WEN! Jy's die Baas!",
+      draw: "GELYKOP! Sharp Sharp!",
+      gamesPlayed: 'Spelle Gespeel',
+      wins: 'Oorwinnings',
+      draws: 'Gelykop',
+      totalScore: 'Totale Punte',
+      bestGame: 'Beste Spel',
+      onFire: 'OP VUUR!'
+    }
+  };
+
+  function t(key) {
+    return LANG[gameLang][key] || LANG.en[key] || key;
+  }
+
+  function applyLanguage() {
+    // Title screen
+    document.querySelector('.title-sub').textContent = t('titleSub');
+    var titleBtns = document.querySelectorAll('#screen-title .btn-group .btn');
+    if (titleBtns[0]) titleBtns[0].textContent = t('letsPlay');
+    if (titleBtns[1]) titleBtns[1].textContent = t('howToPlay');
+    if (titleBtns[2]) titleBtns[2].textContent = t('leaderboard');
+    if (titleBtns[3]) titleBtns[3].textContent = t('achievements');
+
+    // Settings screen
+    var settingsTitle = document.querySelector('#screen-settings .screen-title');
+    if (settingsTitle) settingsTitle.textContent = t('gameSetup');
+    var settingLabels = document.querySelectorAll('#screen-settings .setting-group > label');
+    var labelKeys = ['category', 'timer', 'rounds', 'voice'];
+    for (var i = 0; i < settingLabels.length && i < labelKeys.length; i++) {
+      settingLabels[i].textContent = t(labelKeys[i]);
+    }
+    var settingsBtns = document.querySelectorAll('#screen-settings .btn-group .btn');
+    if (settingsBtns[0]) settingsBtns[0].textContent = t('back');
+    if (settingsBtns[1]) settingsBtns[1].textContent = t('play');
+
+    // How to play
+    var howtoTitle = document.querySelector('#screen-howto .screen-title');
+    if (howtoTitle) howtoTitle.textContent = t('howToPlay');
+
+    // Leaderboard
+    var lbTitle = document.querySelector('#screen-leaderboard .screen-title');
+    if (lbTitle) lbTitle.textContent = t('leaderboard');
+
+    // Achievements
+    var achTitle = document.querySelector('#screen-achievements .screen-title');
+    if (achTitle) achTitle.textContent = t('achievements');
+
+    // Results labels
+    var resLabel = document.querySelector('.results-label');
+    if (resLabel) resLabel.textContent = t('finalScore');
+    var playAgainBtn = document.querySelector('#screen-results .btn:not(.pink)');
+    if (playAgainBtn) playAgainBtn.textContent = t('playAgain');
+
+    // HUD labels
+    var hudLabels = document.querySelectorAll('.game-hud .hud-label');
+    var hudKeys = ['question', 'difficulty', 'currentPlayer'];
+    for (var j = 0; j < hudLabels.length && j < hudKeys.length; j++) {
+      hudLabels[j].textContent = t(hudKeys[j]);
+    }
+
+    // ON FIRE overlay text
+    var fireText = document.querySelector('#on-fire-overlay .fire-text');
+    if (fireText) fireText.textContent = t('onFire');
+
+    // Loading screen
+    var loadingText = document.querySelector('#screen-loading div');
+    if (loadingText) loadingText.textContent = t('loadingQuestions');
+
+    // Leaderboard labels
+    var lbLabels = document.querySelectorAll('#screen-leaderboard .lb-label');
+    var lbKeys = ['wins', 'gamesPlayed', 'draws', 'totalScore', 'correct', 'bestGame', 'bestStreak'];
+    // Each column has 7 labels, pattern repeats for both columns
+    for (var k = 0; k < lbLabels.length; k++) {
+      var keyIdx = k % 7;
+      if (keyIdx < lbKeys.length) lbLabels[k].textContent = t(lbKeys[keyIdx]);
+    }
+
+    // Results stat labels
+    var resCorrectLabels = document.querySelectorAll('#screen-results .stat-label');
+    if (resCorrectLabels[0]) resCorrectLabels[0].textContent = t('correct');
+    if (resCorrectLabels[1]) resCorrectLabels[1].textContent = t('bestStreak');
+    if (resCorrectLabels[2]) resCorrectLabels[2].textContent = t('correct');
+    if (resCorrectLabels[3]) resCorrectLabels[3].textContent = t('bestStreak');
+
+    // Home buttons throughout
+    var homeButtons = document.querySelectorAll('#screen-leaderboard > .btn, #screen-achievements > .btn, #screen-admin > .btn');
+    homeButtons.forEach(function(b) { b.textContent = t('home'); });
+
+    // Save preference
+    try { localStorage.setItem('brainblitz_lang', gameLang); } catch(e) {}
+  }
+
+  function restoreLang() {
+    try {
+      var saved = localStorage.getItem('brainblitz_lang');
+      if (saved && LANG[saved]) {
+        gameLang = saved;
+        // Update admin lang pill selection
+        var pills = [].slice.call(document.querySelectorAll('#lang-pills .pill'));
+        pills.forEach(function(p) {
+          p.classList.toggle('selected', p.dataset.val === gameLang);
+        });
+        applyLanguage();
+      }
+    } catch(e) {}
+  }
+
+  // ═══════════════════════════════════════
   //  KEYBOARD & REMOTE SUPPORT
   // ═══════════════════════════════════════
   document.addEventListener('keydown', (e) => {
@@ -2285,6 +3928,18 @@
       e.preventDefault();
       handleBack();
       return;
+    }
+
+    // PIN screen digit entry via keyboard/remote
+    if (document.getElementById('screen-pin').classList.contains('active')) {
+      if (key >= '0' && key <= '9') {
+        pinDigit(parseInt(key, 10));
+        return;
+      }
+      if (key === 'Backspace' || key === 'Delete') {
+        pinClear();
+        return;
+      }
     }
 
     // Arrow navigation
@@ -2305,10 +3960,12 @@
 
     // A/B/C/D to select answers during game
     const upperKey = key.toUpperCase();
-    if (['A','B','C','D'].includes(upperKey) && document.getElementById('screen-game').classList.contains('active') && !answered && !ttsPlaying) {
+    if (['A','B','C','D'].includes(upperKey) && document.getElementById('screen-game').classList.contains('active')) {
       const idx = upperKey.charCodeAt(0) - 65;
-      const btn = document.querySelector(`.answer-btn[data-index="${idx}"]`);
-      if (btn) selectAnswer(btn);
+      if (!answered && !ttsPlaying) {
+        const btn = document.querySelector('.answer-btn[data-index="' + idx + '"]');
+        if (btn) selectAnswer(btn);
+      }
     }
   });
 
@@ -2319,8 +3976,11 @@
       case 'screen-howto':
       case 'screen-settings':
       case 'screen-leaderboard':
+      case 'screen-achievements':
       case 'screen-results':
       case 'screen-error':
+      case 'screen-pin':
+      case 'screen-admin':
         showScreen('title');
         break;
       // During game — don't navigate back (prevent accidental exit)
@@ -2333,9 +3993,9 @@
 
     // Navigate 2x2 answer grid during game
     if (gameActive && !answered && !ttsPlaying) {
-      const btns = [...document.querySelectorAll('.answer-btn')];
+      const btns = [].slice.call(document.querySelectorAll('#answers-grid .answer-btn'));
       const idx = btns.indexOf(active);
-      if (idx === -1) { btns[0]?.focus(); return; }
+      if (idx === -1) { if (btns[0]) btns[0].focus(); return; }
 
       let newIdx = idx;
       switch(key) {
@@ -2351,14 +4011,14 @@
     // For other screens: navigate between focusable elements
     const activeScreen = document.querySelector('.screen.active');
     if (!activeScreen) return;
-    const focusables = [...activeScreen.querySelectorAll('.btn, .pill, .answer-btn')];
+    const focusables = [].slice.call(activeScreen.querySelectorAll('.btn, .pill, .answer-btn'));
     const curIdx = focusables.indexOf(active);
-    if (curIdx === -1) { focusables[0]?.focus(); return; }
+    if (curIdx === -1) { if (focusables[0]) focusables[0].focus(); return; }
 
     let next = curIdx;
     if (key === 'ArrowDown' || key === 'ArrowRight') next = Math.min(curIdx + 1, focusables.length - 1);
     if (key === 'ArrowUp' || key === 'ArrowLeft') next = Math.max(curIdx - 1, 0);
-    focusables[next]?.focus();
+    if (focusables[next]) focusables[next].focus();
   }
 
   // Wire click sound to all menu buttons
@@ -2369,9 +4029,11 @@
   // Init: show cursor on mouse move
   document.addEventListener('mousemove', () => document.body.classList.add('show-cursor'));
 
-  // Restore saved settings and load stats on page load
+  // Restore saved settings and load stats/achievements on page load
   restoreSettings();
+  restoreLang();
   loadLifetimeStats();
+  loadAchievements();
 </script>
 
 </body>

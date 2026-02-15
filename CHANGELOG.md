@@ -1,5 +1,31 @@
 # Changelog
 
+## [4.0.0] - 2026-02-15
+
+### New Features
+- **Difficulty scaling**: Questions tagged easy/medium/hard with difficulty stars in HUD. Harder questions earn 1.5x–2x base points
+- **Answer cascade**: Wrong answers grey out one-by-one with staggered animation before revealing the correct answer
+- **Achievements system**: 15 achievements (e.g. Perfect Game, Speed Demon, Comeback King) tracked per player, stored in Cloudflare KV, with toast notifications and gallery screen
+- **Streak celebration**: 5+ correct streak triggers rainbow border glow, "ON FIRE" overlay, and crowd cheer SFX
+- **Close game tension**: When scores are within 15%, background shifts to dramatic tint, scores pulse, and music volume rises
+- **Screen transitions**: Smooth scale + fade transitions between all screens
+- **Admin panel**: PIN-locked (4-digit code) admin settings with ElevenLabs TTS usage/cost summary and language toggle
+- **Language system**: Switch between South African English and Afrikaans — all UI labels, feedback expressions, winner text, leaderboard stats translate instantly
+- **New categories**: Braai Culture (30 Qs), 90s Pop Culture (31 Qs), SA Food & Slang (30 Qs), True or False (20 Qs)
+- **Expanded question bank**: 10 additional questions per existing category (Frenchies, Hiking, SA Wines, Paris, Cheeses) — all with difficulty ratings
+
+### Performance
+- **CSS-driven timer**: Replaced `setInterval(50ms)` visual timer with CSS `animation: timerShrink` + `will-change: transform` for GPU-accelerated rendering
+- **requestAnimationFrame timer**: Countdown logic uses rAF loop instead of setInterval — eliminates lag and drift on LG webOS
+
+### Bug Fixes
+- **webOS compatibility**: Replaced all optional chaining (`?.`) and spread syntax (`[...]`) with ES5-compatible alternatives
+- **Removed steal mechanic**: Cleaned out unused steal overlay, CSS, JS, and state variables
+
+### Infrastructure
+- Added `functions/api/achievements.js` — GET/POST player achievements via KV
+- All new questions include difficulty ratings (1/2/3)
+
 ## [3.0.0] - 2026-02-15
 
 ### Major Improvements

@@ -21,8 +21,13 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 - **Synth music** — Web Audio API step sequencer with mute toggle and dynamics compressor
 - **Leaderboard** — Lifetime stats persisted via Cloudflare KV with counter animations
 - **SA Expressions** — Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
-- **Custom categories** — Frenchies, Hiking, SA Wines, Paris, Cheeses (125 built-in questions)
-- **Polish** — Score pop animation, timer danger pulse, particle bursts, turn switch countdown
+- **Custom categories** — Frenchies, Hiking, SA Wines, Paris, Cheeses, Braai Culture, 90s Pop Culture, SA Food & Slang, True or False (250+ built-in questions)
+- **Difficulty scaling** — Questions tagged easy/medium/hard; harder questions earn more points
+- **Answer cascade** — Wrong answers grey out one-by-one before revealing the correct answer
+- **Achievements** — 15 unlockable badges per player, persisted in KV with toast notifications
+- **Admin panel** — PIN-locked admin settings with ElevenLabs cost summary and language toggle
+- **Bilingual** — Switch between South African English and Afrikaans in admin settings
+- **Polish** — Score pop animation, timer danger pulse, particle bursts, turn switch countdown, screen transitions
 - **TTS cost tracking** — Character usage tracked in KV, check via `GET /api/tts-usage`
 
 ## How to Play on Your LG TV
@@ -77,6 +82,7 @@ brainblitz/
 │   └── api/
 │       ├── _middleware.js   # CORS headers for API routes
 │       ├── scores.js        # GET/POST player stats (Cloudflare KV)
+│       ├── achievements.js  # GET/POST player achievements (Cloudflare KV)
 │       ├── tts.js           # ElevenLabs TTS proxy (Turbo v2.5)
 │       └── tts-usage.js     # GET TTS character usage stats
 ├── CHANGELOG.md
