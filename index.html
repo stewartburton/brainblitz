@@ -1205,11 +1205,10 @@
 <div id="screen-title" class="screen active">
   <div class="title-logo">BRAINBLITZ</div>
   <div class="title-sub">Lekker TV Trivia</div>
-  <div class="btn-group">
-    <button class="btn" onclick="showScreen('settings')" autofocus>Let's Play!</button>
-    <button class="btn pink" onclick="showScreen('howto')">How to Play</button>
-    <button class="btn pink" onclick="showScreen('leaderboard')">Leaderboard</button>
-    <button class="btn pink" onclick="showScreen('achievements')">Achievements</button>
+  <div class="btn-group" style="flex-direction:row; flex-wrap:wrap; justify-content:center; gap:30px 40px;">
+    <button class="btn" onclick="showScreen('settings')" autofocus style="min-width:260px;">Let's Play!</button>
+    <button class="btn pink" onclick="showScreen('howto')" style="min-width:220px;">How to Play</button>
+    <button class="btn pink" onclick="showScreen('leaderboard')" style="min-width:220px;">Leaderboard</button>
   </div>
   <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
     <span id="title-burden-wins">BURDEN: 0</span> &nbsp;|&nbsp; <span id="title-stu-wins">STU: 0</span>
@@ -3839,7 +3838,6 @@
     if (titleBtns[0]) titleBtns[0].textContent = t('letsPlay');
     if (titleBtns[1]) titleBtns[1].textContent = t('howToPlay');
     if (titleBtns[2]) titleBtns[2].textContent = t('leaderboard');
-    if (titleBtns[3]) titleBtns[3].textContent = t('achievements');
 
     // Settings screen
     var settingsTitle = document.querySelector('#screen-settings .screen-title');
