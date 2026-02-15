@@ -16,11 +16,12 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 - **Streak multiplier** — 3+ correct in a row gives bonus points
 - **Winner celebration** — Confetti, trophy animation, and victory fanfare
 - **Sound effects** — Web Audio API synth sounds, no files needed
-- **Configurable** — Difficulty, timer, categories, and round count
-- **Voice mode** — Optional ElevenLabs TTS reads questions aloud
+- **Configurable** — Timer, categories, rounds, and voice selection
+- **Voice mode** — Two ElevenLabs voices (Rachel & Butcher) read questions aloud
+- **Synth music** — Web Audio API step sequencer with mute toggle
 - **Leaderboard** — Lifetime stats persisted via Cloudflare KV
 - **SA Expressions** — Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
-- **Fresh questions** — Pulls from the Open Trivia Database API
+- **Custom categories** — Frenchies, Hiking, SA Wines, Paris, Cheeses (125 built-in questions)
 
 ## How to Play on Your LG TV
 
@@ -63,7 +64,7 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 2. Create a restricted API key with **Text to Speech → Access** permission
 3. In Cloudflare Pages > **Settings > Environment variables**
 4. Add: `ELEVENLABS_API_KEY` = your API key
-5. Redeploy — enable "Voice: On" in game settings to hear questions read aloud
+5. Redeploy — choose "Rachel" or "Butcher" voice in game settings to hear questions read aloud
 
 ## File Structure
 
@@ -88,7 +89,7 @@ Tested/designed for:
 
 ## Requirements
 
-- Internet connection (questions are fetched from [Open Trivia Database](https://opentdb.com))
+- Internet connection (for score persistence and TTS; questions are built-in)
 - LG Magic Remote recommended (pointer-based interaction)
 
 ## South African Expressions Used
@@ -114,8 +115,7 @@ Single HTML file + Cloudflare Pages Functions:
 - HTML5
 - CSS3 (custom properties, grid, animations, confetti)
 - Vanilla JavaScript
-- Web Audio API (synthesised sound effects)
-- [Open Trivia Database API](https://opentdb.com/api_config.php)
+- Web Audio API (synthesised sound effects + step sequencer music)
 - [ElevenLabs TTS API](https://elevenlabs.io) (optional voice)
 - Cloudflare KV (score persistence)
 - Google Fonts (Orbitron + Rajdhani)

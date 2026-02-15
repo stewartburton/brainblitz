@@ -2,7 +2,8 @@
 // Requires env var ELEVENLABS_API_KEY set in Cloudflare Pages settings
 // Uses a default voice; change VOICE_ID to use a different ElevenLabs voice
 
-const VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // "Rachel" — clear English voice
+const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // "Rachel" — clear English voice
+const ALLOWED_VOICES = ['21m00Tcm4TlvDq8ikWAM', '5W1ijlUigww8GacnRjZV']; // Rachel, Butcher
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -16,7 +17,7 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const { text } = await request.json();
+    const { text, voice_id } = await request.json();
 
     if (!text || text.length > 1000) {
       return new Response(JSON.stringify({ error: 'Invalid text' }), {
@@ -25,7 +26,10 @@ export async function onRequestPost(context) {
       });
     }
 
-    const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+    // Use requested voice if allowed, otherwise default
+    const selectedVoice = (voice_id && ALLOWED_VOICES.includes(voice_id)) ? voice_id : DEFAULT_VOICE_ID;
+
+    const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`, {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,

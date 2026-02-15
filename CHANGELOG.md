@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.0] - 2026-02-15
+
+### New Features
+- **Step sequencer music engine**: Replaced drone-based music with a proper step sequencer — title screen plays a chill lo-fi theme (82 BPM, Cmaj7→Am7→Fmaj7→G arpeggios), game track builds tension with intensity (115 BPM, Am→Dm→Em), victory is triumphant (135 BPM ascending arpeggios)
+- **Music mute toggle**: Speaker button in the corner to mute/unmute background music
+- **Voice selection**: Choose between two ElevenLabs voices in settings — Rachel or Butcher (was previously just On/Off)
+
+### Bug Fixes
+- **TV alignment**: Fixed `inset: 0` CSS shorthand not supported on older webOS browsers — replaced with explicit `top/left/right/bottom: 0` and `width/height: 100%`
+
+### Infrastructure
+- Updated `functions/api/tts.js` to accept `voice_id` parameter with allowlist validation
+
 ## [2.0.0] - 2026-02-15
 
 ### Bug Fixes

@@ -23,11 +23,13 @@
 
   html, body {
     width: 100%; height: 100%;
+    min-width: 100vw; min-height: 100vh;
     overflow: hidden;
     background: var(--bg-dark);
     font-family: 'Rajdhani', sans-serif;
     color: #fff;
     cursor: none;
+    margin: 0; padding: 0;
   }
 
   /* Custom large cursor for TV pointer */
@@ -50,13 +52,15 @@
 
   /* ─── SCREENS ─── */
   .screen {
-    position: absolute; inset: 0; z-index: 1;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 40px;
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
+    width: 100%; height: 100%;
   }
   .screen.active {
     opacity: 1;
@@ -645,6 +649,36 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ─── MUSIC MUTE TOGGLE ─── */
+  .music-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 20;
+    background: rgba(15, 15, 40, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: var(--neon-cyan);
+    font-size: 22px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+  }
+  .music-toggle:hover, .music-toggle:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    outline: none;
+  }
+  .music-toggle.muted {
+    color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   .screen-title {
     font-family: 'Orbitron', monospace;
     font-size: clamp(24px, 3vw, 40px);
@@ -725,7 +759,8 @@
       <label>Voice</label>
       <div class="pill-group" id="voice-pills">
         <button class="pill selected" data-val="off" onclick="selectPill(this,'voice')">Off</button>
-        <button class="pill" data-val="on" onclick="selectPill(this,'voice')">On</button>
+        <button class="pill" data-val="rachel" onclick="selectPill(this,'voice')">Rachel</button>
+        <button class="pill" data-val="custom" onclick="selectPill(this,'voice')">Butcher</button>
       </div>
     </div>
   </div>
@@ -870,6 +905,9 @@
 <!-- Confetti container -->
 <div id="confetti-container" class="confetti-container"></div>
 
+<!-- Music mute toggle -->
+<button id="music-toggle" class="music-toggle" onclick="toggleMusic()">&#128266;</button>
+
 <script>
   // ═══════════════════════════════════════
   //  POLYFILLS (webOS compatibility)
@@ -954,6 +992,349 @@
   function sfxDraw() {
     playTone(440, 0.3, 'sine', 0.1);
     setTimeout(() => playTone(440, 0.3, 'triangle', 0.08), 300);
+  }
+
+  // ═══════════════════════════════════════
+  //  MUSIC ENGINE (Step Sequencer)
+  // ═══════════════════════════════════════
+  let musicMuted = false;
+
+  const Music = {
+    playing: false,
+    currentTrack: null,
+    masterGain: null,
+    _intensity: 0,
+    _intervalId: null,
+    _step: 0,
+    _bpm: 120,
+    _nextNoteTime: 0,
+    _scheduledNodes: [],
+
+    stop(fadeTime = 0.3) {
+      if (!this.playing) return;
+      this.playing = false;
+      this.currentTrack = null;
+      if (this._intervalId) { clearInterval(this._intervalId); this._intervalId = null; }
+      if (this.masterGain) {
+        try { this.masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + fadeTime); } catch(e) {}
+      }
+      const old = this._scheduledNodes;
+      this._scheduledNodes = [];
+      setTimeout(() => { old.forEach(n => { try { n.stop(); n.disconnect(); } catch(e) {} }); }, fadeTime * 1000 + 100);
+      this.masterGain = null;
+    },
+
+    _init(vol) {
+      ensureAudio();
+      this.masterGain = audioCtx.createGain();
+      this.masterGain.gain.value = musicMuted ? 0 : vol;
+      this.masterGain.connect(audioCtx.destination);
+      this.playing = true;
+      this._step = 0;
+      this._nextNoteTime = audioCtx.currentTime + 0.05;
+      return this.masterGain;
+    },
+
+    _startScheduler(callback) {
+      if (this._intervalId) clearInterval(this._intervalId);
+      this._intervalId = setInterval(() => {
+        if (!this.playing) return;
+        while (this._nextNoteTime < audioCtx.currentTime + 0.1) {
+          callback(this._nextNoteTime, this._step);
+          this._step++;
+          this._nextNoteTime += 60 / this._bpm / 4; // 16th notes
+        }
+      }, 25);
+    },
+
+    _note(freq, type, dest, time, dur, vol) {
+      try {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, time);
+        g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+        o.connect(g); g.connect(dest);
+        o.start(time); o.stop(time + dur + 0.05);
+        this._scheduledNodes.push(o);
+      } catch(e) {}
+    },
+
+    _kick(dest, time) {
+      try {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.frequency.setValueAtTime(150, time);
+        o.frequency.exponentialRampToValueAtTime(30, time + 0.12);
+        g.gain.setValueAtTime(0.25, time);
+        g.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+        o.connect(g); g.connect(dest);
+        o.start(time); o.stop(time + 0.25);
+        this._scheduledNodes.push(o);
+      } catch(e) {}
+    },
+
+    _hihat(dest, time, vol) {
+      try {
+        const bufSize = audioCtx.sampleRate * 0.03;
+        const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1);
+        const n = audioCtx.createBufferSource();
+        n.buffer = buf;
+        const hp = audioCtx.createBiquadFilter();
+        hp.type = 'highpass'; hp.frequency.value = 7000;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(vol || 0.08, time);
+        g.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+        n.connect(hp); hp.connect(g); g.connect(dest);
+        n.start(time);
+        this._scheduledNodes.push(n);
+      } catch(e) {}
+    },
+
+    // ── Title: chill lo-fi game show theme ──
+    title() {
+      if (this.currentTrack === 'title') return;
+      this.stop(0.2);
+      setTimeout(() => {
+        const master = this._init(0.07);
+        this.currentTrack = 'title';
+        this._bpm = 82;
+
+        // Warm pad layer
+        const padFilter = audioCtx.createBiquadFilter();
+        padFilter.type = 'lowpass'; padFilter.frequency.value = 800;
+        padFilter.connect(master);
+        const padGain = audioCtx.createGain();
+        padGain.gain.value = 0.04;
+        padGain.connect(padFilter);
+
+        const padNotes = [130.81, 164.81, 196, 246.94]; // Cmaj7
+        padNotes.forEach(f => {
+          const o = audioCtx.createOscillator();
+          o.type = 'sine'; o.frequency.value = f;
+          const o2 = audioCtx.createOscillator();
+          o2.type = 'sine'; o2.frequency.value = f * 1.003; // slight detune
+          o.connect(padGain); o2.connect(padGain);
+          o.start(); o2.start();
+          this._scheduledNodes.push(o, o2);
+        });
+
+        // LFO on pad filter
+        const lfo = audioCtx.createOscillator();
+        const lfoG = audioCtx.createGain();
+        lfo.frequency.value = 0.15; lfoG.gain.value = 300;
+        lfo.connect(lfoG); lfoG.connect(padFilter.frequency);
+        lfo.start(); this._scheduledNodes.push(lfo);
+
+        // Chord progression: Cmaj7 → Am7 → Fmaj7 → G
+        const chords = [
+          [261.63, 329.63, 392, 493.88],   // Cmaj7
+          [220, 261.63, 329.63, 440],       // Am7
+          [174.61, 261.63, 329.63, 415.30], // Fmaj7
+          [196, 246.94, 293.66, 392]        // G
+        ];
+
+        // Sequencer: arpeggio + light rhythm
+        this._startScheduler((time, step) => {
+          const bar = Math.floor(step / 16) % 4;
+          const beat = step % 16;
+          const chord = chords[bar];
+
+          // Soft kick on 1 and 9
+          if (beat === 0 || beat === 8) {
+            this._kick(master, time);
+          }
+
+          // Hi-hat on every 4th
+          if (beat % 4 === 0) {
+            this._hihat(master, time, 0.04);
+          }
+          // Ghost hi-hat
+          if (beat % 4 === 2) {
+            this._hihat(master, time, 0.015);
+          }
+
+          // Arpeggio pluck pattern
+          if (beat % 2 === 0) {
+            const noteIdx = (beat / 2) % chord.length;
+            const freq = chord[noteIdx] * (beat >= 8 ? 2 : 1);
+            this._note(freq, 'triangle', master, time, 0.25, 0.035);
+          }
+
+          // Bass on beat 1
+          if (beat === 0) {
+            this._note(chord[0] / 2, 'sine', master, time, 0.4, 0.06);
+          }
+        });
+      }, 250);
+    },
+
+    // ── Game: tense electronic, builds with intensity ──
+    game() {
+      this.stop(0.15);
+      setTimeout(() => {
+        const master = this._init(0.06);
+        this.currentTrack = 'game';
+        this._bpm = 115;
+        this._intensity = 0;
+
+        // Chords: Am → Dm → Em → Am
+        const chords = [
+          [220, 261.63, 329.63],   // Am
+          [146.83, 174.61, 220],   // Dm
+          [164.81, 196, 246.94],   // Em
+          [220, 261.63, 329.63]    // Am
+        ];
+
+        this._startScheduler((time, step) => {
+          const bar = Math.floor(step / 16) % 4;
+          const beat = step % 16;
+          const chord = chords[bar];
+          const inten = this._intensity;
+
+          // Kick: beats 0, 8, and at high intensity also 4, 12
+          if (beat === 0 || beat === 8 || (inten > 0.5 && (beat === 4 || beat === 12))) {
+            this._kick(master, time);
+          }
+
+          // Hi-hat gets denser with intensity
+          if (beat % 4 === 0) {
+            this._hihat(master, time, 0.06);
+          }
+          if (beat % 4 === 2) {
+            this._hihat(master, time, 0.025 + inten * 0.03);
+          }
+          if (inten > 0.4 && beat % 2 === 1) {
+            this._hihat(master, time, 0.012);
+          }
+
+          // Bass pulse
+          if (beat === 0 || beat === 8) {
+            this._note(chord[0] / 2, 'sawtooth', master, time, 0.15, 0.04 + inten * 0.03);
+          }
+
+          // Staccato arp
+          if (beat % 4 === 0) {
+            const f = chord[Math.floor(step / 4) % chord.length];
+            this._note(f, 'square', master, time, 0.08, 0.02 + inten * 0.015);
+          }
+
+          // Tension stabs at high intensity
+          if (inten > 0.6 && beat === 12) {
+            chord.forEach(f => this._note(f * 2, 'sawtooth', master, time, 0.06, 0.015));
+          }
+
+          // Urgent tick at very high intensity
+          if (inten > 0.8 && beat % 2 === 0) {
+            this._note(880, 'sine', master, time, 0.02, 0.02);
+          }
+        });
+      }, 200);
+    },
+
+    setIntensity(level) {
+      this._intensity = Math.max(0, Math.min(1, level));
+      if (this.masterGain && this.playing) {
+        const vol = 0.06 + level * 0.05;
+        try { this.masterGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.3); } catch(e) {}
+      }
+    },
+
+    // ── Victory: triumphant celebration ──
+    victory() {
+      this.stop(0.15);
+      setTimeout(() => {
+        const master = this._init(0.07);
+        this.currentTrack = 'victory';
+        this._bpm = 135;
+
+        const chords = [
+          [261.63, 329.63, 392],     // C
+          [349.23, 440, 523.25],     // F
+          [392, 493.88, 587.33],     // G
+          [261.63, 329.63, 392]      // C
+        ];
+
+        this._startScheduler((time, step) => {
+          const bar = Math.floor(step / 16) % 4;
+          const beat = step % 16;
+          const chord = chords[bar];
+
+          // Energetic kick
+          if (beat % 4 === 0) {
+            this._kick(master, time);
+          }
+
+          // Hi-hats on every 8th
+          if (beat % 2 === 0) {
+            this._hihat(master, time, 0.07);
+          }
+
+          // Ascending celebration arpeggios
+          if (beat % 2 === 0) {
+            const idx = (beat / 2) % chord.length;
+            const octave = beat >= 8 ? 2 : 1;
+            this._note(chord[idx] * octave, 'triangle', master, time, 0.2, 0.04);
+          }
+
+          // Bass
+          if (beat === 0) {
+            this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.06);
+          }
+
+          // Sparkle hits
+          if (beat === 0 || beat === 12) {
+            this._note(chord[2] * 4, 'sine', master, time, 0.5, 0.015);
+          }
+        });
+      }, 200);
+    },
+
+    // ── Draw: mellow ambient pad ──
+    draw() {
+      this.stop(0.2);
+      setTimeout(() => {
+        const master = this._init(0.04);
+        this.currentTrack = 'draw';
+
+        const padFilter = audioCtx.createBiquadFilter();
+        padFilter.type = 'lowpass'; padFilter.frequency.value = 600;
+        padFilter.connect(master);
+
+        [220, 261.63, 329.63].forEach(f => {
+          const o = audioCtx.createOscillator();
+          o.type = 'sine'; o.frequency.value = f;
+          o.connect(padFilter); o.start();
+          this._scheduledNodes.push(o);
+        });
+
+        const lfo = audioCtx.createOscillator();
+        const lfoG = audioCtx.createGain();
+        lfo.frequency.value = 0.1; lfoG.gain.value = 150;
+        lfo.connect(lfoG); lfoG.connect(padFilter.frequency);
+        lfo.start(); this._scheduledNodes.push(lfo);
+      }, 250);
+    }
+  };
+
+  function toggleMusic() {
+    musicMuted = !musicMuted;
+    const btn = document.getElementById('music-toggle');
+    if (musicMuted) {
+      btn.classList.add('muted');
+      btn.innerHTML = '&#128264;'; // muted speaker
+      if (Music.masterGain) {
+        try { Music.masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05); } catch(e) {}
+      }
+    } else {
+      btn.classList.remove('muted');
+      btn.innerHTML = '&#128266;'; // speaker with sound
+      if (Music.masterGain && Music.playing) {
+        try { Music.masterGain.gain.setTargetAtTime(0.06, audioCtx.currentTime, 0.05); } catch(e) {}
+      }
+    }
   }
 
   // ═══════════════════════════════════════
@@ -1117,6 +1498,7 @@
   let gameLoading = false;
   let ttsPlaying = false;
   let voiceEnabled = false;
+  let voiceId = '21m00Tcm4TlvDq8ikWAM';
   let lifetimeStats = null;
 
   // ═══════════════════════════════════════
@@ -1130,6 +1512,10 @@
     if (id !== 'results') {
       const confetti = document.getElementById('confetti-container');
       if (confetti) confetti.innerHTML = '';
+    }
+    // Music transitions — title music for menu screens
+    if (['title', 'settings', 'howto', 'leaderboard'].includes(id)) {
+      Music.title();
     }
     // Focus first button
     setTimeout(() => {
@@ -1186,7 +1572,9 @@
       settings.timer = parseInt(getSelected('timer')) || 15;
       settings.category = getSelected('cat');
       settings.rounds = parseInt(getSelected('rounds')) || 10;
-      voiceEnabled = getSelected('voice') === 'on';
+      const voiceSetting = getSelected('voice');
+      voiceEnabled = voiceSetting !== 'off';
+      voiceId = voiceSetting === 'custom' ? '5W1ijlUigww8GacnRjZV' : '21m00Tcm4TlvDq8ikWAM';
 
       // Reset both players
       players.burden = { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
@@ -1202,6 +1590,7 @@
       }
 
       sfxStart();
+      Music.game();
       showScreen('game');
       showRoundSplash(1, () => loadQuestion());
     } finally {
@@ -1331,6 +1720,8 @@
         sfxCountdown();
       }
       prevTimeLeft = timeLeft;
+      // Ramp up music intensity as timer runs down
+      Music.setIntensity(1 - (timeLeft / settings.timer));
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
         if (!answered) timeUp();
@@ -1502,6 +1893,7 @@
       stuCol.classList.add('loser-column');
       trophy.style.display = 'block';
       sfxVictory();
+      Music.victory();
       createConfetti();
     } else if (players.stu.score > players.burden.score) {
       winnerText = 'STU WINS! Jy\'s die Boss!';
@@ -1509,11 +1901,13 @@
       burdenCol.classList.add('loser-column');
       trophy.style.display = 'block';
       sfxVictory();
+      Music.victory();
       createConfetti();
     } else {
       winnerText = 'IT\'S A DRAW! Sharp Sharp!';
       trophy.style.display = 'none';
       sfxDraw();
+      Music.draw();
     }
     document.getElementById('res-winner').textContent = winnerText;
 
@@ -1628,7 +2022,7 @@
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, voice_id: voiceId }),
         signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) return false;
