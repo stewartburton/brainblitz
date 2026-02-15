@@ -1,5 +1,36 @@
 # Changelog
 
+## [3.0.0] - 2026-02-15
+
+### Major Improvements
+- **Faster game pace**: Reduced answer feedback delay (1800ms → 1200ms), turn switch countdown (800ms → 600ms per tick), and round splash (1200ms → 800ms) — total between-question time cut by ~40%
+- **Faster TTS**: Switched ElevenLabs model from `eleven_multilingual_v2` to `eleven_turbo_v2_5` for faster voice generation, reduced timeout from 10s to 6s
+- **Score pop animation**: HUD scores flash and scale when points are added
+- **Timer danger pulse**: Timer bar throbs when below 30% remaining
+- **Particle burst on correct answer**: Green/cyan/yellow particle explosion from the answer button
+- **Leaderboard counter animation**: Stats count up from 0 when entering leaderboard
+- **Settings pill animation**: Selected pills scale up slightly for tactile feedback
+- **Settings persistence**: Selected settings (category, timer, rounds, voice) saved to localStorage and restored on page load
+- **Score number formatting**: Scores above 999 display with comma separators (e.g. 1,200)
+- **TTS loading indicator**: Speaker icon pulses while waiting for voice to load
+- **TTS usage tracking**: Character count and request history stored in KV (`tts:usage` key), accessible via `GET /api/tts-usage`
+
+### Bug Fixes
+- **Turn switch interval leak**: Stored interval reference so it can be cleaned up if navigation happens during countdown
+- **Dead code**: Removed unused `prevPlayer` variable in selectAnswer and timeUp
+- **Question pool warning**: If a category has fewer questions than selected rounds, rounds auto-adjust instead of silently playing fewer
+- **Loser column readability**: Increased loser opacity from 0.45 to 0.55 for better TV viewing
+
+### Question Bank Fixes
+- Replaced Eiffel Tower height question with Moulin Rouge question (was 3 Eiffel Tower Qs, now 2)
+- Replaced 3 Frenchie health questions with personality/fun fact questions (sleeping position, sounds, attitude to strangers)
+- Fixed obviously wrong answer options (lifespan "3-4 years" → "13-15 years", litter size "1" → "1-2")
+- Fixed debatable "most consumed cheese" → "most popular pizza topping" (Mozzarella)
+
+### Infrastructure
+- Added `functions/api/tts-usage.js` — GET endpoint for TTS character usage stats
+- Switched TTS model to `eleven_turbo_v2_5` for faster response
+
 ## [2.3.0] - 2026-02-15
 
 ### Bug Fixes

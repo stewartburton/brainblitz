@@ -181,6 +181,7 @@
     color: var(--neon-cyan);
     background: rgba(0,240,255,0.1);
     box-shadow: 0 0 15px rgba(0,240,255,0.15);
+    transform: scale(1.05);
   }
 
   /* ─── GAME SCREEN ─── */
@@ -213,12 +214,29 @@
   }
   .hud-value.streak { color: var(--neon-yellow); }
   .hud-value.score { color: var(--neon-pink); }
+  .hud-value.score-pop {
+    animation: scorePop 0.35s ease;
+  }
+  @keyframes scorePop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3); filter: brightness(1.5); }
+    100% { transform: scale(1); }
+  }
+
+  /* TTS speaker loading pulse */
+  .hud-speaker.loading {
+    animation: speakerPulse 0.6s ease infinite;
+  }
+  @keyframes speakerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
 
   /* Active turn indicator */
   .hud-item.active-turn::after {
     content: '';
     position: absolute;
-    inset: -4px;
+    top: -4px; left: -4px; right: -4px; bottom: -4px;
     border: 2px solid var(--neon-cyan);
     border-radius: 8px;
     animation: turnPulse 1.5s ease infinite;
@@ -260,6 +278,11 @@
   .timer-fill.danger {
     background: linear-gradient(90deg, var(--neon-pink), var(--neon-yellow));
     box-shadow: 0 0 20px rgba(255,45,120,0.4);
+    animation: timerPulse 0.5s ease infinite;
+  }
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
   /* Category badge */
@@ -497,7 +520,7 @@
     0%, 100% { filter: drop-shadow(0 0 10px rgba(255,230,0,0.3)); }
     50% { filter: drop-shadow(0 0 30px rgba(255,230,0,0.6)); }
   }
-  .loser-column { opacity: 0.45; }
+  .loser-column { opacity: 0.55; }
 
   /* Trophy animation */
   .trophy-icon {
@@ -1419,26 +1442,26 @@
     {category:"Frenchies",question:"What is the average weight range of an adult French Bulldog?",correct_answer:"16-28 pounds",incorrect_answers:["30-45 pounds","8-12 pounds","50-65 pounds"]},
     {category:"Frenchies",question:"French Bulldogs are known for their distinctive ears. What shape are they?",correct_answer:"Bat-shaped",incorrect_answers:["Floppy","Pointed","Rose-shaped"]},
     {category:"Frenchies",question:"What is a common health concern specific to French Bulldogs due to their flat face?",correct_answer:"Brachycephalic airway syndrome",incorrect_answers:["Hip dysplasia","Bloat","Cataracts"]},
-    {category:"Frenchies",question:"What is the average lifespan of a French Bulldog?",correct_answer:"10-12 years",incorrect_answers:["5-7 years","15-18 years","3-4 years"]},
+    {category:"Frenchies",question:"What is the average lifespan of a French Bulldog?",correct_answer:"10-12 years",incorrect_answers:["7-9 years","14-16 years","13-15 years"]},
     {category:"Frenchies",question:"Which of these coat colors is NOT standard for French Bulldogs?",correct_answer:"Merle",incorrect_answers:["Brindle","Fawn","White"]},
     {category:"Frenchies",question:"French Bulldogs were originally bred as companions for which group of workers in England?",correct_answer:"Lace makers",incorrect_answers:["Coal miners","Fishermen","Blacksmiths"]},
     {category:"Frenchies",question:"Why are French Bulldogs unable to swim well?",correct_answer:"Their heavy front body and short legs",incorrect_answers:["They are afraid of water","Their fur is too thick","They have no webbed feet"]},
     {category:"Frenchies",question:"What is the French Bulldog's rank among the most popular dog breeds in the USA (as of 2024)?",correct_answer:"#1",incorrect_answers:["#5","#10","#3"]},
-    {category:"Frenchies",question:"How many puppies does a French Bulldog typically have in a litter?",correct_answer:"2-4",incorrect_answers:["6-8","8-12","1"]},
+    {category:"Frenchies",question:"How many puppies does a French Bulldog typically have in a litter?",correct_answer:"2-4",incorrect_answers:["5-7","7-10","1-2"]},
     {category:"Frenchies",question:"Why do most French Bulldogs require cesarean sections for birth?",correct_answer:"Their puppies' heads are too large for the birth canal",incorrect_answers:["They are too small","Their hips are weak","It is a breed regulation"]},
-    {category:"Frenchies",question:"What temperature sensitivity is common in French Bulldogs?",correct_answer:"They overheat easily in hot weather",incorrect_answers:["They are sensitive to cold only","They tolerate all temperatures well","They prefer humid climates"]},
+    {category:"Frenchies",question:"What position do French Bulldogs prefer to sleep in?",correct_answer:"On their back with legs in the air (frog pose)",incorrect_answers:["Curled in a tight ball","Standing up like a horse","Hanging upside down"]},
     {category:"Frenchies",question:"What group does the AKC classify French Bulldogs in?",correct_answer:"Non-Sporting Group",incorrect_answers:["Toy Group","Terrier Group","Working Group"]},
     {category:"Frenchies",question:"Which celebrity is NOT known for owning a French Bulldog?",correct_answer:"Oprah Winfrey",incorrect_answers:["Lady Gaga","Dwayne 'The Rock' Johnson","Hugh Jackman"]},
     {category:"Frenchies",question:"What is the typical personality trait most associated with French Bulldogs?",correct_answer:"Clownish and affectionate",incorrect_answers:["Aggressive and territorial","Independent and aloof","Hyperactive and restless"]},
     {category:"Frenchies",question:"What sound do French Bulldogs commonly make that other breeds don't?",correct_answer:"A unique 'talking' or yodeling sound",incorrect_answers:["A high-pitched whistle","A deep howl","A clicking noise"]},
-    {category:"Frenchies",question:"What is 'cherry eye,' a condition French Bulldogs are prone to?",correct_answer:"Prolapse of the third eyelid gland",incorrect_answers:["A red nose","Bloodshot eyes from allergies","A type of ear infection"]},
+    {category:"Frenchies",question:"What sound are French Bulldogs famously known for making besides barking?",correct_answer:"Snoring and snorting",incorrect_answers:["Howling","Chirping","Growling"]},
     {category:"Frenchies",question:"In what decade did French Bulldogs first arrive in America?",correct_answer:"1880s",incorrect_answers:["1920s","1950s","1770s"]},
     {category:"Frenchies",question:"What is the correct way to clean a French Bulldog's facial wrinkles?",correct_answer:"Gently wipe with a damp cloth and dry thoroughly",incorrect_answers:["Use rubbing alcohol","Leave them alone","Apply baby powder daily"]},
     {category:"Frenchies",question:"Which of these activities is LEAST suitable for a French Bulldog?",correct_answer:"Long-distance running",incorrect_answers:["Short walks","Indoor play","Trick training"]},
     {category:"Frenchies",question:"What distinctive feature besides bat ears makes Frenchies easy to identify?",correct_answer:"A short, stumpy corkscrew tail",incorrect_answers:["A long fluffy tail","Blue eyes","Extra-long legs"]},
     {category:"Frenchies",question:"What is the most expensive French Bulldog color?",correct_answer:"Blue",incorrect_answers:["Black","White","Brindle"]},
     {category:"Frenchies",question:"French Bulldogs are known to be particularly good at which of these?",correct_answer:"Being apartment dogs",incorrect_answers:["Guarding livestock","Hunting rabbits","Pulling sleds"]},
-    {category:"Frenchies",question:"What is 'reverse sneezing,' common in French Bulldogs?",correct_answer:"Rapid inward pulling of air through the nose",incorrect_answers:["Sneezing while walking backward","A type of cough","Breathing through the mouth only"]},
+    {category:"Frenchies",question:"What is a French Bulldog's typical attitude towards strangers?",correct_answer:"Friendly and sociable",incorrect_answers:["Aggressive and territorial","Fearful and shy","Completely indifferent"]},
     {category:"Frenchies",question:"What was the original English ancestor breed of the French Bulldog?",correct_answer:"Toy Bulldog",incorrect_answers:["Pug","Boston Terrier","English Mastiff"]},
 
     // ── HIKING ──
@@ -1503,7 +1526,7 @@
     {category:"Paris",question:"What was the original purpose of the Eiffel Tower?",correct_answer:"Temporary entrance arch for the 1889 World's Fair",incorrect_answers:["A military watchtower","A radio tower","A monument to Napoleon"]},
     {category:"Paris",question:"Which Parisian landmark was originally a medieval fortress before becoming a museum?",correct_answer:"The Louvre",incorrect_answers:["Notre-Dame","Sacré-Cœur","The Panthéon"]},
     {category:"Paris",question:"What is the famous Parisian boulevard known for luxury shopping and the Arc de Triomphe?",correct_answer:"Champs-Élysées",incorrect_answers:["Boulevard Haussmann","Rue de Rivoli","Boulevard Saint-Germain"]},
-    {category:"Paris",question:"How tall is the Eiffel Tower including its antenna?",correct_answer:"330 meters",incorrect_answers:["200 meters","450 meters","150 meters"]},
+    {category:"Paris",question:"What is the famous cabaret venue in the Montmartre district of Paris?",correct_answer:"Moulin Rouge",incorrect_answers:["Lido","Folies Bergère","Crazy Horse"]},
     {category:"Paris",question:"What Parisian cathedral suffered a devastating fire in 2019?",correct_answer:"Notre-Dame de Paris",incorrect_answers:["Sacré-Cœur","Saint-Sulpice","La Madeleine"]},
     {category:"Paris",question:"What is the Parisian underground ossuary that holds the remains of over 6 million people?",correct_answer:"The Catacombs",incorrect_answers:["The Panthéon","Père Lachaise","The Sewer Museum"]},
     {category:"Paris",question:"Which Parisian train station serves as the Eurostar terminal to London?",correct_answer:"Gare du Nord",incorrect_answers:["Gare de Lyon","Gare Montparnasse","Gare de l'Est"]},
@@ -1524,7 +1547,7 @@
 
     // ── CHEESES ──
     {category:"Cheeses",question:"What country produces the most cheese in the world?",correct_answer:"United States",incorrect_answers:["France","Italy","Netherlands"]},
-    {category:"Cheeses",question:"What is the most consumed cheese in the world?",correct_answer:"Mozzarella",incorrect_answers:["Cheddar","Brie","Gouda"]},
+    {category:"Cheeses",question:"What cheese is the most popular pizza topping worldwide?",correct_answer:"Mozzarella",incorrect_answers:["Cheddar","Gouda","Parmesan"]},
     {category:"Cheeses",question:"What type of milk is traditionally used to make Roquefort?",correct_answer:"Sheep's milk",incorrect_answers:["Cow's milk","Goat's milk","Buffalo milk"]},
     {category:"Cheeses",question:"What gives blue cheese its distinctive blue-green veins?",correct_answer:"Penicillium mold",incorrect_answers:["Food coloring","Blue algae","Copper minerals"]},
     {category:"Cheeses",question:"Which Italian cheese is traditionally aged for at least 12 months?",correct_answer:"Parmigiano-Reggiano",incorrect_answers:["Mozzarella","Ricotta","Mascarpone"]},
@@ -1605,11 +1628,33 @@
     el.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
     el.classList.add('selected');
     sfxTick();
+    // Persist settings to localStorage
+    try {
+      const saved = JSON.parse(localStorage.getItem('brainblitz_settings') || '{}');
+      saved[group] = el.dataset.val;
+      localStorage.setItem('brainblitz_settings', JSON.stringify(saved));
+    } catch(e) {}
   }
 
   function getSelected(groupId) {
     const pill = document.querySelector('#' + groupId + '-pills .pill.selected');
     return pill ? pill.dataset.val : '';
+  }
+
+  // Restore saved settings from localStorage
+  function restoreSettings() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('brainblitz_settings') || '{}');
+      Object.entries(saved).forEach(([group, val]) => {
+        const pills = document.querySelectorAll('#' + group + '-pills .pill');
+        pills.forEach(p => {
+          if (p.dataset.val === val) {
+            p.parentElement.querySelectorAll('.pill').forEach(pp => pp.classList.remove('selected'));
+            p.classList.add('selected');
+          }
+        });
+      });
+    } catch(e) {}
   }
 
   function showError(msg) {
@@ -1665,6 +1710,10 @@
         showError('Not enough questions for that category. Try fewer rounds or "Any" category.');
         return;
       }
+      if (questions.length < settings.rounds) {
+        // Silently adjust — play with what we have
+        settings.rounds = questions.length;
+      }
 
       sfxStart();
       Music.game();
@@ -1702,7 +1751,10 @@
     return arr;
   }
 
+  let turnSwitchInterval = null;
+
   function showTurnSwitch(playerKey, cb) {
+    if (turnSwitchInterval) { clearInterval(turnSwitchInterval); turnSwitchInterval = null; }
     const overlay = document.getElementById('turn-switch');
     const nameEl = document.getElementById('turn-switch-name');
     const countEl = document.getElementById('turn-switch-countdown');
@@ -1718,17 +1770,18 @@
     overlay.classList.add('show');
     sfxTick();
 
-    const interval = setInterval(() => {
+    turnSwitchInterval = setInterval(() => {
       count--;
       if (count > 0) {
         countEl.textContent = count;
         sfxTick();
       } else {
-        clearInterval(interval);
+        clearInterval(turnSwitchInterval);
+        turnSwitchInterval = null;
         overlay.classList.remove('show');
         if (cb) cb();
       }
-    }, 800);
+    }, 600);
   }
 
   function showRoundSplash(num, cb) {
@@ -1739,7 +1792,7 @@
     setTimeout(() => {
       splash.classList.remove('show');
       if (cb) cb();
-    }, 1200);
+    }, 800);
   }
 
   async function loadQuestion() {
@@ -1764,8 +1817,8 @@
       (voiceEnabled ? '<span id="hud-speaker" class="hud-speaker">&#128264;</span>' : '');
     playerEl.style.color = currentPlayer === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
-    document.getElementById('hud-burden-score').textContent = players.burden.score;
-    document.getElementById('hud-stu-score').textContent = players.stu.score;
+    document.getElementById('hud-burden-score').textContent = formatScore(players.burden.score);
+    document.getElementById('hud-stu-score').textContent = formatScore(players.stu.score);
     document.getElementById('q-category').textContent = decodeHTML(q.category);
     document.getElementById('q-text').textContent = decodeHTML(q.question);
 
@@ -1790,8 +1843,11 @@
     // TTS: read question aloud if enabled
     if (voiceEnabled) {
       ttsPlaying = true;
+      const speaker = document.getElementById('hud-speaker');
+      if (speaker) speaker.classList.add('loading');
       const questionText = decodeHTML(q.question);
       await playQuestionTTS(questionText);
+      if (speaker) speaker.classList.remove('loading');
       ttsPlaying = false;
     }
 
@@ -1870,6 +1926,7 @@
       const points = 100 + speedBonus + streakBonus;
       player.score += points;
 
+      spawnParticles(btn, 12);
       showFeedback('correct');
       if (player.streak >= 3) {
         const streakMsgs = [
@@ -1887,25 +1944,23 @@
       showFeedback('wrong');
     }
 
-    // Update HUD
-    document.getElementById('hud-burden-score').textContent = players.burden.score;
-    document.getElementById('hud-stu-score').textContent = players.stu.score;
+    // Update HUD with score pop animation
+    updateScoreDisplay('hud-burden-score', players.burden.score);
+    updateScoreDisplay('hud-stu-score', players.stu.score);
 
     // Alternate players and go to next question
-    const prevPlayer = currentPlayer;
     currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
 
     setTimeout(() => {
       currentQ++;
       if (currentQ < questions.length) {
-        // Show turn switch countdown if switching to a different player
         showTurnSwitch(currentPlayer, () => {
           showRoundSplash(currentQ + 1, () => loadQuestion());
         });
       } else {
         endGame();
       }
-    }, 1800);
+    }, 1200);
   }
 
   function timeUp() {
@@ -1927,7 +1982,6 @@
     showFeedback('timeout');
 
     // Alternate players
-    const prevPlayer = currentPlayer;
     currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
 
     setTimeout(() => {
@@ -1939,7 +1993,63 @@
       } else {
         endGame();
       }
-    }, 1800);
+    }, 1200);
+  }
+
+  // Format number with commas
+  function formatScore(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // Update score display with pop animation
+  function updateScoreDisplay(id, score) {
+    const el = document.getElementById(id);
+    const oldText = el.textContent;
+    const newText = formatScore(score);
+    if (oldText !== newText) {
+      el.textContent = newText;
+      el.classList.remove('score-pop');
+      void el.offsetHeight; // force reflow
+      el.classList.add('score-pop');
+    }
+  }
+
+  // Spawn particles at element position
+  function spawnParticles(sourceEl, count) {
+    const rect = sourceEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ['var(--neon-cyan)', 'var(--neon-green)', 'var(--neon-yellow)', '#fff'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.opacity = '1';
+      document.body.appendChild(p);
+      const angle = (Math.PI * 2 * i) / count;
+      const dist = 40 + Math.random() * 60;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      p.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: `translate(${dx}px,${dy}px) scale(0)`, opacity: 0 }
+      ], { duration: 500, easing: 'ease-out' });
+      setTimeout(() => p.remove(), 550);
+    }
+  }
+
+  // Animate number counting up from 0
+  function animateCounter(el, target, duration) {
+    const start = performance.now();
+    const end = start + duration;
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      el.textContent = formatScore(Math.round(target * progress));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
   }
 
   function showFeedback(type) {
@@ -2070,21 +2180,31 @@
     document.getElementById('lb-content').style.display = hasData ? 'flex' : 'none';
     document.getElementById('lb-no-data').style.display = hasData ? 'none' : 'block';
 
-    document.getElementById('lb-burden-wins').textContent = b.wins || 0;
-    document.getElementById('lb-burden-games').textContent = b.gamesPlayed || 0;
-    document.getElementById('lb-burden-draws').textContent = b.draws || 0;
-    document.getElementById('lb-burden-total').textContent = b.totalScore || 0;
-    document.getElementById('lb-burden-correct').textContent = b.totalCorrect || 0;
-    document.getElementById('lb-burden-best').textContent = b.bestGameScore || 0;
-    document.getElementById('lb-burden-streak').textContent = b.bestStreak || 0;
+    // Check if leaderboard is currently visible for counter animation
+    const isVisible = document.getElementById('screen-leaderboard').classList.contains('active');
+    const dur = isVisible ? 600 : 0;
 
-    document.getElementById('lb-stu-wins').textContent = s.wins || 0;
-    document.getElementById('lb-stu-games').textContent = s.gamesPlayed || 0;
-    document.getElementById('lb-stu-draws').textContent = s.draws || 0;
-    document.getElementById('lb-stu-total').textContent = s.totalScore || 0;
-    document.getElementById('lb-stu-correct').textContent = s.totalCorrect || 0;
-    document.getElementById('lb-stu-best').textContent = s.bestGameScore || 0;
-    document.getElementById('lb-stu-streak').textContent = s.bestStreak || 0;
+    const setLB = (id, val) => {
+      const el = document.getElementById(id);
+      if (dur > 0 && val > 0) { animateCounter(el, val, dur); }
+      else { el.textContent = formatScore(val); }
+    };
+
+    setLB('lb-burden-wins', b.wins || 0);
+    setLB('lb-burden-games', b.gamesPlayed || 0);
+    setLB('lb-burden-draws', b.draws || 0);
+    setLB('lb-burden-total', b.totalScore || 0);
+    setLB('lb-burden-correct', b.totalCorrect || 0);
+    setLB('lb-burden-best', b.bestGameScore || 0);
+    setLB('lb-burden-streak', b.bestStreak || 0);
+
+    setLB('lb-stu-wins', s.wins || 0);
+    setLB('lb-stu-games', s.gamesPlayed || 0);
+    setLB('lb-stu-draws', s.draws || 0);
+    setLB('lb-stu-total', s.totalScore || 0);
+    setLB('lb-stu-correct', s.totalCorrect || 0);
+    setLB('lb-stu-best', s.bestGameScore || 0);
+    setLB('lb-stu-streak', s.bestStreak || 0);
   }
 
   async function saveGameResult() {
@@ -2137,7 +2257,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, voice_id: voiceId }),
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(6000)
       });
       if (!res.ok) return false;
       const blob = await res.blob();
@@ -2249,7 +2369,8 @@
   // Init: show cursor on mouse move
   document.addEventListener('mousemove', () => document.body.classList.add('show-cursor'));
 
-  // Load lifetime stats on page load
+  // Restore saved settings and load stats on page load
+  restoreSettings();
   loadLifetimeStats();
 </script>
 
