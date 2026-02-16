@@ -1447,31 +1447,44 @@
   <div class="screen-title">Admin Panel</div>
   <div class="admin-content">
     <div class="admin-section">
-      <div class="admin-section-title">ElevenLabs TTS Usage</div>
-      <div id="admin-tts-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
-      <div id="admin-tts-stats" style="display:none;">
+      <div class="admin-section-title">ElevenLabs Costs</div>
+      <div id="admin-costs-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
+      <div id="admin-costs-stats" style="display:none;">
         <div class="admin-stat-row" style="padding:16px 0; border-bottom:2px solid rgba(255,230,0,0.15);">
-          <span class="admin-stat-label" style="font-size:clamp(18px,1.8vw,24px); font-weight:700; color:rgba(255,255,255,0.8);">Total Cost to Date</span>
-          <span class="admin-stat-value cost" id="admin-tts-cost" style="font-size:clamp(22px,2.2vw,32px);">R0.00</span>
+          <span class="admin-stat-label" style="font-size:clamp(18px,1.8vw,24px); font-weight:700; color:rgba(255,255,255,0.8);">Total Estimated Cost</span>
+          <span class="admin-stat-value cost" id="admin-total-cost" style="font-size:clamp(22px,2.2vw,32px);">R0.00</span>
         </div>
         <div class="admin-stat-row">
-          <span class="admin-stat-label">Total Characters</span>
-          <span class="admin-stat-value" id="admin-tts-chars">0</span>
+          <span class="admin-stat-label">Text-to-Speech</span>
+          <span class="admin-stat-value cost" id="admin-cost-tts">R0.00</span>
+        </div>
+        <div class="admin-stat-row" style="padding-left:20px; border-bottom:none;">
+          <span class="admin-stat-label" style="font-size:clamp(12px,1.2vw,15px); color:rgba(255,255,255,0.35);" id="admin-cost-tts-detail">0 chars / 0 requests</span>
         </div>
         <div class="admin-stat-row">
-          <span class="admin-stat-label">Total Requests</span>
-          <span class="admin-stat-value" id="admin-tts-requests">0</span>
+          <span class="admin-stat-label">Music Generation</span>
+          <span class="admin-stat-value cost" id="admin-cost-music">R0.00</span>
+        </div>
+        <div class="admin-stat-row" style="padding-left:20px; border-bottom:none;">
+          <span class="admin-stat-label" style="font-size:clamp(12px,1.2vw,15px); color:rgba(255,255,255,0.35);" id="admin-cost-music-detail">0 tracks / 0m 0s generated</span>
         </div>
         <div class="admin-stat-row">
-          <span class="admin-stat-label">Avg Cost/Request</span>
+          <span class="admin-stat-label">Sound Effects</span>
+          <span class="admin-stat-value cost" id="admin-cost-sfx">R0.00</span>
+        </div>
+        <div class="admin-stat-row" style="padding-left:20px; border-bottom:none;">
+          <span class="admin-stat-label" style="font-size:clamp(12px,1.2vw,15px); color:rgba(255,255,255,0.35);" id="admin-cost-sfx-detail">0 effects / 0s generated</span>
+        </div>
+        <div class="admin-stat-row" style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+          <span class="admin-stat-label">Avg Cost/TTS Request</span>
           <span class="admin-stat-value cost" id="admin-tts-avg-cost">R0.00</span>
         </div>
         <div class="admin-stat-row">
-          <span class="admin-stat-label">Avg Chars/Request</span>
+          <span class="admin-stat-label">Avg Chars/TTS Request</span>
           <span class="admin-stat-value" id="admin-tts-avg">0</span>
         </div>
       </div>
-      <div id="admin-tts-error" style="display:none; color:var(--neon-pink); font-family:'Rajdhani',sans-serif; font-size:16px; text-align:center; padding:15px;">Could not load TTS data</div>
+      <div id="admin-costs-error" style="display:none; color:var(--neon-pink); font-family:'Rajdhani',sans-serif; font-size:16px; text-align:center; padding:15px;">Could not load cost data</div>
     </div>
 
     <div class="admin-section">
@@ -3849,7 +3862,7 @@
           pinBuffer = '';
           updatePinDots();
           showScreen('admin');
-          loadAdminTTS();
+          loadAdminCosts();
           loadAdminAudio();
         }, 250);
       } else {
@@ -3884,41 +3897,92 @@
     }
   }
 
-  function loadAdminTTS() {
-    var loadingEl = document.getElementById('admin-tts-loading');
-    var statsEl = document.getElementById('admin-tts-stats');
-    var errorEl = document.getElementById('admin-tts-error');
+  function loadAdminCosts() {
+    var loadingEl = document.getElementById('admin-costs-loading');
+    var statsEl = document.getElementById('admin-costs-stats');
+    var errorEl = document.getElementById('admin-costs-error');
 
     loadingEl.style.display = 'block';
     statsEl.style.display = 'none';
     errorEl.style.display = 'none';
 
-    fetch('/api/tts-usage', { signal: AbortSignal.timeout(5000) })
-      .then(function(res) { return res.ok ? res.json() : Promise.reject('bad response'); })
-      .then(function(data) {
-        loadingEl.style.display = 'none';
-        statsEl.style.display = 'block';
+    var USD_TO_ZAR = 18.50;
+    var ttsCostZAR = 0;
+    var musicCostZAR = 0;
+    var sfxCostZAR = 0;
 
-        var totalChars = data.totalChars || 0;
-        var totalReqs = data.totalRequests || 0;
-        // ElevenLabs pricing: ~$0.18 per 1000 chars (Turbo v2.5)
-        var estCostUSD = (totalChars / 1000) * 0.18;
-        // Convert to ZAR (~18.50 ZAR per USD)
-        var USD_TO_ZAR = 18.50;
-        var estCostZAR = estCostUSD * USD_TO_ZAR;
-        var avgChars = totalReqs > 0 ? Math.round(totalChars / totalReqs) : 0;
-        var avgCostZAR = totalReqs > 0 ? (estCostZAR / totalReqs) : 0;
+    // Fetch all three sources in parallel
+    var ttsPromise = fetch('/api/tts-usage', { signal: AbortSignal.timeout(5000) })
+      .then(function(res) { return res.ok ? res.json() : { totalChars: 0, totalRequests: 0 }; })
+      .catch(function() { return { totalChars: 0, totalRequests: 0 }; });
 
-        document.getElementById('admin-tts-chars').textContent = formatScore(totalChars);
-        document.getElementById('admin-tts-requests').textContent = formatScore(totalReqs);
-        document.getElementById('admin-tts-cost').textContent = 'R' + estCostZAR.toFixed(2);
-        document.getElementById('admin-tts-avg-cost').textContent = 'R' + avgCostZAR.toFixed(2);
-        document.getElementById('admin-tts-avg').textContent = formatScore(avgChars);
-      })
-      .catch(function() {
-        loadingEl.style.display = 'none';
-        errorEl.style.display = 'block';
-      });
+    var musicPromise = fetch('/api/music?status=true', { signal: AbortSignal.timeout(5000) })
+      .then(function(res) { return res.ok ? res.json() : {}; })
+      .catch(function() { return {}; });
+
+    var sfxPromise = fetch('/api/sfx?status=true', { signal: AbortSignal.timeout(5000) })
+      .then(function(res) { return res.ok ? res.json() : {}; })
+      .catch(function() { return {}; });
+
+    Promise.all([ttsPromise, musicPromise, sfxPromise]).then(function(results) {
+      var ttsData = results[0];
+      var musicData = results[1];
+      var sfxData = results[2];
+
+      loadingEl.style.display = 'none';
+      statsEl.style.display = 'block';
+
+      // TTS costs: ~$0.18 per 1000 chars (Turbo v2.5)
+      var totalChars = ttsData.totalChars || 0;
+      var totalReqs = ttsData.totalRequests || 0;
+      ttsCostZAR = (totalChars / 1000) * 0.18 * USD_TO_ZAR;
+      var avgChars = totalReqs > 0 ? Math.round(totalChars / totalReqs) : 0;
+      var avgCostZAR = totalReqs > 0 ? (ttsCostZAR / totalReqs) : 0;
+
+      document.getElementById('admin-cost-tts').textContent = 'R' + ttsCostZAR.toFixed(2);
+      document.getElementById('admin-cost-tts-detail').textContent = formatScore(totalChars) + ' chars / ' + formatScore(totalReqs) + ' requests';
+      document.getElementById('admin-tts-avg-cost').textContent = 'R' + avgCostZAR.toFixed(2);
+      document.getElementById('admin-tts-avg').textContent = formatScore(avgChars);
+
+      // Music costs: ~$0.71/min (Creator plan: $22/mo for 31 min)
+      var musicTracks = 0;
+      var musicDurationMs = 0;
+      var musicKeys = Object.keys(musicData);
+      for (var i = 0; i < musicKeys.length; i++) {
+        if (musicData[musicKeys[i]]) {
+          musicTracks++;
+          musicDurationMs += (musicData[musicKeys[i]].duration_ms || 0);
+        }
+      }
+      var musicMin = Math.floor(musicDurationMs / 60000);
+      var musicSec = Math.round((musicDurationMs % 60000) / 1000);
+      musicCostZAR = (musicDurationMs / 60000) * 0.71 * USD_TO_ZAR;
+
+      document.getElementById('admin-cost-music').textContent = 'R' + musicCostZAR.toFixed(2);
+      document.getElementById('admin-cost-music-detail').textContent = musicTracks + '/4 tracks / ' + musicMin + 'm ' + musicSec + 's of 31m quota';
+
+      // SFX costs: ~$0.0088/sec (Creator plan: $22/mo for 2,500s)
+      var sfxCount = 0;
+      var sfxDurationSec = 0;
+      var sfxKeys = Object.keys(sfxData);
+      for (var j = 0; j < sfxKeys.length; j++) {
+        if (sfxData[sfxKeys[j]]) {
+          sfxCount++;
+          sfxDurationSec += (sfxData[sfxKeys[j]].duration || 0);
+        }
+      }
+      sfxCostZAR = sfxDurationSec * 0.0088 * USD_TO_ZAR;
+
+      document.getElementById('admin-cost-sfx').textContent = 'R' + sfxCostZAR.toFixed(2);
+      document.getElementById('admin-cost-sfx-detail').textContent = sfxCount + '/12 effects / ' + sfxDurationSec.toFixed(1) + 's of 2,500s quota';
+
+      // Total
+      var totalCostZAR = ttsCostZAR + musicCostZAR + sfxCostZAR;
+      document.getElementById('admin-total-cost').textContent = 'R' + totalCostZAR.toFixed(2);
+    }).catch(function() {
+      loadingEl.style.display = 'none';
+      errorEl.style.display = 'block';
+    });
   }
 
   // ═══════════════════════════════════════
