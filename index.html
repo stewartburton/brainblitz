@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>BRAINBLITZ - TV Trivia</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
@@ -30,6 +33,13 @@
     color: #fff;
     cursor: none;
     margin: 0; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Prevent double-tap zoom on game buttons */
+  button, .answer-btn, .pill, .btn {
+    touch-action: manipulation;
   }
 
   /* Custom large cursor for TV pointer */
@@ -768,12 +778,467 @@
     50% { text-shadow: 0 0 25px rgba(255,100,0,0.7), 0 0 50px rgba(255,45,120,0.3); }
   }
 
-  /* Responsive for smaller screens */
+  /* ─── RESPONSIVE: TABLETS & PHONES ─── */
   @media (max-width: 800px) {
     .answers-grid { grid-template-columns: 1fr; }
     .settings-grid { grid-template-columns: 1fr; gap: 30px; }
     .stats-row { gap: 30px; }
     .lb-columns { flex-direction: column; gap: 40px; }
+  }
+
+  /* ─── MOBILE DEVICES (phones) ─── */
+  @media (max-width: 768px) {
+    html, body {
+      overflow: hidden;
+      cursor: default;
+      min-height: 100vh;
+      min-height: 100dvh;
+      height: 100%;
+    }
+
+    .screen {
+      padding: 24px 16px;
+      padding-top: max(40px, env(safe-area-inset-top, 40px));
+      padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom, 0px)));
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      justify-content: flex-start;
+    }
+
+    /* ── Title Screen ── */
+    .title-logo {
+      font-size: clamp(36px, 12vw, 60px);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .title-sub {
+      font-size: clamp(11px, 3vw, 16px);
+      letter-spacing: 0.3em;
+      margin-bottom: 30px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      font-size: clamp(14px, 3.5vw, 18px);
+      padding: 14px 28px;
+      min-width: 200px;
+      letter-spacing: 0.08em;
+    }
+    .btn-group {
+      gap: 14px;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    /* ── Settings Screen ── */
+    .settings-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      max-width: 100%;
+      margin-bottom: 30px;
+    }
+    .setting-group label {
+      font-size: clamp(12px, 3vw, 16px);
+      margin-bottom: 10px;
+    }
+    .pill {
+      font-size: clamp(13px, 3.2vw, 17px);
+      padding: 10px 18px;
+    }
+    .pill-group {
+      gap: 8px;
+    }
+
+    /* ── Game HUD ── */
+    .game-hud {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 4px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+    .hud-item {
+      padding: 4px 8px;
+      min-width: auto;
+      flex: 0 0 auto;
+    }
+    .hud-label {
+      font-size: clamp(8px, 2.2vw, 12px);
+      letter-spacing: 0.1em;
+    }
+    .hud-value {
+      font-size: clamp(18px, 5vw, 28px);
+    }
+
+    /* ── Timer ── */
+    .timer-track {
+      height: 6px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Category / Question ── */
+    .category-badge {
+      font-size: clamp(10px, 2.8vw, 16px);
+      letter-spacing: 0.15em;
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: clamp(18px, 5vw, 32px);
+      margin-bottom: 24px;
+      max-width: 100%;
+      line-height: 1.3;
+    }
+
+    /* ── Answers ── */
+    .answers-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: 100%;
+    }
+    .answer-btn {
+      font-size: clamp(15px, 4vw, 22px);
+      padding: 14px 16px;
+      gap: 12px;
+    }
+    .answer-btn .letter {
+      font-size: clamp(12px, 3vw, 18px);
+      min-width: 34px;
+      height: 34px;
+    }
+
+    /* ── Results Screen ── */
+    .results-label {
+      font-size: clamp(12px, 3vw, 18px);
+      margin-bottom: 20px;
+    }
+    .results-score {
+      font-size: clamp(36px, 14vw, 70px) !important;
+    }
+    .trophy-icon {
+      font-size: clamp(30px, 10vw, 60px);
+    }
+    .rank-text {
+      font-size: clamp(16px, 4vw, 26px);
+      margin-bottom: 24px;
+    }
+
+    /* ── Leaderboard ── */
+    .lb-columns {
+      flex-direction: column;
+      gap: 30px;
+    }
+    .lb-column { min-width: auto; }
+    .lb-name {
+      font-size: clamp(16px, 4.5vw, 24px);
+      margin-bottom: 16px;
+    }
+    .lb-val {
+      font-size: clamp(18px, 5vw, 28px);
+    }
+    .lb-label {
+      font-size: clamp(10px, 2.5vw, 14px);
+    }
+    .lb-stat { margin-bottom: 10px; }
+
+    /* ── Achievements ── */
+    .achievements-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      max-height: 60vh;
+      padding: 6px;
+    }
+    .achievement-card {
+      padding: 14px 10px;
+    }
+    .achievement-card-icon { font-size: 30px; margin-bottom: 6px; }
+    .achievement-card-name { font-size: clamp(10px, 2.5vw, 13px); }
+    .achievement-card-desc { font-size: clamp(10px, 2.4vw, 12px); }
+
+    /* ── Admin ── */
+    .admin-section {
+      padding: 20px 16px;
+      max-width: 100%;
+    }
+    .admin-content {
+      max-width: 100%;
+      padding: 4px;
+    }
+    .admin-section-title {
+      font-size: clamp(12px, 3vw, 16px);
+    }
+    .admin-stat-label {
+      font-size: clamp(13px, 3vw, 16px) !important;
+    }
+    .admin-stat-value {
+      font-size: clamp(13px, 3vw, 16px) !important;
+    }
+
+    /* ── Pin Entry ── */
+    .pin-numpad {
+      max-width: 240px;
+      gap: 10px;
+    }
+    .pin-numpad button {
+      font-size: 20px;
+      padding: 14px;
+      min-height: 48px;
+    }
+    .pin-dot {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ── Overlays ── */
+    .feedback-text {
+      font-size: clamp(32px, 12vw, 70px);
+    }
+    .bonus-popup {
+      font-size: clamp(16px, 5vw, 28px);
+    }
+    .on-fire-text {
+      font-size: clamp(36px, 14vw, 80px);
+    }
+    .round-number {
+      font-size: clamp(50px, 18vw, 100px);
+    }
+    .round-label {
+      font-size: clamp(12px, 3.5vw, 20px);
+    }
+    .turn-switch-name {
+      font-size: clamp(28px, 8vw, 50px);
+    }
+    .turn-switch-label {
+      font-size: clamp(14px, 4vw, 24px);
+    }
+    .turn-switch-countdown {
+      font-size: clamp(40px, 14vw, 80px);
+    }
+
+    /* ── Music Toggle ── */
+    .music-toggle {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      bottom: 14px;
+      right: 14px;
+    }
+
+    /* ── Admin Gear ── */
+    .admin-gear {
+      width: 42px;
+      height: 42px;
+      font-size: 12px !important;
+      bottom: 14px;
+      left: 14px;
+    }
+
+    /* ── Screen Title ── */
+    .screen-title {
+      font-size: clamp(18px, 5vw, 28px);
+      margin-bottom: 24px;
+    }
+
+    /* ── How to Play ── */
+    #screen-howto > div {
+      font-size: clamp(14px, 3.5vw, 20px) !important;
+      margin-bottom: 30px !important;
+      line-height: 1.6 !important;
+    }
+
+    /* ── Difficulty ── */
+    .difficulty-badge {
+      font-size: clamp(9px, 2.5vw, 14px);
+      padding: 3px 10px;
+    }
+    .difficulty-stars {
+      font-size: clamp(10px, 3vw, 16px);
+    }
+
+    /* ── Loading ── */
+    .loading-ring {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* ── Achievement Toast ── */
+    .achievement-toast {
+      min-width: 280px;
+      max-width: calc(100vw - 32px);
+      padding: 12px 18px;
+      gap: 12px;
+    }
+    .achievement-toast-icon { font-size: 28px; }
+    .achievement-toast-name { font-size: clamp(12px, 3vw, 15px); }
+    .achievement-toast-desc { font-size: clamp(11px, 2.5vw, 14px); }
+
+    /* ── Confetti (smaller on mobile) ── */
+    .confetti-piece {
+      width: 7px;
+      height: 7px;
+    }
+  }
+
+  /* ─── SMALL PHONES (iPhone SE, etc) ─── */
+  @media (max-width: 390px) {
+    .screen { padding: 16px 12px; }
+
+    .title-logo {
+      font-size: clamp(30px, 11vw, 48px);
+    }
+    .title-sub {
+      font-size: clamp(9px, 2.5vw, 13px);
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      font-size: clamp(12px, 3.2vw, 15px);
+      padding: 12px 20px;
+      min-width: 160px;
+    }
+
+    .game-hud {
+      gap: 4px;
+    }
+    .hud-label {
+      font-size: clamp(7px, 2vw, 10px);
+    }
+    .hud-value {
+      font-size: clamp(16px, 4.5vw, 24px);
+    }
+
+    .question-text {
+      font-size: clamp(16px, 4.5vw, 26px);
+      margin-bottom: 18px;
+    }
+
+    .answer-btn {
+      font-size: clamp(13px, 3.5vw, 18px);
+      padding: 12px 12px;
+      gap: 10px;
+    }
+    .answer-btn .letter {
+      min-width: 28px;
+      height: 28px;
+      font-size: clamp(10px, 2.5vw, 14px);
+    }
+
+    .pill {
+      font-size: clamp(11px, 3vw, 15px);
+      padding: 8px 14px;
+    }
+
+    .achievements-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .achievement-card {
+      padding: 10px 8px;
+    }
+  }
+
+  /* ─── TOUCH DEVICE ADJUSTMENTS ─── */
+  @media (hover: none) and (pointer: coarse) {
+    /* Remove hover scale effects on touch - prevent sticky hover */
+    .btn:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(0,240,255,0.05);
+    }
+    .btn.pink:hover {
+      background: rgba(255,45,120,0.05);
+    }
+    .answer-btn:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: rgba(255,255,255,0.12);
+      background: var(--bg-card);
+    }
+    .pill:hover {
+      border-color: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Active states for tap feedback */
+    .btn:active {
+      transform: scale(0.96);
+      background: rgba(0,240,255,0.15);
+      box-shadow: 0 0 15px rgba(0,240,255,0.3);
+    }
+    .btn.pink:active {
+      background: rgba(255,45,120,0.15);
+      box-shadow: 0 0 15px rgba(255,45,120,0.3);
+    }
+    .answer-btn:active {
+      transform: scale(0.98);
+      border-color: var(--neon-cyan);
+      background: rgba(0,240,255,0.08);
+    }
+
+    /* Larger tap targets */
+    .pin-numpad button {
+      min-height: 52px;
+    }
+  }
+
+  /* ─── LANDSCAPE PHONE ─── */
+  @media (max-height: 500px) and (max-width: 900px) {
+    .screen { padding: 12px 16px; }
+
+    .title-logo { font-size: clamp(28px, 6vw, 44px); margin-bottom: 4px; }
+    .title-sub { margin-bottom: 16px; }
+
+    .game-hud { margin-bottom: 8px; }
+    .timer-track { margin-bottom: 10px; height: 5px; }
+    .question-text { font-size: clamp(16px, 3vw, 24px); margin-bottom: 14px; }
+    .answers-grid { gap: 8px; }
+    .answer-btn { padding: 10px 14px; }
+
+    .round-number { font-size: clamp(40px, 12vw, 80px); }
+    .turn-switch-name { font-size: clamp(24px, 6vw, 40px); }
+    .turn-switch-countdown { font-size: clamp(36px, 10vw, 60px); }
+
+    .feedback-text { font-size: clamp(28px, 8vw, 56px); }
+    .on-fire-text { font-size: clamp(30px, 10vw, 60px); }
+  }
+
+  /* ─── MOBILE: Override inline flex layouts ─── */
+  @media (max-width: 768px) {
+    /* Results screen: stack player columns vertically */
+    #screen-results > div[style*="display: flex"][style*="gap: 80px"] {
+      flex-direction: column !important;
+      gap: 30px !important;
+      align-items: center !important;
+    }
+    /* Results buttons: stack and center */
+    #screen-results .btn-group {
+      flex-direction: column !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+    }
+    /* Error buttons */
+    #screen-error .btn-group {
+      flex-direction: column !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+    }
+    /* Settings Back/Play buttons */
+    #screen-settings .btn-group {
+      flex-direction: column !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+    }
+    /* Title screen buttons wrap nicely */
+    #screen-title .btn-group {
+      flex-direction: column !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+    }
+    /* Lifetime wins display */
+    #lifetime-wins {
+      font-size: clamp(11px, 3vw, 16px) !important;
+      margin-top: 20px !important;
+    }
   }
 
   /* ─── DIFFICULTY INDICATOR ─── */
