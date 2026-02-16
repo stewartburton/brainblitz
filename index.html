@@ -808,13 +808,15 @@
 
     /* ── Title Screen ── */
     .title-logo {
-      font-size: clamp(36px, 12vw, 60px);
-      letter-spacing: 0.08em;
+      font-size: clamp(24px, 8.5vw, 44px);
+      letter-spacing: 0;
       margin-bottom: 6px;
+      max-width: 100%;
+      padding: 0 8px;
     }
     .title-sub {
-      font-size: clamp(11px, 3vw, 16px);
-      letter-spacing: 0.3em;
+      font-size: clamp(10px, 2.8vw, 15px);
+      letter-spacing: 0.2em;
       margin-bottom: 30px;
     }
 
@@ -1084,11 +1086,12 @@
     .screen { padding: 16px 12px; }
 
     .title-logo {
-      font-size: clamp(30px, 11vw, 48px);
+      font-size: clamp(24px, 8vw, 36px);
+      letter-spacing: 0.01em;
     }
     .title-sub {
-      font-size: clamp(9px, 2.5vw, 13px);
-      margin-bottom: 24px;
+      font-size: clamp(8px, 2.2vw, 12px);
+      margin-bottom: 20px;
     }
 
     .btn {
@@ -1182,17 +1185,20 @@
   }
 
   /* ─── LANDSCAPE PHONE ─── */
-  @media (max-height: 500px) and (max-width: 900px) {
-    .screen { padding: 12px 16px; }
+  @media (max-height: 500px) and (max-width: 1000px) {
+    html, body { cursor: default; }
+    .screen { padding: 12px 16px; justify-content: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-    .title-logo { font-size: clamp(28px, 6vw, 44px); margin-bottom: 4px; }
-    .title-sub { margin-bottom: 16px; }
+    .title-logo { font-size: clamp(24px, 5vw, 40px); letter-spacing: 0; margin-bottom: 4px; }
+    .title-sub { margin-bottom: 12px; font-size: clamp(9px, 1.8vw, 14px); }
+
+    .btn { font-size: clamp(12px, 2vw, 16px); padding: 10px 24px; min-width: 160px; }
 
     .game-hud { margin-bottom: 8px; }
     .timer-track { margin-bottom: 10px; height: 5px; }
     .question-text { font-size: clamp(16px, 3vw, 24px); margin-bottom: 14px; }
-    .answers-grid { gap: 8px; }
-    .answer-btn { padding: 10px 14px; }
+    .answers-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .answer-btn { padding: 10px 14px; font-size: clamp(13px, 2.2vw, 18px); }
 
     .round-number { font-size: clamp(40px, 12vw, 80px); }
     .turn-switch-name { font-size: clamp(24px, 6vw, 40px); }
