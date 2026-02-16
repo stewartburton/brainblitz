@@ -18,7 +18,8 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 - **Sound effects** — Web Audio API synth sounds, no files needed
 - **Configurable** — Timer, categories, rounds, and voice selection (persisted across sessions)
 - **Voice mode** — Two ElevenLabs voices (Rachel & Butcher) using fast Turbo v2.5 model
-- **Synth music** — Web Audio API step sequencer with mute toggle and dynamics compressor
+- **AI Music** — ElevenLabs Music API generates 4 custom tracks (title, game, victory, draw), cached in KV. Falls back to Web Audio API step sequencer
+- **AI Sound Effects** — ElevenLabs SFX API generates 12 custom effects, cached in KV. Falls back to synthesized SFX
 - **Leaderboard** — Lifetime stats persisted via Cloudflare KV with counter animations
 - **SA Expressions** — Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
 - **Custom categories** — Frenchies, Hiking, SA Wines, Paris, Cheeses, Braai Culture, 90s Pop Culture, SA Food & Slang, True or False (250+ built-in questions)
@@ -73,6 +74,15 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 4. Add: `ELEVENLABS_API_KEY` = your API key
 5. Redeploy — choose "Rachel" or "Butcher" voice in game settings to hear questions read aloud
 
+#### Setting up ElevenLabs Music & SFX (Optional)
+
+The same `ELEVENLABS_API_KEY` powers AI-generated music and sound effects. With a Creator subscription you get 31 minutes of music and 2,500 seconds of SFX.
+
+1. Open the game and go to **Admin Panel** (PIN: `1945`)
+2. Scroll to **Audio Assets (ElevenLabs)**
+3. Click **Generate All** for Music and SFX — each track/effect is generated and cached in KV
+4. The game automatically uses cached audio. If none exists, it falls back to the built-in Web Audio synthesizer
+
 ## File Structure
 
 ```
@@ -84,7 +94,9 @@ brainblitz/
 │       ├── scores.js        # GET/POST player stats (Cloudflare KV)
 │       ├── achievements.js  # GET/POST player achievements (Cloudflare KV)
 │       ├── tts.js           # ElevenLabs TTS proxy (Turbo v2.5)
-│       └── tts-usage.js     # GET TTS character usage stats
+│       ├── tts-usage.js     # GET TTS character usage stats
+│       ├── music.js         # ElevenLabs Music generation + KV cache
+│       └── sfx.js           # ElevenLabs Sound Effects generation + KV cache
 ├── CHANGELOG.md
 ├── wrangler.toml            # KV namespace binding config
 └── README.md

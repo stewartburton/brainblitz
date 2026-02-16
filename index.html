@@ -1484,6 +1484,32 @@
         Changes game UI labels and feedback expressions.
       </div>
     </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Audio Assets (ElevenLabs)</div>
+      <div id="admin-audio-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
+      <div id="admin-audio-content" style="display:none;">
+        <div style="margin-bottom:24px;">
+          <div class="admin-stat-row" style="border-bottom:2px solid rgba(0,240,255,0.15); padding-bottom:12px; margin-bottom:8px;">
+            <span class="admin-stat-label" style="font-size:clamp(16px,1.6vw,20px); font-weight:700; color:rgba(255,255,255,0.8);">Music Tracks</span>
+            <button class="btn" onclick="generateAllMusic()" id="btn-gen-all-music" style="font-size:11px; padding:6px 14px; min-width:auto; letter-spacing:0.05em;">Generate All</button>
+          </div>
+          <div id="admin-music-list"></div>
+        </div>
+        <div>
+          <div class="admin-stat-row" style="border-bottom:2px solid rgba(0,240,255,0.15); padding-bottom:12px; margin-bottom:8px;">
+            <span class="admin-stat-label" style="font-size:clamp(16px,1.6vw,20px); font-weight:700; color:rgba(255,255,255,0.8);">Sound Effects</span>
+            <button class="btn" onclick="generateAllSfx()" id="btn-gen-all-sfx" style="font-size:11px; padding:6px 14px; min-width:auto; letter-spacing:0.05em;">Generate All</button>
+          </div>
+          <div id="admin-sfx-list"></div>
+        </div>
+      </div>
+      <div id="admin-audio-progress" style="display:none; text-align:center; padding:20px;">
+        <div class="loading-ring" style="margin:0 auto 15px; width:40px; height:40px;"></div>
+        <div id="admin-audio-progress-text" style="font-family:'Rajdhani',sans-serif; font-size:16px; color:var(--neon-cyan);">Generating...</div>
+      </div>
+      <div id="admin-audio-error" style="display:none; color:var(--neon-pink); font-family:'Rajdhani',sans-serif; font-size:16px; text-align:center; padding:15px;"></div>
+    </div>
   </div>
   <button class="btn" onclick="showScreen('title')" style="margin-top:20px;">Home</button>
 </div>
@@ -1534,6 +1560,81 @@
   }
 
   // ═══════════════════════════════════════
+  //  ELEVENLABS AUDIO ASSET LOADER
+  // ═══════════════════════════════════════
+  var ElevenAudio = {
+    sfx: {},     // name -> AudioBuffer
+    music: {},   // name -> AudioBuffer
+    loaded: false,
+
+    SFX_NAMES: ['correct','wrong','tick','countdown','start','click','whoosh','victory_fanfare','draw_tone','crowd_cheer','achievement','streak_fire'],
+    MUSIC_NAMES: ['title','game','victory','draw'],
+
+    loadAll: function() {
+      var self = this;
+      var promises = [];
+
+      self.SFX_NAMES.forEach(function(name) {
+        promises.push(
+          self._fetchAudio('/api/sfx?name=' + name).then(function(buf) {
+            if (buf) self.sfx[name] = buf;
+          })
+        );
+      });
+
+      self.MUSIC_NAMES.forEach(function(name) {
+        promises.push(
+          self._fetchAudio('/api/music?name=' + name).then(function(buf) {
+            if (buf) self.music[name] = buf;
+          })
+        );
+      });
+
+      return Promise.all(promises).then(function() {
+        self.loaded = true;
+      }).catch(function() {
+        self.loaded = true;
+      });
+    },
+
+    _fetchAudio: function(url) {
+      return fetch(url, { signal: AbortSignal.timeout(10000) })
+        .then(function(res) {
+          if (!res.ok) return null;
+          return res.arrayBuffer();
+        })
+        .then(function(buf) {
+          if (!buf) return null;
+          ensureAudio();
+          return new Promise(function(resolve) {
+            audioCtx.decodeAudioData(buf, function(decoded) {
+              resolve(decoded);
+            }, function() {
+              resolve(null);
+            });
+          });
+        })
+        .catch(function() { return null; });
+    },
+
+    playSfx: function(name, volume) {
+      var buf = this.sfx[name];
+      if (!buf) return false;
+      try {
+        ensureAudio();
+        var source = audioCtx.createBufferSource();
+        source.buffer = buf;
+        var gain = audioCtx.createGain();
+        gain.gain.value = volume || 0.5;
+        source.connect(gain);
+        gain.connect(masterCompressor);
+        source.start();
+      } catch(e) {}
+      return true;
+    }
+  };
+
+  // ═══════════════════════════════════════
   //  AUDIO ENGINE (Web Audio API)
   // ═══════════════════════════════════════
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1571,29 +1672,36 @@
   }
 
   function sfxCorrect() {
+    if (ElevenAudio.playSfx('correct')) return;
     playTone(523, 0.12, 'sine', 0.10);
     setTimeout(() => playTone(659, 0.12, 'sine', 0.10), 80);
     setTimeout(() => playTone(784, 0.25, 'sine', 0.10), 160);
   }
   function sfxWrong() {
+    if (ElevenAudio.playSfx('wrong')) return;
     playTone(200, 0.3, 'sawtooth', 0.1);
     setTimeout(() => playTone(150, 0.4, 'sawtooth', 0.08), 150);
   }
   function sfxTick() {
+    if (ElevenAudio.playSfx('tick', 0.3)) return;
     playTone(800, 0.05, 'square', 0.04);
   }
   function sfxCountdown() {
+    if (ElevenAudio.playSfx('countdown', 0.4)) return;
     playTone(440, 0.15, 'square', 0.08);
   }
   function sfxStart() {
+    if (ElevenAudio.playSfx('start')) return;
     [523, 659, 784, 1047].forEach((f, i) => {
       setTimeout(() => playTone(f, 0.2, 'sine', 0.12), i * 100);
     });
   }
   function sfxClick() {
+    if (ElevenAudio.playSfx('click', 0.3)) return;
     playTone(1200, 0.05, 'sine', 0.08);
   }
   function sfxWhoosh() {
+    if (ElevenAudio.playSfx('whoosh', 0.4)) return;
     try {
       ensureAudio();
       const osc = audioCtx.createOscillator();
@@ -1610,12 +1718,14 @@
     } catch(e) {}
   }
   function sfxVictory() {
+    if (ElevenAudio.playSfx('victory_fanfare')) return;
     const notes = [523, 659, 784, 1047, 784, 1047, 1319];
     notes.forEach((f, i) => {
       setTimeout(() => playTone(f, 0.3, 'sine', 0.12), i * 150);
     });
   }
   function sfxDraw() {
+    if (ElevenAudio.playSfx('draw_tone')) return;
     playTone(440, 0.3, 'sine', 0.1);
     setTimeout(() => playTone(440, 0.3, 'triangle', 0.08), 300);
   }
@@ -1624,6 +1734,7 @@
   //  STREAK CELEBRATION SFX & TENSION ENGINE
   // ═══════════════════════════════════════
   function sfxCrowdCheer() {
+    if (ElevenAudio.playSfx('crowd_cheer')) return;
     try {
       ensureAudio();
       var bufSize = Math.floor(audioCtx.sampleRate * 0.8);
@@ -1664,8 +1775,10 @@
     fireOverlay.classList.add('show');
     setTimeout(function() { fireOverlay.classList.remove('show'); }, 1200);
 
-    // Crowd cheer SFX
-    sfxCrowdCheer();
+    // Streak fire SFX (falls back to crowd cheer)
+    if (!ElevenAudio.playSfx('streak_fire')) {
+      sfxCrowdCheer();
+    }
 
     // Extra emphasis on bonus popup
     var bonusEl = document.getElementById('bonus-popup');
@@ -1728,6 +1841,7 @@
     _bpm: 120,
     _nextNoteTime: 0,
     _scheduledNodes: [],
+    _elevenSource: null,
 
     stop(fadeTime = 0.3) {
       if (!this.playing) return;
@@ -1737,10 +1851,35 @@
       if (this.masterGain) {
         try { this.masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + fadeTime); } catch(e) {}
       }
+      // Stop ElevenAudio source if active
+      if (this._elevenSource) {
+        var elSrc = this._elevenSource;
+        this._elevenSource = null;
+        setTimeout(function() { try { elSrc.stop(); elSrc.disconnect(); } catch(e) {} }, fadeTime * 1000 + 100);
+      }
       const old = this._scheduledNodes;
       this._scheduledNodes = [];
       setTimeout(() => { old.forEach(n => { try { n.stop(); n.disconnect(); } catch(e) {} }); }, fadeTime * 1000 + 100);
       this.masterGain = null;
+    },
+
+    // Play ElevenLabs cached music track (returns true if available)
+    _playEleven(trackName, loop, vol) {
+      var buf = ElevenAudio.music[trackName];
+      if (!buf) return false;
+      ensureAudio();
+      var source = audioCtx.createBufferSource();
+      source.buffer = buf;
+      source.loop = loop !== false;
+      var gain = audioCtx.createGain();
+      gain.gain.value = musicMuted ? 0 : vol;
+      source.connect(gain);
+      gain.connect(masterCompressor);
+      source.start();
+      this._elevenSource = source;
+      this.masterGain = gain;
+      this.playing = true;
+      return true;
     },
 
     _init(vol) {
@@ -1833,7 +1972,13 @@
     title() {
       if (this.currentTrack === 'title') return;
       this.stop(0.2);
+      // Try ElevenLabs cached music first
+      var self = this;
       setTimeout(() => {
+        if (self._playEleven('title', true, 0.18)) {
+          self.currentTrack = 'title';
+          return;
+        }
         const master = this._init(0.18);
         this.currentTrack = 'title';
         this._bpm = 82;
@@ -1910,7 +2055,12 @@
     // ── Game: tense electronic, builds with intensity ──
     game() {
       this.stop(0.15);
+      var self = this;
       setTimeout(() => {
+        if (self._playEleven('game', true, 0.15)) {
+          self.currentTrack = 'game';
+          return;
+        }
         const master = this._init(0.15);
         this.currentTrack = 'game';
         this._bpm = 115;
@@ -1981,7 +2131,12 @@
     // ── Victory: triumphant celebration ──
     victory() {
       this.stop(0.15);
+      var self = this;
       setTimeout(() => {
+        if (self._playEleven('victory', true, 0.18)) {
+          self.currentTrack = 'victory';
+          return;
+        }
         const master = this._init(0.18);
         this.currentTrack = 'victory';
         this._bpm = 135;
@@ -2031,7 +2186,12 @@
     // ── Draw: mellow ambient pad ──
     draw() {
       this.stop(0.2);
+      var self = this;
       setTimeout(() => {
+        if (self._playEleven('draw', true, 0.10)) {
+          self.currentTrack = 'draw';
+          return;
+        }
         const master = this._init(0.10);
         this.currentTrack = 'draw';
 
@@ -3496,6 +3656,7 @@
 
   // Sound effect for achievement unlock
   function sfxAchievement() {
+    if (ElevenAudio.playSfx('achievement')) return;
     playTone(880, 0.15, 'sine', 0.10);
     setTimeout(function() { playTone(1109, 0.15, 'sine', 0.10); }, 100);
     setTimeout(function() { playTone(1319, 0.25, 'sine', 0.12); }, 200);
@@ -3689,6 +3850,7 @@
           updatePinDots();
           showScreen('admin');
           loadAdminTTS();
+          loadAdminAudio();
         }, 250);
       } else {
         // Wrong PIN — shake and reset
@@ -3757,6 +3919,173 @@
         loadingEl.style.display = 'none';
         errorEl.style.display = 'block';
       });
+  }
+
+  // ═══════════════════════════════════════
+  //  ADMIN: AUDIO ASSETS (ElevenLabs Music + SFX)
+  // ═══════════════════════════════════════
+  var audioGenerating = false;
+
+  function loadAdminAudio() {
+    var loadingEl = document.getElementById('admin-audio-loading');
+    var contentEl = document.getElementById('admin-audio-content');
+    var errorEl = document.getElementById('admin-audio-error');
+
+    loadingEl.style.display = 'block';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    Promise.all([
+      fetch('/api/music?status=true', { signal: AbortSignal.timeout(8000) }).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }),
+      fetch('/api/sfx?status=true', { signal: AbortSignal.timeout(8000) }).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; })
+    ]).then(function(results) {
+      loadingEl.style.display = 'none';
+      contentEl.style.display = 'block';
+      renderAudioAssetList('admin-music-list', results[0], 'music');
+      renderAudioAssetList('admin-sfx-list', results[1], 'sfx');
+    }).catch(function() {
+      loadingEl.style.display = 'none';
+      errorEl.style.display = 'block';
+      errorEl.textContent = 'Could not load audio asset status';
+    });
+  }
+
+  function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function renderAudioAssetList(containerId, statusMap, type) {
+    var container = document.getElementById(containerId);
+    var names = Object.keys(statusMap);
+    if (names.length === 0) {
+      container.innerHTML = '<div style="color:rgba(255,255,255,0.25); font-family:Rajdhani,sans-serif; font-size:14px; padding:8px 0;">API not available</div>';
+      return;
+    }
+    var html = '';
+    names.forEach(function(name) {
+      var meta = statusMap[name];
+      var statusColor = meta ? 'var(--neon-green)' : 'rgba(255,255,255,0.35)';
+      var statusText = meta ? formatFileSize(meta.size_bytes) : 'Not generated';
+      var label = meta ? (meta.label || name) : name;
+      var btnLabel = meta ? 'Regen' : 'Generate';
+
+      html += '<div class="admin-stat-row" id="audio-row-' + type + '-' + name + '">' +
+        '<span class="admin-stat-label" style="flex:1;">' + label + ' <span style="opacity:0.4;">(' + name + ')</span></span>' +
+        '<span id="audio-status-' + type + '-' + name + '" style="font-family:Orbitron,monospace; font-size:clamp(11px,1.1vw,13px); color:' + statusColor + '; margin-right:12px;">' + statusText + '</span>' +
+        '<button class="btn" onclick="generateSingleAudio(\'' + type + '\',\'' + name + '\')" id="btn-gen-' + type + '-' + name + '" style="font-size:10px; padding:5px 12px; min-width:auto; letter-spacing:0.05em;">' + btnLabel + '</button>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function generateSingleAudio(type, name) {
+    if (audioGenerating) return;
+    audioGenerating = true;
+    var btn = document.getElementById('btn-gen-' + type + '-' + name);
+    var statusEl = document.getElementById('audio-status-' + type + '-' + name);
+    if (btn) { btn.textContent = '...'; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.4'; }
+    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.style.color = 'var(--neon-yellow)'; }
+
+    var url = type === 'music' ? '/api/music' : '/api/sfx';
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name }),
+      signal: AbortSignal.timeout(300000) // 5 min timeout for music generation
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      audioGenerating = false;
+      if (data.ok) {
+        if (statusEl) { statusEl.textContent = formatFileSize(data.meta.size_bytes); statusEl.style.color = 'var(--neon-green)'; }
+        if (btn) { btn.textContent = 'Regen'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
+        // Reload the audio into ElevenAudio cache
+        ElevenAudio._fetchAudio('/api/' + type + '?name=' + name).then(function(buf) {
+          if (buf) {
+            if (type === 'music') ElevenAudio.music[name] = buf;
+            else ElevenAudio.sfx[name] = buf;
+          }
+        });
+      } else {
+        if (statusEl) { statusEl.textContent = data.error || 'Failed'; statusEl.style.color = 'var(--neon-pink)'; }
+        if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
+      }
+    })
+    .catch(function(e) {
+      audioGenerating = false;
+      if (statusEl) { statusEl.textContent = 'Error'; statusEl.style.color = 'var(--neon-pink)'; }
+      if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
+    });
+  }
+
+  async function generateAllMusic() {
+    if (audioGenerating) return;
+    audioGenerating = true;
+    var progressEl = document.getElementById('admin-audio-progress');
+    var progressText = document.getElementById('admin-audio-progress-text');
+    progressEl.style.display = 'block';
+
+    var names = ['title', 'game', 'victory', 'draw'];
+    for (var i = 0; i < names.length; i++) {
+      progressText.textContent = 'Generating music: ' + names[i] + ' (' + (i + 1) + '/' + names.length + ')...';
+      await generateSingleAudioAsync('music', names[i]);
+    }
+    progressEl.style.display = 'none';
+    audioGenerating = false;
+  }
+
+  async function generateAllSfx() {
+    if (audioGenerating) return;
+    audioGenerating = true;
+    var progressEl = document.getElementById('admin-audio-progress');
+    var progressText = document.getElementById('admin-audio-progress-text');
+    progressEl.style.display = 'block';
+
+    var names = ElevenAudio.SFX_NAMES;
+    for (var i = 0; i < names.length; i++) {
+      progressText.textContent = 'Generating SFX: ' + names[i] + ' (' + (i + 1) + '/' + names.length + ')...';
+      await generateSingleAudioAsync('sfx', names[i]);
+    }
+    progressEl.style.display = 'none';
+    audioGenerating = false;
+  }
+
+  function generateSingleAudioAsync(type, name) {
+    var btn = document.getElementById('btn-gen-' + type + '-' + name);
+    var statusEl = document.getElementById('audio-status-' + type + '-' + name);
+    if (btn) { btn.textContent = '...'; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.4'; }
+    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.style.color = 'var(--neon-yellow)'; }
+
+    var url = type === 'music' ? '/api/music' : '/api/sfx';
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name }),
+      signal: AbortSignal.timeout(300000)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        if (statusEl) { statusEl.textContent = formatFileSize(data.meta.size_bytes); statusEl.style.color = 'var(--neon-green)'; }
+        if (btn) { btn.textContent = 'Regen'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
+        return ElevenAudio._fetchAudio('/api/' + type + '?name=' + name).then(function(buf) {
+          if (buf) {
+            if (type === 'music') ElevenAudio.music[name] = buf;
+            else ElevenAudio.sfx[name] = buf;
+          }
+        });
+      } else {
+        if (statusEl) { statusEl.textContent = data.error || 'Failed'; statusEl.style.color = 'var(--neon-pink)'; }
+        if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
+      }
+    })
+    .catch(function() {
+      if (statusEl) { statusEl.textContent = 'Error'; statusEl.style.color = 'var(--neon-pink)'; }
+      if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
+    });
   }
 
   // ═══════════════════════════════════════
@@ -4049,6 +4378,8 @@
   restoreLang();
   loadLifetimeStats();
   loadAchievements();
+  // Load cached ElevenLabs audio assets (non-blocking)
+  ElevenAudio.loadAll();
 </script>
 
 </body>
