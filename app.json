@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Frenchie Trivia",
+    "slug": "frenchie-trivia",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "frenchietrivia",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1035"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.frenchietrivia.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1a1035"
+      },
+      "package": "com.frenchietrivia.app",
+      "versionCode": 1
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      },
+      "firebaseApiKey": "YOUR_FIREBASE_API_KEY",
+      "firebaseAuthDomain": "YOUR_PROJECT.firebaseapp.com",
+      "firebaseProjectId": "YOUR_PROJECT_ID",
+      "apiBaseUrl": "https://frenchie-trivia-api.YOUR_SUBDOMAIN.workers.dev"
+    }
+  }
+}

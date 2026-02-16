@@ -1,0 +1,31 @@
+name = "frenchie-trivia-api"
+main = "src/index.ts"
+compatibility_date = "2026-02-13"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "frenchie-trivia-db"
+database_id = "" # Run: wrangler d1 create frenchie-trivia-db
+
+# KV Namespace (caching)
+[[kv_namespaces]]
+binding = "CACHE"
+id = "" # Run: wrangler kv namespace create CACHE
+
+# R2 Bucket (audio files)
+[[r2_buckets]]
+binding = "AUDIO"
+bucket_name = "frenchie-trivia-audio"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+CORS_ORIGIN = "*"
+
+# Secrets (set via: wrangler secret put SECRET_NAME)
+# JWT_SECRET
+# UPSTASH_REDIS_REST_URL
+# UPSTASH_REDIS_REST_TOKEN
+# FIREBASE_PROJECT_ID
