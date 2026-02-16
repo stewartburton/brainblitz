@@ -8,7 +8,7 @@ var TRACK_CONFIGS = {
     label: 'Title Screen'
   },
   game: {
-    prompt: 'Tense electronic quiz show music with driving beat and pulsing synthesizers, 115 BPM. Dark cyberpunk atmosphere that builds intensity. Urgent staccato synths, deep bass pulses, escalating pressure. Tron soundtrack meets game show suspense.',
+    prompt: 'Energetic electronic quiz show background music with a driving beat and pulsing synthesizers, 115 BPM. Neon cyberpunk atmosphere with building excitement. Staccato synth melodies, deep bass grooves, rising anticipation. Retro-futuristic game show soundtrack, instrumental.',
     duration_ms: 60000,
     label: 'Game'
   },
