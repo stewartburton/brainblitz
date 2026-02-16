@@ -4010,13 +4010,15 @@
           }
         });
       } else {
-        if (statusEl) { statusEl.textContent = data.error || 'Failed'; statusEl.style.color = 'var(--neon-pink)'; }
+        var errMsg = data.error || 'Failed';
+        if (data.detail) errMsg += ': ' + (typeof data.detail === 'string' ? data.detail.substring(0, 120) : JSON.stringify(data.detail).substring(0, 120));
+        if (statusEl) { statusEl.textContent = errMsg; statusEl.style.color = 'var(--neon-pink)'; }
         if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
       }
     })
     .catch(function(e) {
       audioGenerating = false;
-      if (statusEl) { statusEl.textContent = 'Error'; statusEl.style.color = 'var(--neon-pink)'; }
+      if (statusEl) { statusEl.textContent = 'Error: ' + (e.message || 'Unknown'); statusEl.style.color = 'var(--neon-pink)'; }
       if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
     });
   }
@@ -4078,12 +4080,14 @@
           }
         });
       } else {
-        if (statusEl) { statusEl.textContent = data.error || 'Failed'; statusEl.style.color = 'var(--neon-pink)'; }
+        var errMsg2 = data.error || 'Failed';
+        if (data.detail) errMsg2 += ': ' + (typeof data.detail === 'string' ? data.detail.substring(0, 120) : JSON.stringify(data.detail).substring(0, 120));
+        if (statusEl) { statusEl.textContent = errMsg2; statusEl.style.color = 'var(--neon-pink)'; }
         if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
       }
     })
-    .catch(function() {
-      if (statusEl) { statusEl.textContent = 'Error'; statusEl.style.color = 'var(--neon-pink)'; }
+    .catch(function(e2) {
+      if (statusEl) { statusEl.textContent = 'Error: ' + (e2.message || 'Unknown'); statusEl.style.color = 'var(--neon-pink)'; }
       if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
     });
   }

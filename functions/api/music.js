@@ -95,7 +95,7 @@ export async function onRequestPost(context) {
     var config = TRACK_CONFIGS[name];
     var prompt = customPrompt || config.prompt;
 
-    var res = await fetch('https://api.elevenlabs.io/v1/music/stream?output_format=mp3_44100_128', {
+    var res = await fetch('https://api.elevenlabs.io/v1/music?output_format=mp3_44100_128', {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
