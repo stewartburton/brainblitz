@@ -3,11 +3,13 @@
 ## [5.0.0] - 2026-02-16
 
 ### New Features
-- **ElevenLabs Music integration**: Replace synthesized music with AI-generated tracks via ElevenLabs Music API. 4 tracks: title (60s chill lo-fi), game (60s tense electronic), victory (30s triumphant), draw (30s ambient). Cached in Cloudflare KV.
+- **ElevenLabs Music integration**: Replace synthesized music with AI-generated tracks via ElevenLabs Music API. 4 tracks: title (60s chill lo-fi), game (60s energetic electronic), victory (30s triumphant), draw (30s ambient). Cached in Cloudflare KV.
 - **ElevenLabs Sound Effects**: Replace synthesized SFX with AI-generated sound effects via ElevenLabs SFX API. 12 effects: correct, wrong, tick, countdown, start, click, whoosh, victory fanfare, draw tone, crowd cheer, achievement, streak fire. Cached in KV.
 - **Graceful fallback**: All ElevenLabs audio falls back to existing Web Audio API synthesis when cached assets are unavailable. Game always works without generated audio.
 - **Admin audio panel**: New "Audio Assets" section in admin panel shows generation status for all music tracks and SFX, with individual "Generate" buttons and "Generate All" for batch generation.
+- **Admin cost dashboard**: Comprehensive ElevenLabs cost breakdown showing TTS, Music, and SFX usage with estimated costs in ZAR. Shows Creator plan quota usage (31 min music, 2,500s SFX).
 - **Auto-loading**: Cached audio assets load automatically on page start (non-blocking). New assets available immediately after generation without page reload.
+- **Local audio assets**: Generated music and SFX saved to `assets/music/` and `assets/sfx/` as MP3 files for backup.
 
 ### Infrastructure
 - Added `functions/api/music.js` — generate + cache music tracks via ElevenLabs Music API (`music_v1` model, instrumental, mp3_44100_128)

@@ -26,10 +26,10 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 - **Difficulty scaling** — Questions tagged easy/medium/hard; harder questions earn more points
 - **Answer cascade** — Wrong answers grey out one-by-one before revealing the correct answer
 - **Achievements** — 15 unlockable badges per player, persisted in KV with toast notifications
-- **Admin panel** — PIN-locked admin settings with ElevenLabs cost summary and language toggle
+- **Admin panel** — PIN-locked admin settings with ElevenLabs cost dashboard (TTS, Music, SFX), audio asset management, and language toggle
 - **Bilingual** — Switch between South African English and Afrikaans in admin settings
 - **Polish** — Score pop animation, timer danger pulse, particle bursts, turn switch countdown, screen transitions
-- **TTS cost tracking** — Character usage tracked in KV, check via `GET /api/tts-usage`
+- **Cost tracking** — TTS character usage, Music generation (vs 31 min Creator quota), and SFX generation (vs 2,500s quota) tracked with estimated ZAR costs in admin panel
 
 ## How to Play on Your LG TV
 
@@ -88,6 +88,16 @@ The same `ELEVENLABS_API_KEY` powers AI-generated music and sound effects. With 
 ```
 brainblitz/
 ├── index.html              # The entire game (HTML + CSS + JS)
+├── assets/
+│   ├── music/              # Generated ElevenLabs music tracks (MP3)
+│   │   ├── title.mp3       # Title screen (60s chill lo-fi)
+│   │   ├── game.mp3        # Gameplay (60s energetic electronic)
+│   │   ├── victory.mp3     # Winner celebration (30s triumphant)
+│   │   └── draw.mp3        # Draw result (30s ambient)
+│   └── sfx/                # Generated ElevenLabs sound effects (MP3)
+│       ├── correct.mp3     # Correct answer chime
+│       ├── wrong.mp3       # Wrong answer buzzer
+│       └── ...             # 10 more effects (tick, countdown, start, etc.)
 ├── functions/
 │   └── api/
 │       ├── _middleware.js   # CORS headers for API routes
