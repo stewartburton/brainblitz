@@ -789,21 +789,26 @@
   /* ─── MOBILE DEVICES (phones) ─── */
   @media (max-width: 768px) {
     html, body {
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       cursor: default;
       min-height: 100vh;
       min-height: 100dvh;
-      height: 100%;
+      height: auto;
     }
 
     .screen {
-      padding: 24px 16px;
-      padding-top: max(40px, env(safe-area-inset-top, 40px));
-      padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom, 0px)));
+      position: relative;
+      padding: 20px 14px;
+      padding-top: max(20px, env(safe-area-inset-top, 20px));
+      padding-bottom: max(90px, calc(90px + env(safe-area-inset-bottom, 0px)));
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       justify-content: flex-start;
+      min-height: 100vh;
+      min-height: 100dvh;
+      height: auto;
     }
 
     /* ── Title Screen ── */
@@ -854,23 +859,36 @@
 
     /* ── Game HUD ── */
     .game-hud {
-      flex-wrap: wrap;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 4px 8px;
       padding: 0 4px;
-      margin-bottom: 12px;
-      justify-content: center;
+      margin-bottom: 10px;
+      width: 100%;
     }
     .hud-item {
-      padding: 4px 8px;
-      min-width: auto;
-      flex: 0 0 auto;
+      padding: 4px 4px;
+      min-width: 0;
+      text-align: center;
     }
+    /* Hide "Current Player" label on mobile - name is shown in color */
+    .hud-item:nth-child(3) .hud-label { display: none; }
     .hud-label {
-      font-size: clamp(8px, 2.2vw, 12px);
-      letter-spacing: 0.1em;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .hud-value {
-      font-size: clamp(18px, 5vw, 28px);
+      font-size: clamp(16px, 4.5vw, 24px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* Scores row: span full width on second row */
+    #hud-burden-section, #hud-stu-section {
+      padding: 2px 4px;
     }
 
     /* ── Timer ── */
@@ -1026,6 +1044,18 @@
       right: 14px;
     }
 
+    /* ── Pause Toggle ── */
+    .pause-toggle {
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+      bottom: 14px;
+      right: 62px;
+    }
+    .pause-overlay-title {
+      font-size: clamp(28px, 8vw, 50px);
+    }
+
     /* ── Admin Gear ── */
     .admin-gear {
       width: 42px;
@@ -1050,11 +1080,14 @@
 
     /* ── Difficulty ── */
     .difficulty-badge {
-      font-size: clamp(9px, 2.5vw, 14px);
-      padding: 3px 10px;
+      font-size: 9px;
+      padding: 2px 8px;
     }
     .difficulty-stars {
-      font-size: clamp(10px, 3vw, 16px);
+      font-size: 10px;
+    }
+    #hud-difficulty-section .hud-label {
+      display: none;
     }
 
     /* ── Loading ── */
@@ -1210,35 +1243,40 @@
 
   /* ─── MOBILE: Override inline flex layouts ─── */
   @media (max-width: 768px) {
+    /* ANY btn-group with inline row direction should stack on mobile */
+    .btn-group[style*="flex-direction:row"],
+    .btn-group[style*="flex-direction: row"] {
+      flex-direction: column !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      padding: 0 10px !important;
+    }
     /* Results screen: stack player columns vertically */
-    #screen-results > div[style*="display: flex"][style*="gap: 80px"] {
+    #screen-results > div[style*="display: flex"][style*="gap: 80px"],
+    #screen-results > div[style*="display: flex"][style*="gap:80px"] {
       flex-direction: column !important;
       gap: 30px !important;
       align-items: center !important;
-    }
-    /* Results buttons: stack and center */
-    #screen-results .btn-group {
-      flex-direction: column !important;
-      gap: 14px !important;
-      align-items: stretch !important;
+      width: 100% !important;
     }
     /* Error buttons */
-    #screen-error .btn-group {
+    #screen-error .btn-group[style] {
       flex-direction: column !important;
       gap: 14px !important;
       align-items: stretch !important;
     }
-    /* Settings Back/Play buttons */
-    #screen-settings .btn-group {
+    /* Title screen buttons */
+    #screen-title .btn-group[style] {
       flex-direction: column !important;
       gap: 14px !important;
       align-items: stretch !important;
+      padding: 0 20px !important;
     }
-    /* Title screen buttons wrap nicely */
-    #screen-title .btn-group {
-      flex-direction: column !important;
-      gap: 14px !important;
-      align-items: stretch !important;
+    /* Buttons inside mobile stacked groups */
+    .btn-group[style] .btn {
+      min-width: unset !important;
+      width: 100% !important;
     }
     /* Lifetime wins display */
     #lifetime-wins {
@@ -1344,6 +1382,77 @@
   .music-toggle.muted {
     color: rgba(255, 255, 255, 0.25);
     border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ─── PAUSE BUTTON ─── */
+  .pause-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 80px;
+    z-index: 20;
+    background: rgba(15, 15, 40, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: var(--neon-cyan);
+    font-size: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+  }
+  .pause-toggle.visible {
+    display: flex;
+  }
+  .pause-toggle:hover, .pause-toggle:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    outline: none;
+  }
+  .pause-toggle.paused {
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+    box-shadow: 0 0 15px rgba(255, 230, 0, 0.3);
+  }
+
+  /* ─── PAUSE OVERLAY ─── */
+  .pause-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 18;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10, 10, 26, 0.92);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .pause-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .pause-overlay-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(40px, 8vw, 80px);
+    font-weight: 900;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 40px rgba(255, 230, 0, 0.4);
+    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+  }
+  .pause-overlay-sub {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 3vw, 22px);
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+  }
+  .pause-overlay .btn-group {
+    gap: 20px;
   }
 
   .screen-title {
@@ -2030,6 +2139,19 @@
 
 <!-- Music mute toggle -->
 <button id="music-toggle" class="music-toggle" onclick="toggleMusic()">&#128266;</button>
+
+<!-- Pause toggle (visible during game) -->
+<button id="pause-toggle" class="pause-toggle" onclick="togglePause()" title="Pause">&#9208;</button>
+
+<!-- Pause overlay -->
+<div id="pause-overlay" class="pause-overlay">
+  <div class="pause-overlay-title">PAUSED</div>
+  <div class="pause-overlay-sub">Game paused, boet</div>
+  <div class="btn-group">
+    <button class="btn" onclick="togglePause()">Resume</button>
+    <button class="btn pink" onclick="quitFromPause()">Quit Game</button>
+  </div>
+</div>
 
 <script>
   // ═══════════════════════════════════════
@@ -3055,6 +3177,8 @@
   let answered = false;
   let gameLoading = false;
   let ttsPlaying = false;
+  let isPaused = false;
+  let pauseTimeLeft = 0;
 
   // ── Cascade state (to track ongoing cascade animations) ──
   let cascadeInProgress = false;
@@ -3116,6 +3240,15 @@
     // Clear tension state when leaving game
     if (id !== 'game') {
       clearTension();
+      // Hide pause button and close pause overlay when leaving game
+      document.getElementById('pause-toggle').classList.remove('visible', 'paused');
+      document.getElementById('pause-toggle').innerHTML = '&#9208;';
+      document.getElementById('pause-overlay').classList.remove('show');
+      isPaused = false;
+    }
+    if (id === 'game') {
+      // Show pause button during gameplay
+      document.getElementById('pause-toggle').classList.add('visible');
     }
     // Reset PIN entry when entering pin screen
     if (id === 'pin') {
@@ -3514,6 +3647,136 @@
   }
 
   // =======================================
+  //  PAUSE / RESUME
+  // =======================================
+  function togglePause() {
+    if (isPaused) {
+      resumeGame();
+    } else {
+      pauseGame();
+    }
+  }
+
+  function pauseGame() {
+    if (isPaused || answered) return;
+    isPaused = true;
+    pauseTimeLeft = timeLeft;
+
+    // Stop the timer
+    if (timerRAF) { cancelAnimationFrame(timerRAF); timerRAF = null; }
+
+    // Freeze the CSS timer bar animation
+    var fill = document.getElementById('timer-fill');
+    var computed = window.getComputedStyle(fill);
+    var currentTransform = computed.transform || computed.webkitTransform || 'scaleX(1)';
+    fill.classList.remove('timer-running', 'timer-pulse', 'timer-pulse-tense');
+    fill.style.animation = 'none';
+    fill.style.transform = currentTransform;
+
+    // Mute music
+    if (Music.masterGain && Music.playing) {
+      try { Music.masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05); } catch(e) {}
+    }
+
+    // Show pause overlay and update button
+    document.getElementById('pause-overlay').classList.add('show');
+    var btn = document.getElementById('pause-toggle');
+    btn.classList.add('paused');
+    btn.innerHTML = '&#9654;'; // play icon
+  }
+
+  function resumeGame() {
+    if (!isPaused) return;
+    isPaused = false;
+
+    // Hide pause overlay and update button
+    document.getElementById('pause-overlay').classList.remove('show');
+    var btn = document.getElementById('pause-toggle');
+    btn.classList.remove('paused');
+    btn.innerHTML = '&#9208;'; // pause icon
+
+    // Restore music
+    if (Music.masterGain && Music.playing && !musicMuted) {
+      try { Music.masterGain.gain.setTargetAtTime(0.15, audioCtx.currentTime, 0.05); } catch(e) {}
+    }
+
+    // Restart timer from where we left off
+    timeLeft = pauseTimeLeft;
+    prevTimeLeft = pauseTimeLeft;
+    var fill = document.getElementById('timer-fill');
+    var pct = pauseTimeLeft / settings.timer;
+
+    // Reset CSS animation to continue from current position
+    fill.classList.remove('timer-running', 'timer-pulse', 'timer-pulse-tense', 'danger');
+    fill.style.animation = 'none';
+    fill.style.transform = 'scaleX(' + pct + ')';
+    void fill.offsetHeight; // force reflow
+
+    // Set new duration for remaining time
+    fill.style.setProperty('--timer-duration', pauseTimeLeft + 's');
+    fill.style.animation = '';
+    fill.style.transform = '';
+
+    // Determine which class to add based on remaining time
+    var remainingPct = (pauseTimeLeft / settings.timer) * 100;
+    if (remainingPct < 30) {
+      fill.classList.add('danger');
+      var isTense = document.querySelector('.bg-glow.tense');
+      fill.classList.add(isTense ? 'timer-pulse-tense' : 'timer-pulse');
+    } else {
+      fill.classList.add('timer-running');
+    }
+
+    // Restart the rAF timer loop
+    var startTime = Date.now();
+    var dangerTriggered = remainingPct < 30;
+
+    function timerTick() {
+      if (isPaused) return;
+      var elapsed = (Date.now() - startTime) / 1000;
+      timeLeft = Math.max(0, pauseTimeLeft - elapsed);
+      var pct = (timeLeft / settings.timer) * 100;
+
+      if (pct < 30 && !dangerTriggered) {
+        dangerTriggered = true;
+        fill.classList.add('danger');
+        var isTense = document.querySelector('.bg-glow.tense');
+        fill.classList.remove('timer-running');
+        fill.classList.add(isTense ? 'timer-pulse-tense' : 'timer-pulse');
+      }
+
+      if (timeLeft <= 3 && timeLeft > 0 && Math.floor(prevTimeLeft) !== Math.floor(timeLeft)) {
+        sfxCountdown();
+      }
+      prevTimeLeft = timeLeft;
+      Music.setIntensity(1 - (timeLeft / settings.timer));
+      checkTension();
+
+      if (timeLeft <= 0) {
+        timerRAF = null;
+        fill.classList.remove('timer-running', 'timer-pulse', 'timer-pulse-tense');
+        if (!answered) timeUp();
+        return;
+      }
+
+      timerRAF = requestAnimationFrame(timerTick);
+    }
+
+    timerRAF = requestAnimationFrame(timerTick);
+  }
+
+  function quitFromPause() {
+    isPaused = false;
+    document.getElementById('pause-overlay').classList.remove('show');
+    var btn = document.getElementById('pause-toggle');
+    btn.classList.remove('paused');
+    btn.innerHTML = '&#9208;';
+    btn.classList.remove('visible');
+    if (timerRAF) { cancelAnimationFrame(timerRAF); timerRAF = null; }
+    showScreen('title');
+  }
+
+  // =======================================
   //  ANSWER CASCADE ANIMATION
   // =======================================
   // Reveals answers one-by-one for dramatic effect.
@@ -3586,7 +3849,7 @@
   //  SELECT ANSWER (cascade + difficulty)
   // =======================================
   function selectAnswer(btn) {
-    if (answered || ttsPlaying) return;
+    if (answered || ttsPlaying || isPaused) return;
     answered = true;
     stopQuestionTimer();
     ensureAudio();
@@ -4809,7 +5072,19 @@
     // LG Back button (keyCode 461) or Escape
     if (e.keyCode === 461 || key === 'GoBack' || key === 'Escape') {
       e.preventDefault();
+      // If in game, toggle pause instead of going back
+      const gameActive = document.getElementById('screen-game').classList.contains('active');
+      if (gameActive) {
+        togglePause();
+        return;
+      }
       handleBack();
+      return;
+    }
+
+    // P key to toggle pause during game
+    if (key.toUpperCase() === 'P' && document.getElementById('screen-game').classList.contains('active')) {
+      togglePause();
       return;
     }
 
@@ -4845,7 +5120,7 @@
     const upperKey = key.toUpperCase();
     if (['A','B','C','D'].includes(upperKey) && document.getElementById('screen-game').classList.contains('active')) {
       const idx = upperKey.charCodeAt(0) - 65;
-      if (!answered && !ttsPlaying) {
+      if (!answered && !ttsPlaying && !isPaused) {
         const btn = document.querySelector('.answer-btn[data-index="' + idx + '"]');
         if (btn) selectAnswer(btn);
       }
@@ -4875,7 +5150,7 @@
     const gameActive = document.getElementById('screen-game').classList.contains('active');
 
     // Navigate 2x2 answer grid during game
-    if (gameActive && !answered && !ttsPlaying) {
+    if (gameActive && !answered && !ttsPlaying && !isPaused) {
       const btns = [].slice.call(document.querySelectorAll('#answers-grid .answer-btn'));
       const idx = btns.indexOf(active);
       if (idx === -1) { if (btns[0]) btns[0].focus(); return; }
