@@ -15,6 +15,8 @@ import { useRouter } from 'expo-router';
 import { useGameStore } from '@/hooks/useGameStore';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { formatScore, calculateAccuracy, formatTime } from '@/utils/scoring';
+import { ShareCard } from '@/components/ui/ShareCard';
+import { CATEGORY_LABELS } from '@/utils/constants';
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -183,6 +185,32 @@ export default function ResultsScreen() {
               </Text>
             </View>
           ))}
+        </View>
+
+        {/* Share Card */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+          <Text
+            style={{
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: 13,
+              fontWeight: '600',
+              marginBottom: 10,
+              letterSpacing: 1,
+            }}
+          >
+            SHARE YOUR SCORE
+          </Text>
+          <ShareCard
+            score={score}
+            correctCount={correctCount}
+            totalRounds={config.totalRounds}
+            bestStreak={bestStreak}
+            category={
+              config.category === 'all'
+                ? 'All Categories'
+                : CATEGORY_LABELS[config.category] || config.category
+            }
+          />
         </View>
 
         {/* Action Buttons */}

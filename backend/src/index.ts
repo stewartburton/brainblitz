@@ -426,7 +426,172 @@ app.patch('/profile', async (c) => {
   return c.json({ success: true, data: user });
 });
 
+// --- DAILY CHALLENGE: Get today's challenge ---
+app.get('/daily-challenge', async (c) => {
+  const today = getTodayKey();
+
+  // Check if daily challenge exists for today
+  let challengeRow = await c.env.DB.prepare(
+    'SELECT question_ids FROM daily_challenges WHERE date = ?'
+  ).bind(today).first<{ question_ids: string }>();
+
+  if (!challengeRow) {
+    // Generate today's challenge: 10 random mixed-difficulty questions
+    const { results: allQuestions } = await c.env.DB.prepare(
+      'SELECT id, difficulty FROM questions WHERE is_active = 1 ORDER BY RANDOM() LIMIT 30'
+    ).all<{ id: number; difficulty: string }>();
+
+    if (!allQuestions || allQuestions.length < 10) {
+      return c.json({ success: false, error: { code: 'NO_QUESTIONS', message: 'Not enough questions for daily challenge' } }, 500);
+    }
+
+    // Pick 3 easy, 4 medium, 3 hard
+    const easy = allQuestions.filter(q => q.difficulty === 'easy').slice(0, 3);
+    const medium = allQuestions.filter(q => q.difficulty === 'medium').slice(0, 4);
+    const hard = allQuestions.filter(q => q.difficulty === 'hard').slice(0, 3);
+    let selected = [...easy, ...medium, ...hard];
+
+    // Fill if we don't have enough of each difficulty
+    if (selected.length < 10) {
+      const remaining = allQuestions.filter(q => !selected.includes(q));
+      selected.push(...remaining.slice(0, 10 - selected.length));
+    }
+
+    const questionIds = selected.slice(0, 10).map(q => q.id);
+
+    await c.env.DB.prepare(
+      'INSERT INTO daily_challenges (date, question_ids) VALUES (?, ?)'
+    ).bind(today, JSON.stringify(questionIds)).run();
+
+    challengeRow = { question_ids: JSON.stringify(questionIds) };
+  }
+
+  // Fetch the full questions
+  const questionIds: number[] = JSON.parse(challengeRow.question_ids);
+  const placeholders = questionIds.map(() => '?').join(',');
+  const { results: questions } = await c.env.DB.prepare(
+    `SELECT * FROM questions WHERE id IN (${placeholders})`
+  ).bind(...questionIds).all<QuestionRow>();
+
+  // Sort questions to match the original order
+  const idOrder = new Map(questionIds.map((id, i) => [id, i]));
+  const sorted = (questions || []).sort((a, b) => (idOrder.get(a.id) || 0) - (idOrder.get(b.id) || 0));
+
+  const formatted = sorted.map(q => ({
+    id: String(q.id),
+    category: q.category,
+    difficulty: q.difficulty,
+    question: q.question,
+    correctAnswer: q.correct_answer,
+    incorrectAnswers: [q.incorrect_answer_1, q.incorrect_answer_2, q.incorrect_answer_3].filter(Boolean),
+    explanation: q.explanation,
+    funFact: q.fun_fact,
+    isPremium: false,
+  }));
+
+  return c.json({ success: true, data: { date: today, questions: formatted } });
+});
+
+// --- DAILY CHALLENGE: Submit score ---
+app.post('/daily-challenge/score', async (c) => {
+  const auth = await requireAuth(c);
+  if (auth instanceof Response) return auth;
+
+  const { score, timeTaken, correctCount } = await c.req.json();
+  const today = getTodayKey();
+
+  // Check if already submitted today
+  const existing = await c.env.DB.prepare(
+    'SELECT id FROM daily_challenge_scores WHERE user_id = ? AND challenge_date = ?'
+  ).bind(auth.userId, today).first();
+
+  if (existing) {
+    return c.json({ success: false, error: { code: 'ALREADY_PLAYED', message: 'You already completed today\'s challenge' } }, 409);
+  }
+
+  // Insert score
+  await c.env.DB.prepare(
+    'INSERT INTO daily_challenge_scores (user_id, challenge_date, score, time_taken, correct_count) VALUES (?, ?, ?, ?, ?)'
+  ).bind(auth.userId, today, score, timeTaken, correctCount).run();
+
+  // Update Redis daily leaderboard
+  try {
+    const redis = getRedis(c.env);
+    await redis.zadd(`lb:daily:${today}`, { score, member: auth.userId });
+    await redis.expire(`lb:daily:${today}`, 2 * 24 * 60 * 60); // 2 days TTL
+
+    const rank = await redis.zrevrank(`lb:daily:${today}`, auth.userId);
+    return c.json({ success: true, data: { rank: rank !== null ? rank + 1 : null } });
+  } catch {
+    return c.json({ success: true, data: { rank: null } });
+  }
+});
+
+// --- ACHIEVEMENTS: Get user achievements ---
+app.get('/achievements', async (c) => {
+  const auth = await requireAuth(c);
+  if (auth instanceof Response) return auth;
+
+  const { results: allAchievements } = await c.env.DB.prepare(
+    'SELECT * FROM achievements ORDER BY category'
+  ).all<{ id: string; name: string; description: string; icon: string; category: string; is_secret: number }>();
+
+  const { results: earned } = await c.env.DB.prepare(
+    'SELECT achievement_id, earned_at FROM user_achievements WHERE user_id = ?'
+  ).bind(auth.userId).all<{ achievement_id: string; earned_at: string }>();
+
+  const earnedMap = new Map((earned || []).map(e => [e.achievement_id, e.earned_at]));
+
+  const achievements = (allAchievements || []).map(a => ({
+    id: a.id,
+    name: a.name,
+    description: a.description,
+    icon: a.icon,
+    category: a.category,
+    isSecret: a.is_secret === 1,
+    earnedAt: earnedMap.get(a.id) || null,
+    isEarned: earnedMap.has(a.id),
+  }));
+
+  return c.json({
+    success: true,
+    data: {
+      total: allAchievements?.length || 0,
+      earned: earned?.length || 0,
+      achievements,
+    },
+  });
+});
+
+// --- ACHIEVEMENTS: Award achievement ---
+app.post('/achievements', async (c) => {
+  const auth = await requireAuth(c);
+  if (auth instanceof Response) return auth;
+
+  const { achievementIds } = await c.req.json();
+  if (!Array.isArray(achievementIds) || achievementIds.length === 0) {
+    return c.json({ success: true, data: { awarded: [] } });
+  }
+
+  const awarded: string[] = [];
+
+  for (const achievementId of achievementIds) {
+    try {
+      await c.env.DB.prepare(
+        'INSERT OR IGNORE INTO user_achievements (user_id, achievement_id) VALUES (?, ?)'
+      ).bind(auth.userId, achievementId).run();
+      awarded.push(achievementId);
+    } catch {}
+  }
+
+  return c.json({ success: true, data: { awarded } });
+});
+
 // --- Helpers ---
+
+function getTodayKey(): string {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+}
 
 function getWeekKey(): string {
   const now = new Date();

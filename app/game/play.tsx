@@ -1,9 +1,9 @@
 // ============================================================
 // Frenchie Trivia — Game Play Screen
-// The core trivia gameplay experience
+// The core trivia gameplay experience with haptics & countdown
 // ============================================================
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { View, Text, SafeAreaView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '@/hooks/useGameStore';
@@ -12,10 +12,21 @@ import { AnswerButton } from '@/components/game/AnswerButton';
 import { TimerBar } from '@/components/game/TimerBar';
 import { ScoreHUD } from '@/components/game/ScoreHUD';
 import { FeedbackOverlay } from '@/components/game/FeedbackOverlay';
+import { CountdownOverlay } from '@/components/game/CountdownOverlay';
+import {
+  hapticTap,
+  hapticSuccess,
+  hapticError,
+  hapticWarning,
+  hapticStreakCelebration,
+} from '@/utils/haptics';
+import { soundManager } from '@/utils/soundManager';
 
 export default function PlayScreen() {
   const router = useRouter();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastWarningTime = useRef<number>(999);
+  const [showCountdown, setShowCountdown] = useState(true);
 
   const {
     phase,
@@ -56,9 +67,45 @@ export default function PlayScreen() {
     };
   }, [phase]);
 
+  // Haptic warning when timer hits 5s and 3s
+  useEffect(() => {
+    if (phase === 'playing') {
+      if (timeLeft <= 3 && lastWarningTime.current > 3) {
+        hapticWarning();
+        soundManager.play('timer_warning');
+      } else if (timeLeft <= 5 && lastWarningTime.current > 5) {
+        hapticWarning();
+      }
+      lastWarningTime.current = timeLeft;
+    } else {
+      lastWarningTime.current = 999;
+    }
+  }, [timeLeft, phase]);
+
+  // Haptic feedback on answer reveal
+  useEffect(() => {
+    if (phase === 'answered' && selectedAnswerIndex !== null && currentQuestion) {
+      const isCorrect = selectedAnswerIndex === currentQuestion.correctIndex;
+      if (isCorrect) {
+        hapticSuccess();
+        soundManager.play('correct');
+        if (streak >= 5) {
+          hapticStreakCelebration(streak);
+          soundManager.play('mega_streak');
+        } else if (streak >= 3) {
+          soundManager.play('streak');
+        }
+      } else {
+        hapticError();
+        soundManager.play(selectedAnswerIndex === -1 ? 'timeout' : 'wrong');
+      }
+    }
+  }, [phase]);
+
   // Navigate to results when game ends
   useEffect(() => {
     if (phase === 'results') {
+      soundManager.play('game_over');
       router.replace('/game/results');
     }
   }, [phase]);
@@ -66,6 +113,7 @@ export default function PlayScreen() {
   const handleAnswer = useCallback(
     (index: number) => {
       if (phase === 'playing') {
+        hapticTap();
         selectAnswer(index);
       }
     },
@@ -81,39 +129,13 @@ export default function PlayScreen() {
     router.back();
   }, [resetGame, router]);
 
-  // Countdown phase
-  if (phase === 'countdown') {
+  // Countdown phase — show animated 3-2-1-🐾
+  if (phase === 'countdown' || showCountdown) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: '#1A1035',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ fontSize: 80, color: '#6C5CE7', fontWeight: '900' }}>
-          🐾
-        </Text>
-        <Text
-          style={{
-            fontSize: 28,
-            color: '#FFFFFF',
-            fontWeight: '800',
-            marginTop: 16,
-          }}
-        >
-          Get Ready!
-        </Text>
-        <Text
-          style={{
-            fontSize: 16,
-            color: 'rgba(255,255,255,0.5)',
-            marginTop: 8,
-          }}
-        >
-          {config.totalRounds} questions coming up...
-        </Text>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#1A1035' }}>
+        <CountdownOverlay
+          onComplete={() => setShowCountdown(false)}
+        />
       </SafeAreaView>
     );
   }

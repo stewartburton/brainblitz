@@ -96,6 +96,29 @@ CREATE TABLE IF NOT EXISTS user_achievements (
 
 CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
 
+-- Daily challenges
+CREATE TABLE IF NOT EXISTS daily_challenges (
+  date TEXT PRIMARY KEY,
+  question_ids TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Daily challenge scores
+CREATE TABLE IF NOT EXISTS daily_challenge_scores (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  challenge_date TEXT NOT NULL,
+  score INTEGER NOT NULL,
+  time_taken REAL,
+  correct_count INTEGER NOT NULL,
+  submitted_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  UNIQUE(user_id, challenge_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_scores_date ON daily_challenge_scores(challenge_date);
+CREATE INDEX IF NOT EXISTS idx_daily_scores_user ON daily_challenge_scores(user_id);
+
 -- Question version tracking (for client cache invalidation)
 CREATE TABLE IF NOT EXISTS question_versions (
   id INTEGER PRIMARY KEY CHECK(id = 1),

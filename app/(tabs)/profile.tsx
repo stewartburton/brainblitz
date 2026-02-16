@@ -11,11 +11,13 @@ import {
   Pressable,
   SafeAreaView,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { formatScore, calculateAccuracy } from '@/utils/scoring';
 import { getLevelForXp, FRENCHIE_AVATARS } from '@/utils/constants';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user } = useAuthStore();
 
   if (!user) {
@@ -152,27 +154,41 @@ export default function ProfileScreen() {
             ACHIEVEMENTS
           </Text>
 
-          <View
+          <Pressable
+            onPress={() => router.push('/achievements')}
             style={{
               backgroundColor: 'rgba(30, 20, 60, 0.85)',
               borderRadius: 20,
               padding: 20,
+              flexDirection: 'row',
               alignItems: 'center',
               borderWidth: 1,
               borderColor: 'rgba(108, 92, 231, 0.3)',
             }}
           >
-            <Text style={{ fontSize: 32 }}>🏅</Text>
-            <Text
-              style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: 14,
-                marginTop: 8,
-              }}
-            >
-              Play more games to unlock achievements!
-            </Text>
-          </View>
+            <Text style={{ fontSize: 32, marginRight: 16 }}>🏅</Text>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: 16,
+                  fontWeight: '700',
+                }}
+              >
+                View All Achievements
+              </Text>
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: 13,
+                  marginTop: 2,
+                }}
+              >
+                Play more games to unlock achievements!
+              </Text>
+            </View>
+            <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }}>→</Text>
+          </Pressable>
         </View>
 
         {/* Account Section */}
@@ -239,7 +255,9 @@ export default function ProfileScreen() {
               </Text>
             </Pressable>
 
-            <Pressable style={{ padding: 16 }}>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={{ padding: 16 }}>
               <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '600' }}>
                 ⚙️ Settings
               </Text>

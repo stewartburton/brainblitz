@@ -61,19 +61,37 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 }}>
-          <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
-            Welcome back,
-          </Text>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: '800',
-              color: '#FFFFFF',
-              marginTop: 2,
-            }}
-          >
-            {user?.displayName || 'Frenchie Fan'}
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
+                Welcome back,
+              </Text>
+              <Text
+                style={{
+                  fontSize: 28,
+                  fontWeight: '800',
+                  color: '#FFFFFF',
+                  marginTop: 2,
+                }}
+              >
+                {user?.displayName || 'Frenchie Fan'}
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 4,
+              }}
+            >
+              <Text style={{ fontSize: 20 }}>⚙️</Text>
+            </Pressable>
+          </View>
           {levelInfo && (
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
               <Text style={{ color: '#6C5CE7', fontSize: 13, fontWeight: '600' }}>
@@ -82,6 +100,10 @@ export default function HomeScreen() {
               <Text style={{ color: 'rgba(255,255,255,0.3)', marginHorizontal: 8 }}>•</Text>
               <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
                 {levelInfo.title}
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.3)', marginHorizontal: 8 }}>•</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
+                {questionBank.length} questions loaded
               </Text>
             </View>
           )}
@@ -157,6 +179,44 @@ export default function HomeScreen() {
             >
               15 questions • Counts toward leaderboard
             </Text>
+          </Pressable>
+        </View>
+
+        {/* Daily Challenge Button */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
+          <Pressable
+            onPress={() => router.push('/game/daily')}
+            style={{
+              backgroundColor: 'rgba(30, 20, 60, 0.85)',
+              borderRadius: 20,
+              padding: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 2,
+              borderColor: '#00CEC9',
+            }}
+          >
+            <Text style={{ fontSize: 36, marginRight: 16 }}>📅</Text>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  color: '#00CEC9',
+                  fontSize: 18,
+                  fontWeight: '800',
+                }}
+              >
+                DAILY CHALLENGE
+              </Text>
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: 13,
+                  marginTop: 4,
+                }}
+              >
+                Same 10 questions for everyone • One attempt
+              </Text>
+            </View>
           </Pressable>
         </View>
 

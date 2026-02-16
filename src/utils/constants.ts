@@ -98,6 +98,45 @@ export const FEEDBACK_MEGA_STREAK = [
 
 // --- Avatar Options ---
 export const FRENCHIE_AVATARS = [
+
+// --- Categories ---
+export const CATEGORY_LABELS: Record<string, string> = {
+  breed_history: '📜 Breed History',
+  health_wellness: '🏥 Health & Wellness',
+  genetics_colours: '🧬 Genetics & Colours',
+  anatomy: '🐕 Anatomy',
+  personality: '🧠 Personality',
+  famous_frenchies: '⭐ Famous Frenchies',
+  puppy_care: '🍼 Puppy Care',
+  nutrition: '🦴 Nutrition',
+  training: '🎾 Training',
+  frenchie_vs_world: '🌍 Frenchie vs World',
+  pop_culture: '🎬 Pop Culture',
+  true_or_false: '✅ True or False',
+  speed_round: '⚡ Speed Round',
+  expert_only: '🎓 Expert Only',
+};
+
+export const CATEGORIES_LIST = [
+  { key: 'all', label: '🎲 All Categories', icon: '🎲' },
+  { key: 'breed_history', label: 'Breed History', icon: '📜' },
+  { key: 'health_wellness', label: 'Health & Wellness', icon: '🏥' },
+  { key: 'genetics_colours', label: 'Genetics & Colours', icon: '🧬' },
+  { key: 'anatomy', label: 'Anatomy', icon: '🐕' },
+  { key: 'personality', label: 'Personality', icon: '🧠' },
+  { key: 'famous_frenchies', label: 'Famous Frenchies', icon: '⭐' },
+  { key: 'puppy_care', label: 'Puppy Care', icon: '🍼' },
+  { key: 'nutrition', label: 'Nutrition', icon: '🦴' },
+  { key: 'training', label: 'Training', icon: '🎾' },
+  { key: 'frenchie_vs_world', label: 'Frenchie vs World', icon: '🌍' },
+  { key: 'pop_culture', label: 'Pop Culture', icon: '🎬' },
+  { key: 'true_or_false', label: 'True or False', icon: '✅' },
+  { key: 'speed_round', label: 'Speed Round', icon: '⚡' },
+  { key: 'expert_only', label: 'Expert Only', icon: '🎓' },
+];
+
+// --- Avatar Options ---
+export const FRENCHIE_AVATARS = [
   { id: 'fawn', label: 'Fawn Frenchie', emoji: '🐕' },
   { id: 'brindle', label: 'Brindle Frenchie', emoji: '🐾' },
   { id: 'pied', label: 'Pied Frenchie', emoji: '🐶' },
