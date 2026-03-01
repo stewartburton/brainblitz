@@ -219,6 +219,50 @@
     transform: scale(1.05);
   }
 
+  /* ─── NAME ENTRY SCREEN ─── */
+  .name-entry-container {
+    display: flex; gap: 60px; align-items: center; justify-content: center;
+    margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .name-entry-field {
+    display: flex; flex-direction: column; align-items: center; gap: 15px;
+  }
+  .name-entry-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 2.5vw, 28px);
+    font-weight: 700; letter-spacing: 0.1em;
+  }
+  .name-entry-input {
+    background: rgba(15, 15, 40, 0.85);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+    width: 280px;
+    max-width: 80vw;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .name-entry-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0,240,255,0.3);
+  }
+  .name-entry-input.pink-focus:focus {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 20px rgba(255,45,120,0.3);
+  }
+  .name-entry-vs {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 900;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 20px rgba(255,230,0,0.4);
+  }
+
   /* ─── GAME SCREEN ─── */
   .game-hud {
     display: flex;
@@ -277,7 +321,7 @@
     animation: turnPulse 1.5s ease infinite;
     pointer-events: none;
   }
-  .hud-item.active-turn.stu-turn::after {
+  .hud-item.active-turn.p2-turn::after {
     border-color: var(--neon-pink);
     box-shadow: 0 0 15px rgba(255,45,120,0.3);
   }
@@ -911,7 +955,7 @@
       text-overflow: ellipsis;
     }
     /* Scores row: span full width on second row */
-    #hud-burden-section, #hud-stu-section {
+    #hud-p1-section, #hud-p2-section {
       padding: 2px 4px;
     }
 
@@ -1632,12 +1676,12 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
-  .achievement-card-player.burden-badge {
+  .achievement-card-player.p1-badge {
     color: var(--neon-cyan);
     border: 1px solid rgba(0,240,255,0.3);
     background: rgba(0,240,255,0.08);
   }
-  .achievement-card-player.stu-badge {
+  .achievement-card-player.p2-badge {
     color: var(--neon-pink);
     border: 1px solid rgba(255,45,120,0.3);
     background: rgba(255,45,120,0.08);
@@ -1795,12 +1839,12 @@
   <div class="title-logo">BRAINBLITZ</div>
   <div class="title-sub">Lekker TV Trivia</div>
   <div class="btn-group btn-row btn-wrap">
-    <button class="btn" onclick="showScreen('settings')" autofocus style="min-width:260px;">Let's Play!</button>
+    <button class="btn" onclick="showScreen('names')" autofocus style="min-width:260px;">Let's Play!</button>
     <button class="btn pink" onclick="showScreen('howto')" style="min-width:220px;">How to Play</button>
     <button class="btn pink" onclick="showScreen('leaderboard')" style="min-width:220px;">Leaderboard</button>
   </div>
   <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
-    <span id="title-burden-wins">BURDEN: 0</span> &nbsp;|&nbsp; <span id="title-stu-wins">STU: 0</span>
+    <span id="title-p1-wins">Player 1: 0</span> &nbsp;|&nbsp; <span id="title-p2-wins">Player 2: 0</span>
   </div>
   <button class="admin-gear" onclick="showScreen('pin')" title="Admin" style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.1em;">ADMIN</button>
 </div>
@@ -1817,6 +1861,26 @@
     <span style="color:rgba(255,255,255,0.4); font-size:0.85em;">Dis maklik, just point and kliek!</span>
   </div>
   <button class="btn" onclick="showScreen('title')">Back</button>
+</div>
+
+<!-- ═══ NAME ENTRY SCREEN ═══ -->
+<div id="screen-names" class="screen">
+  <div class="screen-title">Who's Playing?</div>
+  <div class="name-entry-container">
+    <div class="name-entry-field">
+      <div class="name-entry-label" style="color: var(--neon-cyan);">Player 1</div>
+      <input type="text" id="name-p1" class="name-entry-input" maxlength="12" placeholder="Player 1" autocomplete="off" />
+    </div>
+    <div class="name-entry-vs">VS</div>
+    <div class="name-entry-field">
+      <div class="name-entry-label" style="color: var(--neon-pink);">Player 2</div>
+      <input type="text" id="name-p2" class="name-entry-input pink-focus" maxlength="12" placeholder="Player 2" autocomplete="off" />
+    </div>
+  </div>
+  <div class="btn-group btn-row" id="names-buttons">
+    <button class="btn pink" onclick="showScreen('title')" style="min-width:220px;">Back</button>
+    <button class="btn" onclick="confirmNames()" style="min-width:220px;">Continue</button>
+  </div>
 </div>
 
 <!-- ═══ SETTINGS SCREEN ═══ -->
@@ -1884,15 +1948,15 @@
     </div>
     <div class="hud-item">
       <div class="hud-label">Current Player</div>
-      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Burden<span id="hud-speaker" class="hud-speaker" style="display:none;">&#128264;</span></div>
+      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Player 1<span id="hud-speaker" class="hud-speaker" style="display:none;">&#128264;</span></div>
     </div>
-    <div class="hud-item" id="hud-burden-section">
-      <div class="hud-label">Burden</div>
-      <div class="hud-value score" id="hud-burden-score">0</div>
+    <div class="hud-item" id="hud-p1-section">
+      <div class="hud-label" id="hud-p1-label">Player 1</div>
+      <div class="hud-value score" id="hud-p1-score">0</div>
     </div>
-    <div class="hud-item" id="hud-stu-section">
-      <div class="hud-label">Stu</div>
-      <div class="hud-value score" id="hud-stu-score">0</div>
+    <div class="hud-item" id="hud-p2-section">
+      <div class="hud-label" id="hud-p2-label">Player 2</div>
+      <div class="hud-value score" id="hud-p2-score">0</div>
     </div>
   </div>
   <div class="timer-track">
@@ -1916,33 +1980,33 @@
   <div class="rank-text" id="res-winner" style="margin-bottom: 40px;"></div>
 
   <div class="results-columns">
-    <!-- Burden Stats -->
-    <div id="res-burden-col" class="result-column" style="text-align: center;">
-      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-cyan); margin-bottom: 10px;">BURDEN</div>
-      <div class="results-score" id="res-burden-score" style="font-size: clamp(40px, 8vw, 80px);">0</div>
+    <!-- Player 1 Stats -->
+    <div id="res-p1-col" class="result-column" style="text-align: center;">
+      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-cyan); margin-bottom: 10px;"><span id="res-p1-name">PLAYER 1</span></div>
+      <div class="results-score" id="res-p1-score" style="font-size: clamp(40px, 8vw, 80px);">0</div>
       <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
         <div class="stat-item">
-          <div class="stat-value" id="res-burden-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p1-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Correct</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="res-burden-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p1-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Best Streak</div>
         </div>
       </div>
     </div>
 
-    <!-- Stu Stats -->
-    <div id="res-stu-col" class="result-column" style="text-align: center;">
-      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-pink); margin-bottom: 10px;">STU</div>
-      <div class="results-score" id="res-stu-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+    <!-- Player 2 Stats -->
+    <div id="res-p2-col" class="result-column" style="text-align: center;">
+      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-pink); margin-bottom: 10px;"><span id="res-p2-name">PLAYER 2</span></div>
+      <div class="results-score" id="res-p2-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
       <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
         <div class="stat-item">
-          <div class="stat-value" id="res-stu-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p2-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Correct</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="res-stu-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p2-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Best Streak</div>
         </div>
       </div>
@@ -1971,24 +2035,24 @@
   <div class="screen-title">Leaderboard</div>
   <div id="lb-content" class="lb-columns">
     <div class="lb-column">
-      <div class="lb-name" style="color: var(--neon-cyan);">BURDEN</div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-wins">0</span><span class="lb-label">Wins</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-games">0</span><span class="lb-label">Games</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-draws">0</span><span class="lb-label">Draws</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-total">0</span><span class="lb-label">Total Score</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-correct">0</span><span class="lb-label">Total Correct</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-best">0</span><span class="lb-label">Best Game</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-streak">0</span><span class="lb-label">Best Streak</span></div>
+      <div class="lb-name" style="color: var(--neon-cyan);"><span id="lb-p1-name">PLAYER 1</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-wins">0</span><span class="lb-label">Wins</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-games">0</span><span class="lb-label">Games</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-draws">0</span><span class="lb-label">Draws</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-total">0</span><span class="lb-label">Total Score</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-correct">0</span><span class="lb-label">Total Correct</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-best">0</span><span class="lb-label">Best Game</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-streak">0</span><span class="lb-label">Best Streak</span></div>
     </div>
     <div class="lb-column">
-      <div class="lb-name" style="color: var(--neon-pink);">STU</div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-wins">0</span><span class="lb-label">Wins</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-games">0</span><span class="lb-label">Games</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-draws">0</span><span class="lb-label">Draws</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-total">0</span><span class="lb-label">Total Score</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-correct">0</span><span class="lb-label">Total Correct</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-best">0</span><span class="lb-label">Best Game</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-streak">0</span><span class="lb-label">Best Streak</span></div>
+      <div class="lb-name" style="color: var(--neon-pink);"><span id="lb-p2-name">PLAYER 2</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-wins">0</span><span class="lb-label">Wins</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-games">0</span><span class="lb-label">Games</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-draws">0</span><span class="lb-label">Draws</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-total">0</span><span class="lb-label">Total Score</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-correct">0</span><span class="lb-label">Total Correct</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-best">0</span><span class="lb-label">Best Game</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-streak">0</span><span class="lb-label">Best Streak</span></div>
     </div>
   </div>
   <div id="lb-no-data" class="lb-no-data" style="display:none;">No games played yet. Let's play!</div>
@@ -2133,7 +2197,7 @@
 <!-- Turn switch overlay -->
 <div class="turn-switch" id="turn-switch">
   <div class="turn-switch-label">GET READY</div>
-  <div class="turn-switch-name" id="turn-switch-name">BURDEN</div>
+  <div class="turn-switch-name" id="turn-switch-name"></div>
   <div class="turn-switch-countdown" id="turn-switch-countdown">3</div>
 </div>
 
@@ -2407,8 +2471,8 @@
       if (isTenseActive) clearTension();
       return;
     }
-    var bScore = players.burden.score;
-    var sScore = players.stu.score;
+    var bScore = players.p1.score;
+    var sScore = players.p2.score;
     var maxScore = Math.max(bScore, sScore, 1);
     var diff = Math.abs(bScore - sScore);
     var diffPct = diff / maxScore;
@@ -2417,8 +2481,8 @@
         isTenseActive = true;
         var bgGlow = document.querySelector('.bg-glow');
         if (bgGlow) bgGlow.classList.add('tense');
-        var bScoreEl = document.getElementById('hud-burden-score');
-        var sScoreEl = document.getElementById('hud-stu-score');
+        var bScoreEl = document.getElementById('hud-p1-score');
+        var sScoreEl = document.getElementById('hud-p2-score');
         if (bScoreEl) bScoreEl.classList.add('score-tense');
         if (sScoreEl) sScoreEl.classList.add('score-tense');
         if (Music.playing && Music.masterGain) {
@@ -2435,8 +2499,8 @@
     isTenseActive = false;
     var bgGlow = document.querySelector('.bg-glow');
     if (bgGlow) bgGlow.classList.remove('tense');
-    var bScoreEl = document.getElementById('hud-burden-score');
-    var sScoreEl = document.getElementById('hud-stu-score');
+    var bScoreEl = document.getElementById('hud-p1-score');
+    var sScoreEl = document.getElementById('hud-p2-score');
     if (bScoreEl) bScoreEl.classList.remove('score-tense');
     if (sScoreEl) sScoreEl.classList.remove('score-tense');
   }
@@ -3174,11 +3238,12 @@
   let currentQ = 0;
 
   // Two-player state
-  let players = {
-    burden: { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 },
-    stu: { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 }
+  var playerNames = { p1: 'Player 1', p2: 'Player 2' };
+  var players = {
+    p1: { name: 'Player 1', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 },
+    p2: { name: 'Player 2', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 }
   };
-  let currentPlayer = 'burden';
+  var currentPlayer = 'p1';
 
   let timerInterval = null;
   let timeLeft = 0;
@@ -3196,14 +3261,14 @@
   let lifetimeStats = null;
   // ── Achievement tracking state ──
   var gameTracker = {
-    answerTimes: { burden: [], stu: [] },
+    answerTimes: { p1: [], p2: [] },
     scoreDiffs: [],
     secondAnswerers: [],
-    fastAnswers: { burden: 0, stu: 0 },
-    blitzAnswers: { burden: false, stu: false },
-    previousScores: { burden: null, stu: null }
+    fastAnswers: { p1: 0, p2: 0 },
+    blitzAnswers: { p1: false, p2: false },
+    previousScores: { p1: null, p2: null }
   };
-  var achievementCache = { burden: null, stu: null };
+  var achievementCache = { p1: null, p2: null };
 
   // ═══════════════════════════════════════
   //  NAVIGATION
@@ -3235,7 +3300,7 @@
       if (confetti) confetti.innerHTML = '';
     }
     // Music transitions — title music for menu screens
-    if (['title', 'settings', 'howto', 'leaderboard', 'achievements', 'pin', 'admin'].indexOf(id) !== -1) {
+    if (['title', 'names', 'settings', 'howto', 'leaderboard', 'achievements', 'pin', 'admin'].indexOf(id) !== -1) {
       Music.title();
     }
     // Refresh stats when entering leaderboard or title
@@ -3336,6 +3401,20 @@
   }
 
   // ═══════════════════════════════════════
+  //  NAME ENTRY
+  // ═══════════════════════════════════════
+  function confirmNames() {
+    var n1 = document.getElementById('name-p1').value.trim();
+    var n2 = document.getElementById('name-p2').value.trim();
+    playerNames.p1 = n1 || 'Player 1';
+    playerNames.p2 = n2 || 'Player 2';
+    try {
+      localStorage.setItem('brainblitz_names', JSON.stringify(playerNames));
+    } catch(e) {}
+    showScreen('settings');
+  }
+
+  // ═══════════════════════════════════════
   //  GAME LOGIC
   // ═══════════════════════════════════════
   async function startGame() {
@@ -3351,26 +3430,30 @@
       voiceId = voiceSetting === 'custom' ? '5W1ijlUigww8GacnRjZV' : '21m00Tcm4TlvDq8ikWAM';
 
       // Reset both players
-      players.burden = { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
-      players.stu = { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
-      currentPlayer = 'burden';
+      players.p1 = { name: playerNames.p1, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
+      players.p2 = { name: playerNames.p2, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
+      currentPlayer = 'p1';
       currentQ = 0;
       // Reset cascade state
       cascadeInProgress = false;
 
+      // Set dynamic HUD labels
+      document.getElementById('hud-p1-label').textContent = players.p1.name;
+      document.getElementById('hud-p2-label').textContent = players.p2.name;
+
       // Reset achievement tracker for this game
-      gameTracker.answerTimes = { burden: [], stu: [] };
+      gameTracker.answerTimes = { p1: [], p2: [] };
       gameTracker.scoreDiffs = [0];
       gameTracker.secondAnswerers = [];
-      gameTracker.fastAnswers = { burden: 0, stu: 0 };
-      gameTracker.blitzAnswers = { burden: false, stu: false };
+      gameTracker.fastAnswers = { p1: 0, p2: 0 };
+      gameTracker.blitzAnswers = { p1: false, p2: false };
       // Load previous scores for "Consistent" achievement
       try {
         var prevScores = JSON.parse(localStorage.getItem('brainblitz_prev_scores') || '{}');
-        gameTracker.previousScores.burden = (prevScores.burden !== undefined) ? prevScores.burden : null;
-        gameTracker.previousScores.stu = (prevScores.stu !== undefined) ? prevScores.stu : null;
+        gameTracker.previousScores.p1 = (prevScores.p1 !== undefined) ? prevScores.p1 : null;
+        gameTracker.previousScores.p2 = (prevScores.p2 !== undefined) ? prevScores.p2 : null;
       } catch(e) {
-        gameTracker.previousScores = { burden: null, stu: null };
+        gameTracker.previousScores = { p1: null, p2: null };
       }
 
       selectQuestions();
@@ -3473,11 +3556,11 @@
     const nameEl = document.getElementById('turn-switch-name');
     const countEl = document.getElementById('turn-switch-countdown');
     const name = players[playerKey].name.toUpperCase();
-    const color = playerKey === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    const color = playerKey === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
     nameEl.textContent = name;
     nameEl.style.color = color;
-    nameEl.style.textShadow = `0 0 40px ${playerKey === 'burden' ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)'}`;
+    nameEl.style.textShadow = `0 0 40px ${playerKey === 'p1' ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)'}`;
 
     let count = 2;
     countEl.textContent = count;
@@ -3529,10 +3612,10 @@
     const playerEl = document.getElementById('hud-player');
     playerEl.innerHTML = players[currentPlayer].name +
       (voiceEnabled ? '<span id="hud-speaker" class="hud-speaker">&#128264;</span>' : '');
-    playerEl.style.color = currentPlayer === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    playerEl.style.color = currentPlayer === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
-    document.getElementById('hud-burden-score').textContent = formatScore(players.burden.score);
-    document.getElementById('hud-stu-score').textContent = formatScore(players.stu.score);
+    document.getElementById('hud-p1-score').textContent = formatScore(players.p1.score);
+    document.getElementById('hud-p2-score').textContent = formatScore(players.p2.score);
     document.getElementById('q-category').textContent = decodeHTML(q.category);
     document.getElementById('q-text').textContent = decodeHTML(q.question);
 
@@ -3540,12 +3623,12 @@
     updateDifficultyHUD(q);
 
     // Update turn indicator
-    document.getElementById('hud-burden-section').classList.remove('active-turn', 'stu-turn');
-    document.getElementById('hud-stu-section').classList.remove('active-turn', 'stu-turn');
-    if (currentPlayer === 'burden') {
-      document.getElementById('hud-burden-section').classList.add('active-turn');
+    document.getElementById('hud-p1-section').classList.remove('active-turn', 'p2-turn');
+    document.getElementById('hud-p2-section').classList.remove('active-turn', 'p2-turn');
+    if (currentPlayer === 'p1') {
+      document.getElementById('hud-p1-section').classList.add('active-turn');
     } else {
-      document.getElementById('hud-stu-section').classList.add('active-turn', 'stu-turn');
+      document.getElementById('hud-p2-section').classList.add('active-turn', 'p2-turn');
     }
 
     const grid = document.getElementById('answers-grid');
@@ -3910,18 +3993,18 @@
     }
 
     // Update HUD scores
-    updateScoreDisplay('hud-burden-score', players.burden.score);
-    updateScoreDisplay('hud-stu-score', players.stu.score);
+    updateScoreDisplay('hud-p1-score', players.p1.score);
+    updateScoreDisplay('hud-p2-score', players.p2.score);
 
     // Track data for achievements
     gameTracker.answerTimes[currentPlayer].push(elapsed);
     if (isCorrect && elapsed < 3) gameTracker.fastAnswers[currentPlayer]++;
     if (isCorrect && elapsed < 1) gameTracker.blitzAnswers[currentPlayer] = true;
-    gameTracker.scoreDiffs.push(players.burden.score - players.stu.score);
+    gameTracker.scoreDiffs.push(players.p1.score - players.p2.score);
     if (currentQ % 2 === 1) gameTracker.secondAnswerers.push(currentPlayer);
 
     // Alternate turn for the NEXT question
-    currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
+    currentPlayer = currentPlayer === 'p1' ? 'p2' : 'p1';
 
     // After feedback delay: advance to next question
     setTimeout(function() {
@@ -3946,11 +4029,11 @@
 
     // Track timeout for achievements
     gameTracker.answerTimes[currentPlayer].push(settings.timer);
-    gameTracker.scoreDiffs.push(players.burden.score - players.stu.score);
+    gameTracker.scoreDiffs.push(players.p1.score - players.p2.score);
     if (currentQ % 2 === 1) gameTracker.secondAnswerers.push(currentPlayer);
 
     // Alternate players
-    currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
+    currentPlayer = currentPlayer === 'p1' ? 'p2' : 'p1';
 
     setTimeout(function() {
       advanceAfterAnswer();
@@ -4051,40 +4134,44 @@
   function endGame() {
     stopQuestionTimer();
 
-    // Display Burden's stats
-    document.getElementById('res-burden-score').textContent = players.burden.score;
-    document.getElementById('res-burden-correct').textContent = players.burden.correctCount;
-    document.getElementById('res-burden-streak').textContent = players.burden.bestStreak;
+    // Set dynamic result screen names
+    document.getElementById('res-p1-name').textContent = players.p1.name.toUpperCase();
+    document.getElementById('res-p2-name').textContent = players.p2.name.toUpperCase();
 
-    // Display Stu's stats
-    document.getElementById('res-stu-score').textContent = players.stu.score;
-    document.getElementById('res-stu-correct').textContent = players.stu.correctCount;
-    document.getElementById('res-stu-streak').textContent = players.stu.bestStreak;
+    // Display Player 1's stats
+    document.getElementById('res-p1-score').textContent = players.p1.score;
+    document.getElementById('res-p1-correct').textContent = players.p1.correctCount;
+    document.getElementById('res-p1-streak').textContent = players.p1.bestStreak;
+
+    // Display Player 2's stats
+    document.getElementById('res-p2-score').textContent = players.p2.score;
+    document.getElementById('res-p2-correct').textContent = players.p2.correctCount;
+    document.getElementById('res-p2-streak').textContent = players.p2.bestStreak;
 
     // Reset column classes
-    const burdenCol = document.getElementById('res-burden-col');
-    const stuCol = document.getElementById('res-stu-col');
-    burdenCol.className = 'result-column';
-    stuCol.className = 'result-column';
-    burdenCol.style.textAlign = 'center';
-    stuCol.style.textAlign = 'center';
+    var p1Col = document.getElementById('res-p1-col');
+    var p2Col = document.getElementById('res-p2-col');
+    p1Col.className = 'result-column';
+    p2Col.className = 'result-column';
+    p1Col.style.textAlign = 'center';
+    p2Col.style.textAlign = 'center';
 
-    const trophy = document.getElementById('res-trophy');
+    var trophy = document.getElementById('res-trophy');
 
     // Determine winner
-    let winnerText = '';
-    if (players.burden.score > players.stu.score) {
-      winnerText = t('burdenWins');
-      burdenCol.classList.add('winner-column');
-      stuCol.classList.add('loser-column');
+    var winnerText = '';
+    if (players.p1.score > players.p2.score) {
+      winnerText = t('playerWins').replace('{name}', players.p1.name.toUpperCase());
+      p1Col.classList.add('winner-column');
+      p2Col.classList.add('loser-column');
       trophy.style.display = 'block';
       sfxVictory();
       Music.victory();
       createConfetti();
-    } else if (players.stu.score > players.burden.score) {
-      winnerText = t('stuWins');
-      stuCol.classList.add('winner-column');
-      burdenCol.classList.add('loser-column');
+    } else if (players.p2.score > players.p1.score) {
+      winnerText = t('playerWins').replace('{name}', players.p2.name.toUpperCase());
+      p2Col.classList.add('winner-column');
+      p1Col.classList.add('loser-column');
       trophy.style.display = 'block';
       sfxVictory();
       Music.victory();
@@ -4103,8 +4190,8 @@
     // Save scores for "Consistent" achievement in next game
     try {
       localStorage.setItem('brainblitz_prev_scores', JSON.stringify({
-        burden: players.burden.score,
-        stu: players.stu.score
+        p1: players.p1.score,
+        p2: players.p2.score
       }));
     } catch(e) {}
 
@@ -4119,7 +4206,8 @@
   // ═══════════════════════════════════════
   async function loadLifetimeStats() {
     try {
-      const res = await fetch('/api/scores', { signal: AbortSignal.timeout(5000) });
+      var url = '/api/scores?p1=' + encodeURIComponent(playerNames.p1) + '&p2=' + encodeURIComponent(playerNames.p2);
+      var res = await fetch(url, { signal: AbortSignal.timeout(5000) });
       if (res.ok) {
         lifetimeStats = await res.json();
         updateTitleWins();
@@ -4132,10 +4220,12 @@
 
   function updateTitleWins() {
     if (!lifetimeStats) return;
-    const bWins = (lifetimeStats.burden && lifetimeStats.burden.wins) || 0;
-    const sWins = (lifetimeStats.stu && lifetimeStats.stu.wins) || 0;
-    document.getElementById('title-burden-wins').textContent = `BURDEN: ${bWins}`;
-    document.getElementById('title-stu-wins').textContent = `STU: ${sWins}`;
+    var p1Stats = lifetimeStats.p1 || lifetimeStats.burden || {};
+    var p2Stats = lifetimeStats.p2 || lifetimeStats.stu || {};
+    var p1Wins = p1Stats.wins || 0;
+    var p2Wins = p2Stats.wins || 0;
+    document.getElementById('title-p1-wins').textContent = playerNames.p1.toUpperCase() + ': ' + p1Wins;
+    document.getElementById('title-p2-wins').textContent = playerNames.p2.toUpperCase() + ': ' + p2Wins;
     document.getElementById('lifetime-wins').style.opacity = '1';
   }
 
@@ -4146,55 +4236,60 @@
       return;
     }
 
-    const b = lifetimeStats.burden || {};
-    const s = lifetimeStats.stu || {};
+    var b = lifetimeStats.p1 || lifetimeStats.burden || {};
+    var s = lifetimeStats.p2 || lifetimeStats.stu || {};
 
-    const hasData = (b.gamesPlayed || 0) > 0 || (s.gamesPlayed || 0) > 0;
+    var hasData = (b.gamesPlayed || 0) > 0 || (s.gamesPlayed || 0) > 0;
     document.getElementById('lb-content').style.display = hasData ? 'flex' : 'none';
     document.getElementById('lb-no-data').style.display = hasData ? 'none' : 'block';
 
-    // Check if leaderboard is currently visible for counter animation
-    const isVisible = document.getElementById('screen-leaderboard').classList.contains('active');
-    const dur = isVisible ? 600 : 0;
+    // Set dynamic leaderboard names
+    document.getElementById('lb-p1-name').textContent = playerNames.p1.toUpperCase();
+    document.getElementById('lb-p2-name').textContent = playerNames.p2.toUpperCase();
 
-    const setLB = (id, val) => {
-      const el = document.getElementById(id);
+    // Check if leaderboard is currently visible for counter animation
+    var isVisible = document.getElementById('screen-leaderboard').classList.contains('active');
+    var dur = isVisible ? 600 : 0;
+
+    var setLB = function(id, val) {
+      var el = document.getElementById(id);
       if (dur > 0 && val > 0) { animateCounter(el, val, dur); }
       else { el.textContent = formatScore(val); }
     };
 
-    setLB('lb-burden-wins', b.wins || 0);
-    setLB('lb-burden-games', b.gamesPlayed || 0);
-    setLB('lb-burden-draws', b.draws || 0);
-    setLB('lb-burden-total', b.totalScore || 0);
-    setLB('lb-burden-correct', b.totalCorrect || 0);
-    setLB('lb-burden-best', b.bestGameScore || 0);
-    setLB('lb-burden-streak', b.bestStreak || 0);
+    setLB('lb-p1-wins', b.wins || 0);
+    setLB('lb-p1-games', b.gamesPlayed || 0);
+    setLB('lb-p1-draws', b.draws || 0);
+    setLB('lb-p1-total', b.totalScore || 0);
+    setLB('lb-p1-correct', b.totalCorrect || 0);
+    setLB('lb-p1-best', b.bestGameScore || 0);
+    setLB('lb-p1-streak', b.bestStreak || 0);
 
-    setLB('lb-stu-wins', s.wins || 0);
-    setLB('lb-stu-games', s.gamesPlayed || 0);
-    setLB('lb-stu-draws', s.draws || 0);
-    setLB('lb-stu-total', s.totalScore || 0);
-    setLB('lb-stu-correct', s.totalCorrect || 0);
-    setLB('lb-stu-best', s.bestGameScore || 0);
-    setLB('lb-stu-streak', s.bestStreak || 0);
+    setLB('lb-p2-wins', s.wins || 0);
+    setLB('lb-p2-games', s.gamesPlayed || 0);
+    setLB('lb-p2-draws', s.draws || 0);
+    setLB('lb-p2-total', s.totalScore || 0);
+    setLB('lb-p2-correct', s.totalCorrect || 0);
+    setLB('lb-p2-best', s.bestGameScore || 0);
+    setLB('lb-p2-streak', s.bestStreak || 0);
   }
 
   async function saveGameResult() {
-    const isDraw = players.burden.score === players.stu.score;
-    const burdenWon = players.burden.score > players.stu.score;
+    var isDraw = players.p1.score === players.p2.score;
+    var p1Won = players.p1.score > players.p2.score;
 
     try {
       await fetch('/api/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          player: 'burden',
-          won: burdenWon && !isDraw,
+          player: 'p1',
+          playerName: playerNames.p1,
+          won: p1Won && !isDraw,
           draw: isDraw,
-          score: players.burden.score,
-          correct: players.burden.correctCount,
-          bestStreak: players.burden.bestStreak
+          score: players.p1.score,
+          correct: players.p1.correctCount,
+          bestStreak: players.p1.bestStreak
         }),
         signal: AbortSignal.timeout(5000)
       });
@@ -4203,12 +4298,13 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          player: 'stu',
-          won: !burdenWon && !isDraw,
+          player: 'p2',
+          playerName: playerNames.p2,
+          won: !p1Won && !isDraw,
           draw: isDraw,
-          score: players.stu.score,
-          correct: players.stu.correctCount,
-          bestStreak: players.stu.bestStreak
+          score: players.p2.score,
+          correct: players.p2.correctCount,
+          bestStreak: players.p2.bestStreak
         }),
         signal: AbortSignal.timeout(5000)
       });
@@ -4258,7 +4354,7 @@
       description: 'Answer all questions correctly in one game',
       check: function(player, opponent, sett, stats, playerKey) {
         var totalPlayerQs = Math.ceil(sett.rounds / 2);
-        if (playerKey === 'stu') totalPlayerQs = Math.floor(sett.rounds / 2);
+        if (playerKey === 'p2') totalPlayerQs = Math.floor(sett.rounds / 2);
         return player.correctCount === totalPlayerQs && totalPlayerQs > 0;
       }
     },
@@ -4270,11 +4366,11 @@
       check: function(player, opponent, sett, stats, playerKey) {
         var won = player.score > opponent.score;
         if (!won) return false;
-        var isBurden = playerKey === 'burden';
+        var isP1 = playerKey === 'p1';
         for (var i = 0; i < gameTracker.scoreDiffs.length; i++) {
           var diff = gameTracker.scoreDiffs[i];
-          if (isBurden && diff <= -200) return true;
-          if (!isBurden && diff >= 200) return true;
+          if (isP1 && diff <= -200) return true;
+          if (!isP1 && diff >= 200) return true;
         }
         return false;
       }
@@ -4313,7 +4409,7 @@
       description: 'Win with 90%+ accuracy',
       check: function(player, opponent, sett, stats, playerKey) {
         var totalPlayerQs = Math.ceil(sett.rounds / 2);
-        if (playerKey === 'stu') totalPlayerQs = Math.floor(sett.rounds / 2);
+        if (playerKey === 'p2') totalPlayerQs = Math.floor(sett.rounds / 2);
         if (totalPlayerQs < 3) return false;
         var accuracy = player.correctCount / totalPlayerQs;
         return accuracy >= 0.9 && player.score > opponent.score;
@@ -4421,19 +4517,20 @@
 
   // Load achievements from KV for both players
   function loadAchievements(callback) {
-    fetch('/api/achievements', { signal: AbortSignal.timeout(5000) })
+    var url = '/api/achievements?p1=' + encodeURIComponent(playerNames.p1) + '&p2=' + encodeURIComponent(playerNames.p2);
+    fetch(url, { signal: AbortSignal.timeout(5000) })
       .then(function(res) {
         if (res.ok) return res.json();
         throw new Error('Failed');
       })
       .then(function(data) {
-        achievementCache.burden = data.burden || { earned: [], history: [] };
-        achievementCache.stu = data.stu || { earned: [], history: [] };
+        achievementCache.p1 = data.p1 || data.burden || { earned: [], history: [] };
+        achievementCache.p2 = data.p2 || data.stu || { earned: [], history: [] };
         if (callback) callback();
       })
       .catch(function() {
-        if (!achievementCache.burden) achievementCache.burden = { earned: [], history: [] };
-        if (!achievementCache.stu) achievementCache.stu = { earned: [], history: [] };
+        if (!achievementCache.p1) achievementCache.p1 = { earned: [], history: [] };
+        if (!achievementCache.p2) achievementCache.p2 = { earned: [], history: [] };
         if (callback) callback();
       });
   }
@@ -4441,7 +4538,7 @@
   // Check achievements for one player, return array of newly earned achievement objects
   function checkPlayerAchievements(playerKey) {
     var player = players[playerKey];
-    var opponentKey = playerKey === 'burden' ? 'stu' : 'burden';
+    var opponentKey = playerKey === 'p1' ? 'p2' : 'p1';
     var opponent = players[opponentKey];
     var cached = achievementCache[playerKey];
     var earned = (cached && cached.earned) ? cached.earned : [];
@@ -4488,23 +4585,23 @@
     setTimeout(function() {
       var allNew = [];
 
-      var burdenNew = checkPlayerAchievements('burden');
-      var burdenIds = [];
-      for (var i = 0; i < burdenNew.length; i++) {
-        burdenIds.push(burdenNew[i].id);
-        allNew.push({ achievement: burdenNew[i], playerKey: 'burden' });
-        if (achievementCache.burden) achievementCache.burden.earned.push(burdenNew[i].id);
+      var p1New = checkPlayerAchievements('p1');
+      var p1Ids = [];
+      for (var i = 0; i < p1New.length; i++) {
+        p1Ids.push(p1New[i].id);
+        allNew.push({ achievement: p1New[i], playerKey: 'p1' });
+        if (achievementCache.p1) achievementCache.p1.earned.push(p1New[i].id);
       }
-      saveAchievements('burden', burdenIds);
+      saveAchievements('p1', p1Ids);
 
-      var stuNew = checkPlayerAchievements('stu');
-      var stuIds = [];
-      for (var j = 0; j < stuNew.length; j++) {
-        stuIds.push(stuNew[j].id);
-        allNew.push({ achievement: stuNew[j], playerKey: 'stu' });
-        if (achievementCache.stu) achievementCache.stu.earned.push(stuNew[j].id);
+      var p2New = checkPlayerAchievements('p2');
+      var p2Ids = [];
+      for (var j = 0; j < p2New.length; j++) {
+        p2Ids.push(p2New[j].id);
+        allNew.push({ achievement: p2New[j], playerKey: 'p2' });
+        if (achievementCache.p2) achievementCache.p2.earned.push(p2New[j].id);
       }
-      saveAchievements('stu', stuIds);
+      saveAchievements('p2', p2Ids);
 
       for (var k = 0; k < allNew.length; k++) {
         (function(item, delay) {
@@ -4524,8 +4621,8 @@
     var toast = document.createElement('div');
     toast.className = 'achievement-toast';
 
-    var playerName = playerKey === 'burden' ? 'Burden' : 'Stu';
-    var playerColor = playerKey === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    var playerName = players[playerKey] ? players[playerKey].name : playerNames[playerKey] || playerKey;
+    var playerColor = playerKey === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
     toast.innerHTML =
       '<div class="achievement-toast-icon">' + achievement.icon + '</div>' +
@@ -4553,21 +4650,21 @@
     var grid = document.getElementById('achievements-grid');
     grid.innerHTML = '';
 
-    var burdenEarned = (achievementCache.burden && achievementCache.burden.earned) ? achievementCache.burden.earned : [];
-    var stuEarned = (achievementCache.stu && achievementCache.stu.earned) ? achievementCache.stu.earned : [];
+    var p1Earned = (achievementCache.p1 && achievementCache.p1.earned) ? achievementCache.p1.earned : [];
+    var p2Earned = (achievementCache.p2 && achievementCache.p2.earned) ? achievementCache.p2.earned : [];
 
     for (var i = 0; i < ACHIEVEMENTS.length; i++) {
       var ach = ACHIEVEMENTS[i];
-      var bHas = burdenEarned.indexOf(ach.id) !== -1;
-      var sHas = stuEarned.indexOf(ach.id) !== -1;
+      var bHas = p1Earned.indexOf(ach.id) !== -1;
+      var sHas = p2Earned.indexOf(ach.id) !== -1;
       var isEarned = bHas || sHas;
 
       var card = document.createElement('div');
       card.className = 'achievement-card ' + (isEarned ? 'earned' : 'locked');
 
       var playersHtml = '';
-      if (bHas) playersHtml += '<span class="achievement-card-player burden-badge">Burden</span>';
-      if (sHas) playersHtml += '<span class="achievement-card-player stu-badge">Stu</span>';
+      if (bHas) playersHtml += '<span class="achievement-card-player p1-badge">' + playerNames.p1 + '</span>';
+      if (sHas) playersHtml += '<span class="achievement-card-player p2-badge">' + playerNames.p2 + '</span>';
       if (!isEarned) playersHtml = '<span style="font-family:Orbitron,monospace;font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:0.1em;">\uD83D\uDD12 LOCKED</span>';
 
       card.innerHTML =
@@ -4579,7 +4676,7 @@
       grid.appendChild(card);
     }
 
-    if (!achievementCache.burden && !achievementCache.stu) {
+    if (!achievementCache.p1 && !achievementCache.p2) {
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);font-family:Rajdhani,sans-serif;font-size:20px;">Loading achievements...</div>';
       loadAchievements(function() { renderAchievementsScreen(); });
     }
@@ -4929,8 +5026,7 @@
       correctFb: ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Yoh Nailed It!', 'Eish, Too Easy!', 'Baie Mooi!', "Jy's 'n Bees!", 'Sharp Sharp!'],
       wrongFb: ['Eina!', 'Ag Nee!', 'Haibo!', 'Shame Man!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!'],
       timeoutFb: 'Tyd Op, Bru!',
-      burdenWins: 'BURDEN WINS! Lekker Gespeel!',
-      stuWins: "STU WINS! Jy's die Boss!",
+      playerWins: '{name} WINS! Lekker Gespeel!',
       draw: "IT'S A DRAW! Sharp Sharp!",
       gamesPlayed: 'Games Played',
       wins: 'Wins',
@@ -4964,8 +5060,7 @@
       correctFb: ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Mooi Man!', 'Te Maklik!', 'Baie Mooi!', "Jy's 'n Bees!", 'Sharp Sharp!', "Nou Gaan Ons Braai!"],
       wrongFb: ['Eina!', 'Ag Nee!', 'Haibo!', 'Skande!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!', 'Sies Man!'],
       timeoutFb: 'Tyd Op, Bru!',
-      burdenWins: 'BURDEN WEN! Lekker Gespeel!',
-      stuWins: "STU WEN! Jy's die Baas!",
+      playerWins: '{name} WEN! Lekker Gespeel!',
       draw: "GELYKOP! Sharp Sharp!",
       gamesPlayed: 'Spelle Gespeel',
       wins: 'Oorwinnings',
@@ -5141,6 +5236,7 @@
     if (!active) return;
     switch(active.id) {
       case 'screen-howto':
+      case 'screen-names':
       case 'screen-settings':
       case 'screen-leaderboard':
       case 'screen-achievements':
@@ -5199,6 +5295,20 @@
   // Restore saved settings and load stats/achievements on page load
   restoreSettings();
   restoreLang();
+
+  // Restore saved player names
+  try {
+    var savedNames = JSON.parse(localStorage.getItem('brainblitz_names') || '{}');
+    if (savedNames.p1) {
+      document.getElementById('name-p1').value = savedNames.p1;
+      playerNames.p1 = savedNames.p1;
+    }
+    if (savedNames.p2) {
+      document.getElementById('name-p2').value = savedNames.p2;
+      playerNames.p2 = savedNames.p2;
+    }
+  } catch(e) {}
+
   loadLifetimeStats();
   loadAchievements();
   // Load cached ElevenLabs audio assets (non-blocking)
