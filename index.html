@@ -5493,7 +5493,7 @@
     }
 
     // Arrow navigation
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(key) !== -1) {
       e.preventDefault();
       handleArrowNav(key);
       return;
@@ -5510,7 +5510,7 @@
 
     // A/B/C/D to select answers during game
     const upperKey = key.toUpperCase();
-    if (['A','B','C','D'].includes(upperKey) && document.getElementById('screen-game').classList.contains('active')) {
+    if (['A','B','C','D'].indexOf(upperKey) !== -1 && document.getElementById('screen-game').classList.contains('active')) {
       const idx = upperKey.charCodeAt(0) - 65;
       if (!answered && !ttsPlaying && !isPaused) {
         const btn = document.querySelector('.answer-btn[data-index="' + idx + '"]');
