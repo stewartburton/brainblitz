@@ -2005,6 +2005,7 @@
       <label>Category</label>
       <div class="pill-group" id="cat-pills">
         <button class="pill selected" data-val="" onclick="selectPill(this,'cat')">Any</button>
+        <button class="pill" data-val="roulette" onclick="selectPill(this,'cat')">Roulette &#127920;</button>
         <button class="pill" data-val="Frenchies" onclick="selectPill(this,'cat')">Frenchies</button>
         <button class="pill" data-val="Hiking" onclick="selectPill(this,'cat')">Hiking</button>
         <button class="pill" data-val="SA Wines" onclick="selectPill(this,'cat')">SA Wines</button>
@@ -2239,6 +2240,17 @@
 <!-- ON FIRE streak overlay -->
 <div class="on-fire-overlay" id="on-fire-overlay">
   <div class="on-fire-text">ON FIRE!</div>
+</div>
+
+<!-- Roulette wheel -->
+<div id="roulette-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; z-index:15; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.88); opacity:0; pointer-events:none; transition:opacity 0.2s ease;">
+  <div style="text-align:center;">
+    <div style="position:relative; display:inline-block;">
+      <div style="position:absolute; top:-24px; left:50%; transform:translateX(-50%); font-size:32px; z-index:2; filter:drop-shadow(0 0 8px rgba(255,230,0,0.6));">&#9660;</div>
+      <canvas id="roulette-wheel" width="400" height="400" style="border-radius:50%; border:3px solid rgba(255,255,255,0.25);"></canvas>
+    </div>
+    <div id="roulette-label" style="font-family:'Orbitron',monospace; font-size:clamp(20px,4vw,36px); color:var(--neon-yellow); text-shadow:0 0 15px rgba(255,230,0,0.5); margin-top:25px; opacity:0; transition:opacity 0.3s ease;"></div>
+  </div>
 </div>
 
 <!-- Spotlight handoff overlay -->
@@ -2892,6 +2904,315 @@
         lfo.frequency.value = 0.1; lfoG.gain.value = 150;
         lfo.connect(lfoG); lfoG.connect(padFilter.frequency);
         lfo.start(); this._scheduledNodes.push(lfo);
+    },
+
+    // ── French: accordion waltz feel ──
+    french() {
+      this.stop(0.15);
+      var master = this._init(0.14);
+      this.currentTrack = 'french';
+      this._bpm = 140; // waltz tempo
+      var chords = [
+        [261.63, 329.63, 392],    // C
+        [220, 277.18, 329.63],    // Am
+        [174.61, 220, 261.63],    // F
+        [196, 246.94, 293.66]     // G
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 12) % 4; // 3/4 time = 12 steps per bar
+        var beat = step % 12;
+        var chord = chords[bar];
+        // Waltz: oom-pah-pah
+        if (beat === 0) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.2, 0.06);
+        }
+        if (beat === 4 || beat === 8) {
+          chord.forEach(f => this._note(f, 'triangle', master, time, 0.15, 0.03));
+        }
+        // Melody on the beat
+        if (beat === 0 && bar % 2 === 0) {
+          this._note(chord[2] * 2, 'sine', master, time, 0.3, 0.025);
+        }
+        if (beat === 6) {
+          this._hihat(master, time, 0.015);
+        }
+      });
+    },
+
+    // ── Bossa Nova: warm and smooth ──
+    bossa() {
+      this.stop(0.15);
+      var master = this._init(0.14);
+      this.currentTrack = 'bossa';
+      this._bpm = 120;
+      var chords = [
+        [261.63, 329.63, 392, 466.16],   // Cmaj7
+        [220, 261.63, 329.63, 415.30],    // Am7
+        [196, 246.94, 293.66, 370],       // Gm7
+        [174.61, 220, 261.63, 329.63]     // Fmaj7
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Bossa rhythm
+        if (beat === 0 || beat === 6 || beat === 10) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.05);
+        }
+        if (beat === 0 || beat === 3 || beat === 6 || beat === 10 || beat === 13) {
+          this._hihat(master, time, 0.02);
+        }
+        // Rhodes-style chords
+        if (beat === 0 || beat === 10) {
+          chord.forEach(f => this._note(f, 'sine', master, time, 0.4, 0.02));
+        }
+        // Melody
+        if (beat === 4) {
+          this._note(chord[3], 'triangle', master, time, 0.25, 0.025);
+        }
+      });
+    },
+
+    // ── Classical: gentle strings ──
+    classical() {
+      this.stop(0.15);
+      var master = this._init(0.12);
+      this.currentTrack = 'classical';
+      this._bpm = 72;
+      var chords = [
+        [261.63, 329.63, 392],     // C
+        [220, 261.63, 329.63],     // Am
+        [174.61, 220, 261.63],     // F
+        [196, 246.94, 293.66]      // G
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Arpeggiated strings
+        if (beat % 4 === 0) {
+          var noteIdx = (beat / 4) % chord.length;
+          this._note(chord[noteIdx], 'sine', master, time, 0.5, 0.04);
+        }
+        // Bass
+        if (beat === 0) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.8, 0.05);
+        }
+        // High melody
+        if (beat === 8) {
+          this._note(chord[2] * 2, 'triangle', master, time, 0.4, 0.02);
+        }
+      });
+    },
+
+    // ── Afrobeat: upbeat and rhythmic ──
+    afrobeat() {
+      this.stop(0.15);
+      var master = this._init(0.15);
+      this.currentTrack = 'afrobeat';
+      this._bpm = 118;
+      var chords = [
+        [220, 261.63, 329.63],     // Am
+        [261.63, 329.63, 392],     // C
+        [196, 246.94, 293.66],     // G
+        [174.61, 220, 261.63]      // F
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Kick pattern
+        if (beat === 0 || beat === 6 || beat === 10) {
+          this._kick(master, time);
+        }
+        // Hi-hat
+        if (beat % 2 === 0) {
+          this._hihat(master, time, 0.035);
+        }
+        // Offbeat chords
+        if (beat === 2 || beat === 8 || beat === 14) {
+          chord.forEach(f => this._note(f, 'triangle', master, time, 0.15, 0.025));
+        }
+        // Bass
+        if (beat === 0 || beat === 8) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.06);
+        }
+      });
+    },
+
+    // ── Ambient: calm outdoor feel ──
+    ambient() {
+      this.stop(0.15);
+      var master = this._init(0.10);
+      this.currentTrack = 'ambient';
+      this._bpm = 65;
+      var notes = [261.63, 293.66, 329.63, 392, 440]; // C pentatonic
+      this._startScheduler((time, step) => {
+        var beat = step % 16;
+        // Soft pad
+        if (beat === 0) {
+          this._note(130.81, 'sine', master, time, 1.0, 0.04);
+          this._note(196, 'sine', master, time, 1.0, 0.03);
+        }
+        // Gentle melody
+        if (beat % 4 === 0) {
+          var n = notes[Math.floor(Math.random() * notes.length)];
+          this._note(n, 'triangle', master, time, 0.5, 0.02);
+        }
+        // Light percussion
+        if (beat === 0 || beat === 8) {
+          this._kick(master, time);
+        }
+        if (beat === 4 || beat === 12) {
+          this._hihat(master, time, 0.01);
+        }
+      });
+    },
+
+    // ── Marabi: SA jazz shuffle ──
+    marabi() {
+      this.stop(0.15);
+      var master = this._init(0.14);
+      this.currentTrack = 'marabi';
+      this._bpm = 125;
+      var chords = [
+        [261.63, 329.63, 392],    // C
+        [174.61, 220, 261.63],    // F
+        [196, 246.94, 293.66],    // G
+        [261.63, 329.63, 392]     // C
+      ];
+      var bassWalk = [130.81, 146.83, 164.81, 174.61, 196, 174.61, 164.81, 146.83];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Swing kick
+        if (beat === 0 || beat === 8) {
+          this._kick(master, time);
+        }
+        // Shuffle hi-hat
+        if (beat % 4 === 0) {
+          this._hihat(master, time, 0.04);
+        }
+        if (beat % 4 === 3) {
+          this._hihat(master, time, 0.02);
+        }
+        // Walking bass
+        if (beat % 2 === 0) {
+          var bassNote = bassWalk[(bar * 4 + beat / 2) % bassWalk.length];
+          this._note(bassNote, 'sine', master, time, 0.2, 0.055);
+        }
+        // Chords on 1 and 3
+        if (beat === 0 || beat === 8) {
+          chord.forEach(f => this._note(f, 'triangle', master, time, 0.2, 0.025));
+        }
+      });
+    },
+
+    // ── Synthpop: 80s retro ──
+    synthpop() {
+      this.stop(0.15);
+      var master = this._init(0.13);
+      this.currentTrack = 'synthpop';
+      this._bpm = 120;
+      var bassLine = [110, 110, 130.81, 146.83, 110, 110, 146.83, 130.81];
+      var chords = [
+        [220, 277.18, 329.63],    // Am
+        [196, 246.94, 293.66],    // G
+        [174.61, 220, 261.63],    // F
+        [164.81, 207.65, 246.94]  // Em
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Four on floor kick
+        if (beat % 4 === 0) {
+          this._kick(master, time);
+        }
+        // Hi-hat eighths
+        if (beat % 2 === 0) {
+          this._hihat(master, time, 0.03);
+        }
+        // Arp bass (sawtooth for that synth feel)
+        if (beat % 2 === 0) {
+          var bassNote = bassLine[(bar * 4 + beat / 2) % bassLine.length];
+          this._note(bassNote, 'sawtooth', master, time, 0.15, 0.04);
+        }
+        // Synth pad on 1
+        if (beat === 0) {
+          chord.forEach(f => this._note(f * 2, 'sawtooth', master, time, 0.3, 0.015));
+        }
+      });
+    },
+
+    // ── Jazz: light pizzicato ──
+    jazz() {
+      this.stop(0.15);
+      var master = this._init(0.12);
+      this.currentTrack = 'jazz';
+      this._bpm = 130;
+      var chords = [
+        [261.63, 329.63, 392, 466.16],   // Cmaj7
+        [220, 261.63, 329.63, 440],       // Am7
+        [174.61, 220, 261.63, 329.63],    // Fmaj7
+        [196, 246.94, 293.66, 370]        // G7
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Brush-style
+        if (beat === 0 || beat === 8) {
+          this._kick(master, time);
+        }
+        if (beat % 4 === 0) {
+          this._hihat(master, time, 0.025);
+        }
+        if (beat % 4 === 3) {
+          this._hihat(master, time, 0.012);
+        }
+        // Plucked melody (short, staccato)
+        if (beat % 4 === 0) {
+          var noteIdx = (beat / 4) % chord.length;
+          this._note(chord[noteIdx], 'triangle', master, time, 0.08, 0.03);
+        }
+        // Bass
+        if (beat === 0) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.05);
+        }
+      });
+    },
+
+    // ── Tension: game-show pulse ──
+    tension() {
+      this.stop(0.15);
+      var master = this._init(0.12);
+      this.currentTrack = 'tension';
+      this._bpm = 100;
+      this._startScheduler((time, step) => {
+        var beat = step % 16;
+        // Heartbeat kick
+        if (beat === 0 || beat === 3) {
+          this._kick(master, time);
+        }
+        // Tense hi-hat
+        if (beat % 2 === 0) {
+          this._hihat(master, time, 0.025);
+        }
+        // Minor drone
+        if (beat === 0) {
+          this._note(130.81, 'sine', master, time, 0.8, 0.04);
+          this._note(155.56, 'sine', master, time, 0.8, 0.03); // Eb - minor feel
+        }
+        // Rising tension note
+        if (beat === 8) {
+          this._note(220, 'sawtooth', master, time, 0.15, 0.02);
+        }
+        if (beat === 12) {
+          this._note(246.94, 'sawtooth', master, time, 0.15, 0.02);
+        }
+      });
     }
   };
 
@@ -3467,6 +3788,27 @@
   var currentPlayer = 'p1';
   var lastStartingPlayer = 'p1';
   var isDoublePoints = false;
+  var isRoulette = false;
+  var rouletteBlockSize = 3;
+  var rouletteCategories = [];
+  var currentRouletteBlock = -1;
+  var ROULETTE_CATS = ['Frenchies','Hiking','SA Wines','Paris','Cheeses','Braai Culture','90s Pop Culture','SA Food & Slang','True or False','CT Coffee & Cafes','Cape Winelands','CT Foodie','Cape Adventures'];
+  var ROULETTE_COLORS = ['#00f0ff','#ff2d78','#8b5cf6','#fbbf24','#10b981','#f97316','#ec4899','#06b6d4','#84cc16','#a78bfa','#f43f5e','#14b8a6','#eab308'];
+  var CATEGORY_MUSIC = {
+    'Frenchies': 'french',
+    'Paris': 'french',
+    'CT Coffee & Cafes': 'bossa',
+    'Cape Winelands': 'classical',
+    'SA Wines': 'classical',
+    'CT Foodie': 'afrobeat',
+    'Braai Culture': 'afrobeat',
+    'SA Food & Slang': 'marabi',
+    'Cape Adventures': 'ambient',
+    'Hiking': 'ambient',
+    '90s Pop Culture': 'synthpop',
+    'Cheeses': 'jazz',
+    'True or False': 'tension'
+  };
 
   let timerInterval = null;
   let timeLeft = 0;
@@ -3646,6 +3988,10 @@
     try {
       settings.timer = parseInt(getSelected('timer')) || 15;
       settings.category = getSelected('cat');
+      isRoulette = settings.category === 'roulette';
+      if (isRoulette) {
+        settings.category = ''; // load ALL questions for roulette
+      }
       settings.rounds = parseInt(getSelected('rounds')) || 10;
       // Reset both players
       players.p1 = { name: playerNames.p1, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
@@ -3655,6 +4001,7 @@
       // Reset cascade state
       cascadeInProgress = false;
       isDoublePoints = false;
+      currentRouletteBlock = -1;
       var dpBadge = document.getElementById('double-points-badge');
       if (dpBadge) dpBadge.remove();
 
@@ -3690,11 +4037,46 @@
         settings.rounds = questions.length;
       }
 
+      // Roulette: pre-pick categories for each block
+      if (isRoulette) {
+        rouletteBlockSize = questions.length <= 10 ? 3 : (questions.length <= 15 ? 4 : 5);
+        var allCats = [];
+        for (var qi = 0; qi < questions.length; qi++) {
+          if (allCats.indexOf(questions[qi].category) === -1) allCats.push(questions[qi].category);
+        }
+        var numBlocks = Math.ceil(questions.length / rouletteBlockSize);
+        rouletteCategories = [];
+        for (var bi = 0; bi < numBlocks; bi++) {
+          rouletteCategories.push(allCats[Math.floor(Math.random() * allCats.length)]);
+        }
+        currentRouletteBlock = -1;
+      }
+
       sfxStart();
-      Music.game();
+      // Play category-themed music (or default game music)
+      if (!isRoulette && settings.category) {
+        var musicTheme = CATEGORY_MUSIC[settings.category];
+        if (musicTheme && Music[musicTheme]) {
+          Music[musicTheme]();
+        } else {
+          Music.game();
+        }
+      } else {
+        Music.game();
+      }
       showScreen('game');
-      showTurnSwitch(currentPlayer, () => {
-        showRoundSplash(1, () => loadQuestion());
+      showTurnSwitch(currentPlayer, function() {
+        if (isRoulette) {
+          currentRouletteBlock = 0;
+          var rouletteCat = rouletteCategories[0] || ROULETTE_CATS[Math.floor(Math.random() * ROULETTE_CATS.length)];
+          showRouletteWheel(rouletteCat, function() {
+            var theme = CATEGORY_MUSIC[rouletteCat] || 'game';
+            if (Music[theme]) { Music[theme](); } else { Music.game(); }
+            showRoundSplash(1, function() { loadQuestion(); });
+          });
+        } else {
+          showRoundSplash(1, function() { loadQuestion(); });
+        }
       });
     } finally {
       gameLoading = false;
@@ -3769,6 +4151,103 @@
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }
+
+  function showRouletteWheel(targetCategory, cb) {
+    var overlay = document.getElementById('roulette-overlay');
+    var canvas = document.getElementById('roulette-wheel');
+    var label = document.getElementById('roulette-label');
+    var ctx = canvas.getContext('2d');
+    var cats = ROULETTE_CATS;
+    var colors = ROULETTE_COLORS;
+    var segAngle = (Math.PI * 2) / cats.length;
+
+    // Find target index
+    var targetIdx = 0;
+    for (var i = 0; i < cats.length; i++) {
+      if (cats[i] === targetCategory) { targetIdx = i; break; }
+    }
+
+    function drawWheel(rotation) {
+      ctx.clearRect(0, 0, 400, 400);
+      ctx.save();
+      ctx.translate(200, 200);
+      ctx.rotate(rotation);
+      for (var i = 0; i < cats.length; i++) {
+        var startA = i * segAngle;
+        // Segment fill
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 195, startA, startA + segAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.globalAlpha = 0.75;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Text
+        ctx.save();
+        ctx.rotate(startA + segAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px Orbitron, monospace';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 3;
+        var displayName = cats[i].length > 16 ? cats[i].substring(0, 14) + '..' : cats[i];
+        ctx.fillText(displayName, 180, 4);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    // Show overlay
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'all';
+    label.style.opacity = '0';
+    label.textContent = '';
+
+    // Spin: target angle puts the selected segment at the top (pointer position)
+    // Pointer is at top (12 o'clock = -PI/2 in canvas coords)
+    var targetAngle = -(targetIdx * segAngle + segAngle / 2) - Math.PI / 2;
+    var totalSpin = Math.PI * 8 + targetAngle; // 4 full spins + target
+    var duration = 3000;
+    var startTime = performance.now();
+    var lastTickStep = -1;
+
+    sfxWhoosh();
+
+    function animate(now) {
+      var elapsed = now - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic for deceleration
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var currentAngle = totalSpin * eased;
+      drawWheel(currentAngle);
+
+      // Tick sound as segments pass the pointer
+      var currentStep = Math.floor(currentAngle / segAngle);
+      if (currentStep !== lastTickStep && progress < 0.9) {
+        sfxTick();
+        lastTickStep = currentStep;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Show result label
+        label.textContent = targetCategory;
+        label.style.opacity = '1';
+        sfxCorrect();
+        setTimeout(function() {
+          overlay.style.opacity = '0';
+          overlay.style.pointerEvents = 'none';
+          if (cb) cb();
+        }, 1200);
+      }
+    }
+    requestAnimationFrame(animate);
   }
 
   var turnSwitchInterval = null;
@@ -3857,6 +4336,9 @@
     document.getElementById('hud-p1-score').textContent = formatScore(players.p1.score);
     document.getElementById('hud-p2-score').textContent = formatScore(players.p2.score);
     document.getElementById('q-category').textContent = decodeHTML(q.category);
+    if (isRoulette && currentRouletteBlock >= 0 && rouletteCategories[currentRouletteBlock]) {
+      document.getElementById('q-category').textContent = '\ud83c\udfb0 ' + rouletteCategories[currentRouletteBlock];
+    }
     document.getElementById('q-text').textContent = decodeHTML(q.question);
 
     // Comeback round: double points if final question and scores are close
@@ -4195,6 +4677,20 @@
     currentQ++;
     if (currentQ < questions.length) {
       showTurnSwitch(currentPlayer, function() {
+        // Check if we need a roulette spin for a new block
+        if (isRoulette) {
+          var blockIdx = Math.floor(currentQ / rouletteBlockSize);
+          if (blockIdx !== currentRouletteBlock) {
+            currentRouletteBlock = blockIdx;
+            var rouletteCat = rouletteCategories[blockIdx] || ROULETTE_CATS[Math.floor(Math.random() * ROULETTE_CATS.length)];
+            showRouletteWheel(rouletteCat, function() {
+              var theme = CATEGORY_MUSIC[rouletteCat] || 'game';
+              if (Music[theme]) { Music[theme](); } else { Music.game(); }
+              loadQuestion();
+            });
+            return;
+          }
+        }
         if (currentQ % 5 === 0) {
           showRoundSplash(currentQ + 1, function() { loadQuestion(); });
         } else {
