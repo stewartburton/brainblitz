@@ -328,15 +328,6 @@
     100% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
   }
 
-  /* TTS speaker loading pulse */
-  .hud-speaker.loading {
-    animation: speakerPulse 0.6s ease infinite;
-  }
-  @keyframes speakerPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
   /* Active turn indicator */
   .hud-item.active-turn::after {
     content: '';
@@ -369,14 +360,6 @@
   .hud-item.player-inactive {
     opacity: 0.5;
     transition: opacity 0.3s ease;
-  }
-
-  /* Speaker icon */
-  .hud-speaker {
-    font-size: clamp(14px, 1.5vw, 20px);
-    margin-left: 8px;
-    vertical-align: middle;
-    opacity: 0.5;
   }
 
   /* Timer bar */
@@ -2022,6 +2005,7 @@
       <label>Category</label>
       <div class="pill-group" id="cat-pills">
         <button class="pill selected" data-val="" onclick="selectPill(this,'cat')">Any</button>
+        <button class="pill" data-val="roulette" onclick="selectPill(this,'cat')">Roulette &#127920;</button>
         <button class="pill" data-val="Frenchies" onclick="selectPill(this,'cat')">Frenchies</button>
         <button class="pill" data-val="Hiking" onclick="selectPill(this,'cat')">Hiking</button>
         <button class="pill" data-val="SA Wines" onclick="selectPill(this,'cat')">SA Wines</button>
@@ -2035,6 +2019,7 @@
         <button class="pill" data-val="Cape Winelands" onclick="selectPill(this,'cat')">Cape Winelands</button>
         <button class="pill" data-val="CT Foodie" onclick="selectPill(this,'cat')">CT Foodie</button>
         <button class="pill" data-val="Cape Adventures" onclick="selectPill(this,'cat')">Cape Adventures</button>
+        <button class="pill" data-val="CT Fitness &amp; Wellness" onclick="selectPill(this,'cat')">CT Fitness &amp; Wellness</button>
       </div>
     </div>
     <div class="setting-group">
@@ -2053,14 +2038,6 @@
         <button class="pill selected" data-val="10" onclick="selectPill(this,'rounds')">10</button>
         <button class="pill" data-val="15" onclick="selectPill(this,'rounds')">15</button>
         <button class="pill" data-val="20" onclick="selectPill(this,'rounds')">20</button>
-      </div>
-    </div>
-    <div class="setting-group">
-      <label>Voice</label>
-      <div class="pill-group" id="voice-pills">
-        <button class="pill selected" data-val="off" onclick="selectPill(this,'voice')">Off</button>
-        <button class="pill" data-val="rachel" onclick="selectPill(this,'voice')">Rachel</button>
-        <button class="pill" data-val="custom" onclick="selectPill(this,'voice')">Butcher</button>
       </div>
     </div>
   </div>
@@ -2083,7 +2060,7 @@
     </div>
     <div class="hud-item">
       <div class="hud-label">Current Player</div>
-      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Player 1<span id="hud-speaker" class="hud-speaker" style="display:none;">&#128264;</span></div>
+      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Player 1</div>
     </div>
     <div class="hud-item" id="hud-p1-section">
       <div class="hud-label" id="hud-p1-label">Player 1</div>
@@ -2238,47 +2215,6 @@
   <div class="screen-title">Admin Panel</div>
   <div class="admin-content">
     <div class="admin-section">
-      <div class="admin-section-title">ElevenLabs Costs</div>
-      <div id="admin-costs-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
-      <div id="admin-costs-stats" style="display:none;">
-        <div class="admin-stat-row" style="padding:16px 0; border-bottom:2px solid rgba(255,230,0,0.15);">
-          <span class="admin-stat-label" style="font-size:clamp(18px,1.8vw,24px); font-weight:700; color:rgba(255,255,255,0.8);">Total Estimated Cost</span>
-          <span class="admin-stat-value cost" id="admin-total-cost" style="font-size:clamp(22px,2.2vw,32px);">R0.00</span>
-        </div>
-        <div class="admin-stat-row">
-          <span class="admin-stat-label">Text-to-Speech</span>
-          <span class="admin-stat-value cost" id="admin-cost-tts">R0.00</span>
-        </div>
-        <div class="admin-stat-row" style="padding-left:20px; border-bottom:none;">
-          <span class="admin-stat-label" style="font-size:clamp(12px,1.2vw,15px); color:rgba(255,255,255,0.35);" id="admin-cost-tts-detail">0 chars / 0 requests</span>
-        </div>
-        <div class="admin-stat-row">
-          <span class="admin-stat-label">Music Generation</span>
-          <span class="admin-stat-value cost" id="admin-cost-music">R0.00</span>
-        </div>
-        <div class="admin-stat-row" style="padding-left:20px; border-bottom:none;">
-          <span class="admin-stat-label" style="font-size:clamp(12px,1.2vw,15px); color:rgba(255,255,255,0.35);" id="admin-cost-music-detail">0 tracks / 0m 0s generated</span>
-        </div>
-        <div class="admin-stat-row">
-          <span class="admin-stat-label">Sound Effects</span>
-          <span class="admin-stat-value cost" id="admin-cost-sfx">R0.00</span>
-        </div>
-        <div class="admin-stat-row" style="padding-left:20px; border-bottom:none;">
-          <span class="admin-stat-label" style="font-size:clamp(12px,1.2vw,15px); color:rgba(255,255,255,0.35);" id="admin-cost-sfx-detail">0 effects / 0s generated</span>
-        </div>
-        <div class="admin-stat-row" style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
-          <span class="admin-stat-label">Avg Cost/TTS Request</span>
-          <span class="admin-stat-value cost" id="admin-tts-avg-cost">R0.00</span>
-        </div>
-        <div class="admin-stat-row">
-          <span class="admin-stat-label">Avg Chars/TTS Request</span>
-          <span class="admin-stat-value" id="admin-tts-avg">0</span>
-        </div>
-      </div>
-      <div id="admin-costs-error" style="display:none; color:var(--neon-pink); font-family:'Rajdhani',sans-serif; font-size:16px; text-align:center; padding:15px;">Could not load cost data</div>
-    </div>
-
-    <div class="admin-section">
       <div class="admin-section-title">Language</div>
       <div class="pill-group" id="lang-pills">
         <button class="pill selected" data-val="en" onclick="selectPill(this,'lang')">English (SA)</button>
@@ -2289,31 +2225,6 @@
       </div>
     </div>
 
-    <div class="admin-section">
-      <div class="admin-section-title">Audio Assets (ElevenLabs)</div>
-      <div id="admin-audio-loading" style="color:rgba(255,255,255,0.3); font-family:'Rajdhani',sans-serif; font-size:18px; text-align:center; padding:20px;">Loading...</div>
-      <div id="admin-audio-content" style="display:none;">
-        <div style="margin-bottom:24px;">
-          <div class="admin-stat-row" style="border-bottom:2px solid rgba(0,240,255,0.15); padding-bottom:12px; margin-bottom:8px;">
-            <span class="admin-stat-label" style="font-size:clamp(16px,1.6vw,20px); font-weight:700; color:rgba(255,255,255,0.8);">Music Tracks</span>
-            <button class="btn" onclick="generateAllMusic()" id="btn-gen-all-music" style="font-size:11px; padding:6px 14px; min-width:auto; letter-spacing:0.05em;">Generate All</button>
-          </div>
-          <div id="admin-music-list"></div>
-        </div>
-        <div>
-          <div class="admin-stat-row" style="border-bottom:2px solid rgba(0,240,255,0.15); padding-bottom:12px; margin-bottom:8px;">
-            <span class="admin-stat-label" style="font-size:clamp(16px,1.6vw,20px); font-weight:700; color:rgba(255,255,255,0.8);">Sound Effects</span>
-            <button class="btn" onclick="generateAllSfx()" id="btn-gen-all-sfx" style="font-size:11px; padding:6px 14px; min-width:auto; letter-spacing:0.05em;">Generate All</button>
-          </div>
-          <div id="admin-sfx-list"></div>
-        </div>
-      </div>
-      <div id="admin-audio-progress" style="display:none; text-align:center; padding:20px;">
-        <div class="loading-ring" style="margin:0 auto 15px; width:40px; height:40px;"></div>
-        <div id="admin-audio-progress-text" style="font-family:'Rajdhani',sans-serif; font-size:16px; color:var(--neon-cyan);">Generating...</div>
-      </div>
-      <div id="admin-audio-error" style="display:none; color:var(--neon-pink); font-family:'Rajdhani',sans-serif; font-size:16px; text-align:center; padding:15px;"></div>
-    </div>
   </div>
   <button class="btn" onclick="showScreen('title')" style="margin-top:20px;">Home</button>
 </div>
@@ -2330,6 +2241,17 @@
 <!-- ON FIRE streak overlay -->
 <div class="on-fire-overlay" id="on-fire-overlay">
   <div class="on-fire-text">ON FIRE!</div>
+</div>
+
+<!-- Roulette wheel -->
+<div id="roulette-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; z-index:15; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.88); opacity:0; pointer-events:none; transition:opacity 0.2s ease;">
+  <div style="text-align:center;">
+    <div style="position:relative; display:inline-block;">
+      <div style="position:absolute; top:-24px; left:50%; transform:translateX(-50%); font-size:32px; z-index:2; filter:drop-shadow(0 0 8px rgba(255,230,0,0.6));">&#9660;</div>
+      <canvas id="roulette-wheel" width="400" height="400" style="border-radius:50%; border:3px solid rgba(255,255,255,0.25);"></canvas>
+    </div>
+    <div id="roulette-label" style="font-family:'Orbitron',monospace; font-size:clamp(20px,4vw,36px); color:var(--neon-yellow); text-shadow:0 0 15px rgba(255,230,0,0.5); margin-top:25px; opacity:0; transition:opacity 0.3s ease;"></div>
+  </div>
 </div>
 
 <!-- Spotlight handoff overlay -->
@@ -2382,11 +2304,9 @@
   // ═══════════════════════════════════════
   var ElevenAudio = {
     sfx: {},     // name -> AudioBuffer
-    music: {},   // name -> AudioBuffer
     loaded: false,
 
     SFX_NAMES: ['correct','wrong','tick','countdown','start','click','whoosh','victory_fanfare','draw_tone','crowd_cheer','achievement','streak_fire'],
-    MUSIC_NAMES: ['title','game','victory','draw'],
 
     loadAll: function() {
       var self = this;
@@ -2396,14 +2316,6 @@
         promises.push(
           self._fetchAudio('/api/sfx?name=' + name).then(function(buf) {
             if (buf) self.sfx[name] = buf;
-          })
-        );
-      });
-
-      self.MUSIC_NAMES.forEach(function(name) {
-        promises.push(
-          self._fetchAudio('/api/music?name=' + name).then(function(buf) {
-            if (buf) self.music[name] = buf;
           })
         );
       });
@@ -2677,7 +2589,6 @@
     _bpm: 120,
     _nextNoteTime: 0,
     _scheduledNodes: [],
-    _elevenSource: null,
 
     stop(fadeTime = 0.3) {
       if (!this.playing) return;
@@ -2687,35 +2598,10 @@
       if (this.masterGain) {
         try { this.masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + fadeTime); } catch(e) {}
       }
-      // Stop ElevenAudio source if active
-      if (this._elevenSource) {
-        var elSrc = this._elevenSource;
-        this._elevenSource = null;
-        setTimeout(function() { try { elSrc.stop(); elSrc.disconnect(); } catch(e) {} }, fadeTime * 1000 + 100);
-      }
       const old = this._scheduledNodes;
       this._scheduledNodes = [];
       setTimeout(() => { old.forEach(n => { try { n.stop(); n.disconnect(); } catch(e) {} }); }, fadeTime * 1000 + 100);
       this.masterGain = null;
-    },
-
-    // Play ElevenLabs cached music track (returns true if available)
-    _playEleven(trackName, loop, vol) {
-      var buf = ElevenAudio.music[trackName];
-      if (!buf) return false;
-      ensureAudio();
-      var source = audioCtx.createBufferSource();
-      source.buffer = buf;
-      source.loop = loop !== false;
-      var gain = audioCtx.createGain();
-      gain.gain.value = musicMuted ? 0 : vol;
-      source.connect(gain);
-      gain.connect(masterCompressor);
-      source.start();
-      this._elevenSource = source;
-      this.masterGain = gain;
-      this.playing = true;
-      return true;
     },
 
     _init(vol) {
@@ -2808,13 +2694,6 @@
     title() {
       if (this.currentTrack === 'title') return;
       this.stop(0.2);
-      // Try ElevenLabs cached music first
-      var self = this;
-      setTimeout(() => {
-        if (self._playEleven('title', true, 0.18)) {
-          self.currentTrack = 'title';
-          return;
-        }
         const master = this._init(0.18);
         this.currentTrack = 'title';
         this._bpm = 82;
@@ -2885,18 +2764,11 @@
             this._note(chord[0] / 2, 'sine', master, time, 0.4, 0.06);
           }
         });
-      }, 250);
     },
 
     // ── Game: tense electronic, builds with intensity ──
     game() {
       this.stop(0.15);
-      var self = this;
-      setTimeout(() => {
-        if (self._playEleven('game', true, 0.15)) {
-          self.currentTrack = 'game';
-          return;
-        }
         const master = this._init(0.15);
         this.currentTrack = 'game';
         this._bpm = 115;
@@ -2953,7 +2825,6 @@
             this._note(880, 'sine', master, time, 0.02, 0.02);
           }
         });
-      }, 200);
     },
 
     setIntensity(level) {
@@ -2967,12 +2838,6 @@
     // ── Victory: triumphant celebration ──
     victory() {
       this.stop(0.15);
-      var self = this;
-      setTimeout(() => {
-        if (self._playEleven('victory', true, 0.18)) {
-          self.currentTrack = 'victory';
-          return;
-        }
         const master = this._init(0.18);
         this.currentTrack = 'victory';
         this._bpm = 135;
@@ -3016,18 +2881,11 @@
             this._note(chord[2] * 4, 'sine', master, time, 0.5, 0.015);
           }
         });
-      }, 200);
     },
 
     // ── Draw: mellow ambient pad ──
     draw() {
       this.stop(0.2);
-      var self = this;
-      setTimeout(() => {
-        if (self._playEleven('draw', true, 0.10)) {
-          self.currentTrack = 'draw';
-          return;
-        }
         const master = this._init(0.10);
         this.currentTrack = 'draw';
 
@@ -3047,7 +2905,315 @@
         lfo.frequency.value = 0.1; lfoG.gain.value = 150;
         lfo.connect(lfoG); lfoG.connect(padFilter.frequency);
         lfo.start(); this._scheduledNodes.push(lfo);
-      }, 250);
+    },
+
+    // ── French: accordion waltz feel ──
+    french() {
+      this.stop(0.15);
+      var master = this._init(0.14);
+      this.currentTrack = 'french';
+      this._bpm = 140; // waltz tempo
+      var chords = [
+        [261.63, 329.63, 392],    // C
+        [220, 277.18, 329.63],    // Am
+        [174.61, 220, 261.63],    // F
+        [196, 246.94, 293.66]     // G
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 12) % 4; // 3/4 time = 12 steps per bar
+        var beat = step % 12;
+        var chord = chords[bar];
+        // Waltz: oom-pah-pah
+        if (beat === 0) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.2, 0.06);
+        }
+        if (beat === 4 || beat === 8) {
+          chord.forEach(f => this._note(f, 'triangle', master, time, 0.15, 0.03));
+        }
+        // Melody on the beat
+        if (beat === 0 && bar % 2 === 0) {
+          this._note(chord[2] * 2, 'sine', master, time, 0.3, 0.025);
+        }
+        if (beat === 6) {
+          this._hihat(master, time, 0.015);
+        }
+      });
+    },
+
+    // ── Bossa Nova: warm and smooth ──
+    bossa() {
+      this.stop(0.15);
+      var master = this._init(0.14);
+      this.currentTrack = 'bossa';
+      this._bpm = 120;
+      var chords = [
+        [261.63, 329.63, 392, 466.16],   // Cmaj7
+        [220, 261.63, 329.63, 415.30],    // Am7
+        [196, 246.94, 293.66, 370],       // Gm7
+        [174.61, 220, 261.63, 329.63]     // Fmaj7
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Bossa rhythm
+        if (beat === 0 || beat === 6 || beat === 10) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.05);
+        }
+        if (beat === 0 || beat === 3 || beat === 6 || beat === 10 || beat === 13) {
+          this._hihat(master, time, 0.02);
+        }
+        // Rhodes-style chords
+        if (beat === 0 || beat === 10) {
+          chord.forEach(f => this._note(f, 'sine', master, time, 0.4, 0.02));
+        }
+        // Melody
+        if (beat === 4) {
+          this._note(chord[3], 'triangle', master, time, 0.25, 0.025);
+        }
+      });
+    },
+
+    // ── Classical: gentle strings ──
+    classical() {
+      this.stop(0.15);
+      var master = this._init(0.12);
+      this.currentTrack = 'classical';
+      this._bpm = 72;
+      var chords = [
+        [261.63, 329.63, 392],     // C
+        [220, 261.63, 329.63],     // Am
+        [174.61, 220, 261.63],     // F
+        [196, 246.94, 293.66]      // G
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Arpeggiated strings
+        if (beat % 4 === 0) {
+          var noteIdx = (beat / 4) % chord.length;
+          this._note(chord[noteIdx], 'sine', master, time, 0.5, 0.04);
+        }
+        // Bass
+        if (beat === 0) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.8, 0.05);
+        }
+        // High melody
+        if (beat === 8) {
+          this._note(chord[2] * 2, 'triangle', master, time, 0.4, 0.02);
+        }
+      });
+    },
+
+    // ── Afrobeat: upbeat and rhythmic ──
+    afrobeat() {
+      this.stop(0.15);
+      var master = this._init(0.15);
+      this.currentTrack = 'afrobeat';
+      this._bpm = 118;
+      var chords = [
+        [220, 261.63, 329.63],     // Am
+        [261.63, 329.63, 392],     // C
+        [196, 246.94, 293.66],     // G
+        [174.61, 220, 261.63]      // F
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Kick pattern
+        if (beat === 0 || beat === 6 || beat === 10) {
+          this._kick(master, time);
+        }
+        // Hi-hat
+        if (beat % 2 === 0) {
+          this._hihat(master, time, 0.035);
+        }
+        // Offbeat chords
+        if (beat === 2 || beat === 8 || beat === 14) {
+          chord.forEach(f => this._note(f, 'triangle', master, time, 0.15, 0.025));
+        }
+        // Bass
+        if (beat === 0 || beat === 8) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.06);
+        }
+      });
+    },
+
+    // ── Ambient: calm outdoor feel ──
+    ambient() {
+      this.stop(0.15);
+      var master = this._init(0.10);
+      this.currentTrack = 'ambient';
+      this._bpm = 65;
+      var notes = [261.63, 293.66, 329.63, 392, 440]; // C pentatonic
+      this._startScheduler((time, step) => {
+        var beat = step % 16;
+        // Soft pad
+        if (beat === 0) {
+          this._note(130.81, 'sine', master, time, 1.0, 0.04);
+          this._note(196, 'sine', master, time, 1.0, 0.03);
+        }
+        // Gentle melody
+        if (beat % 4 === 0) {
+          var n = notes[Math.floor(Math.random() * notes.length)];
+          this._note(n, 'triangle', master, time, 0.5, 0.02);
+        }
+        // Light percussion
+        if (beat === 0 || beat === 8) {
+          this._kick(master, time);
+        }
+        if (beat === 4 || beat === 12) {
+          this._hihat(master, time, 0.01);
+        }
+      });
+    },
+
+    // ── Marabi: SA jazz shuffle ──
+    marabi() {
+      this.stop(0.15);
+      var master = this._init(0.14);
+      this.currentTrack = 'marabi';
+      this._bpm = 125;
+      var chords = [
+        [261.63, 329.63, 392],    // C
+        [174.61, 220, 261.63],    // F
+        [196, 246.94, 293.66],    // G
+        [261.63, 329.63, 392]     // C
+      ];
+      var bassWalk = [130.81, 146.83, 164.81, 174.61, 196, 174.61, 164.81, 146.83];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Swing kick
+        if (beat === 0 || beat === 8) {
+          this._kick(master, time);
+        }
+        // Shuffle hi-hat
+        if (beat % 4 === 0) {
+          this._hihat(master, time, 0.04);
+        }
+        if (beat % 4 === 3) {
+          this._hihat(master, time, 0.02);
+        }
+        // Walking bass
+        if (beat % 2 === 0) {
+          var bassNote = bassWalk[(bar * 4 + beat / 2) % bassWalk.length];
+          this._note(bassNote, 'sine', master, time, 0.2, 0.055);
+        }
+        // Chords on 1 and 3
+        if (beat === 0 || beat === 8) {
+          chord.forEach(f => this._note(f, 'triangle', master, time, 0.2, 0.025));
+        }
+      });
+    },
+
+    // ── Synthpop: 80s retro ──
+    synthpop() {
+      this.stop(0.15);
+      var master = this._init(0.13);
+      this.currentTrack = 'synthpop';
+      this._bpm = 120;
+      var bassLine = [110, 110, 130.81, 146.83, 110, 110, 146.83, 130.81];
+      var chords = [
+        [220, 277.18, 329.63],    // Am
+        [196, 246.94, 293.66],    // G
+        [174.61, 220, 261.63],    // F
+        [164.81, 207.65, 246.94]  // Em
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Four on floor kick
+        if (beat % 4 === 0) {
+          this._kick(master, time);
+        }
+        // Hi-hat eighths
+        if (beat % 2 === 0) {
+          this._hihat(master, time, 0.03);
+        }
+        // Arp bass (sawtooth for that synth feel)
+        if (beat % 2 === 0) {
+          var bassNote = bassLine[(bar * 4 + beat / 2) % bassLine.length];
+          this._note(bassNote, 'sawtooth', master, time, 0.15, 0.04);
+        }
+        // Synth pad on 1
+        if (beat === 0) {
+          chord.forEach(f => this._note(f * 2, 'sawtooth', master, time, 0.3, 0.015));
+        }
+      });
+    },
+
+    // ── Jazz: light pizzicato ──
+    jazz() {
+      this.stop(0.15);
+      var master = this._init(0.12);
+      this.currentTrack = 'jazz';
+      this._bpm = 130;
+      var chords = [
+        [261.63, 329.63, 392, 466.16],   // Cmaj7
+        [220, 261.63, 329.63, 440],       // Am7
+        [174.61, 220, 261.63, 329.63],    // Fmaj7
+        [196, 246.94, 293.66, 370]        // G7
+      ];
+      this._startScheduler((time, step) => {
+        var bar = Math.floor(step / 16) % 4;
+        var beat = step % 16;
+        var chord = chords[bar];
+        // Brush-style
+        if (beat === 0 || beat === 8) {
+          this._kick(master, time);
+        }
+        if (beat % 4 === 0) {
+          this._hihat(master, time, 0.025);
+        }
+        if (beat % 4 === 3) {
+          this._hihat(master, time, 0.012);
+        }
+        // Plucked melody (short, staccato)
+        if (beat % 4 === 0) {
+          var noteIdx = (beat / 4) % chord.length;
+          this._note(chord[noteIdx], 'triangle', master, time, 0.08, 0.03);
+        }
+        // Bass
+        if (beat === 0) {
+          this._note(chord[0] / 2, 'sine', master, time, 0.3, 0.05);
+        }
+      });
+    },
+
+    // ── Tension: game-show pulse ──
+    tension() {
+      this.stop(0.15);
+      var master = this._init(0.12);
+      this.currentTrack = 'tension';
+      this._bpm = 100;
+      this._startScheduler((time, step) => {
+        var beat = step % 16;
+        // Heartbeat kick
+        if (beat === 0 || beat === 3) {
+          this._kick(master, time);
+        }
+        // Tense hi-hat
+        if (beat % 2 === 0) {
+          this._hihat(master, time, 0.025);
+        }
+        // Minor drone
+        if (beat === 0) {
+          this._note(130.81, 'sine', master, time, 0.8, 0.04);
+          this._note(155.56, 'sine', master, time, 0.8, 0.03); // Eb - minor feel
+        }
+        // Rising tension note
+        if (beat === 8) {
+          this._note(220, 'sawtooth', master, time, 0.15, 0.02);
+        }
+        if (beat === 12) {
+          this._note(246.94, 'sawtooth', master, time, 0.15, 0.02);
+        }
+      });
     }
   };
 
@@ -3604,7 +3770,52 @@
     {category:"True or False",question:"True or False: Robben Island was used as a prison for over 400 years.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
     {category:"True or False",question:"True or False: The Bo-Kaap houses were painted in bright colors to celebrate the end of slavery.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
     {category:"True or False",question:"True or False: There are more than 2,200 plant species on Table Mountain.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
-    {category:"True or False",question:"True or False: Cape Town's tap water comes primarily from underground springs.",correct_answer:"False",incorrect_answers:["True"],difficulty:2}
+    {category:"True or False",question:"True or False: Cape Town's tap water comes primarily from underground springs.",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+
+    // ── CT FITNESS & WELLNESS ──
+    {category:"CT Fitness & Wellness",question:"What is HYROX?",correct_answer:"A global indoor fitness race combining running and functional workout stations",incorrect_answers:["A CrossFit competition","An obstacle course race like Tough Mudder","A bodybuilding expo"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"Where was the first HYROX event held in Africa?",correct_answer:"Cape Town International Convention Centre (CTICC)",incorrect_answers:["GrandWest Arena","Cape Town Stadium","Stellenbosch University"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"In what year did HYROX first come to Cape Town?",correct_answer:"2024",incorrect_answers:["2019","2022","2026"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"How many workout stations does a standard HYROX race include?",correct_answer:"8",incorrect_answers:["5","10","12"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"HYROX Cape Town 2026 expanded to how many days?",correct_answer:"3 days",incorrect_answers:["1 day","2 days","5 days"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"Which of these is NOT a standard HYROX workout station?",correct_answer:"Rope climb",incorrect_answers:["Sled push","Wall balls","Farmers carry"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"Where is SaunaHaus located in Cape Town?",correct_answer:"Mouille Point, 160 Beach Road",incorrect_answers:["Camps Bay main road","V&A Waterfront","Kalk Bay harbour"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What Scandinavian ritual is SaunaHaus known for hosting?",correct_answer:"Saunagus — a guided sauna ceremony with essential oils and towel-waving",incorrect_answers:["Polar bear plunge competitions","Viking fitness challenges","Nordic walking classes"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What opened in December 2025 at Muizenberg and was billed as Africa's first?",correct_answer:"Muizenberg Beach Hut Sauna — Africa's first beachfront sauna",incorrect_answers:["Africa's first surf school","A beachfront CrossFit box","An ice bath facility"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What is the name of the cold-water swimming group that meets at Camps Bay tidal pool?",correct_answer:"The Waterblommetjies",incorrect_answers:["The Polar Bears CT","Cape Cold Swimmers","Atlantic Dippers"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"Where does the wellness centre Expand Health, known for its rooftop cold plunge, operate?",correct_answer:"De Waterkant",incorrect_answers:["Woodstock","Sea Point","Constantia"],difficulty:3},
+    {category:"CT Fitness & Wellness",question:"Cape CrossFit, one of the city's oldest CrossFit boxes, was established in what year?",correct_answer:"2009",incorrect_answers:["2005","2014","2018"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"How many times has Cape CrossFit won the FiCT team championship?",correct_answer:"5 times",incorrect_answers:["Once","3 times","Never"],difficulty:3},
+    {category:"CT Fitness & Wellness",question:"Where is the annual FiCT (Fittest in Cape Town) CrossFit competition held?",correct_answer:"Stellenbosch University",incorrect_answers:["Cape Town Stadium","CTICC","GrandWest Arena"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"The Two Oceans Marathon ultra-distance is how many kilometres?",correct_answer:"56 km",incorrect_answers:["42.2 km","80 km","21.1 km"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What remarkable feat did Dirkie Steyn achieve at the first Two Oceans Marathon in 1970?",correct_answer:"He won the race running barefoot",incorrect_answers:["He ran it backwards","He completed it in under 2 hours","He ran it twice in one day"],difficulty:3},
+    {category:"CT Fitness & Wellness",question:"What is special about the Cape Town Marathon in African road running?",correct_answer:"It is Africa's only World Athletics Gold Label marathon",incorrect_answers:["It is the oldest marathon in Africa","It is the shortest major marathon","It is run entirely uphill"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"How many parkrun locations are there in the greater Cape Town area?",correct_answer:"13",incorrect_answers:["3","7","25"],difficulty:3},
+    {category:"CT Fitness & Wellness",question:"What is parkrun?",correct_answer:"A free, weekly timed 5km community run held every Saturday morning",incorrect_answers:["A paid trail race series","A monthly marathon","An indoor treadmill challenge"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"The Robben Island swim covers approximately how many kilometres?",correct_answer:"7.5 km",incorrect_answers:["2 km","15 km","21 km"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What is the approximate water temperature for the Robben Island swim?",correct_answer:"13-14 degrees Celsius",incorrect_answers:["20-22 degrees Celsius","8-9 degrees Celsius","25-27 degrees Celsius"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"Where is the famous free outdoor gym along the Atlantic Seaboard?",correct_answer:"Sea Point Promenade",incorrect_answers:["Camps Bay beachfront","Green Point Urban Park","V&A Waterfront"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What is notable about the Sea Point Promenade outdoor gym?",correct_answer:"It is free and accessible 24 hours a day",incorrect_answers:["It requires a monthly membership","It is only open on weekends","It is indoor only"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"Which is the oldest route up Table Mountain, popular with fitness hikers?",correct_answer:"Platteklip Gorge",incorrect_answers:["Skeleton Gorge","India Venster","Kasteelspoort"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"One Flow Cape Town is a studio specialising in which practice?",correct_answer:"Yoga",incorrect_answers:["CrossFit","Boxing","Pilates"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What type of yoga class has grown popular in Cape Town outdoor settings like beaches and parks?",correct_answer:"Sunrise yoga and outdoor flow sessions",incorrect_answers:["Hot yoga in saunas","Underwater yoga","Skydiving yoga"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"The Wim Hof Method, popular in Cape Town wellness circles, combines cold exposure with what?",correct_answer:"Specific breathing techniques and meditation",incorrect_answers:["Weightlifting and sprinting","Hot sauna and steam rooms","Massage and aromatherapy"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What is a cold plunge?",correct_answer:"Brief immersion in cold water (typically below 15 degrees Celsius) for health benefits",incorrect_answers:["A swimming pool dive","A waterslide at a theme park","A type of deep-sea diving"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"Which Cape Town suburb has become a hub for boutique fitness studios and wellness centres?",correct_answer:"Sea Point",incorrect_answers:["Mitchells Plain","Bellville","Kuils River"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What annual multi-sport event combines swimming, cycling, and running in Cape Town?",correct_answer:"The Cape Town Triathlon",incorrect_answers:["The Peninsula Decathlon","The Atlantic Biathlon","The Table Mountain Pentathlon"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"Lions Head is a popular destination for what fitness activity at sunrise and full moon?",correct_answer:"Hiking — large groups hike at sunrise and during full moon nights",incorrect_answers:["Marathon running","Rock climbing competitions","Paragliding"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What is the typical distance of the Green Point parkrun along the Sea Point Promenade?",correct_answer:"5 km",incorrect_answers:["10 km","3 km","21 km"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"In HYROX, what exercise involves pushing a heavy weighted platform across the floor?",correct_answer:"Sled push",incorrect_answers:["Deadlift","Bench press","Pull-up"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"Which iconic Cape Town mountain offers a steep staircase workout popular with fitness enthusiasts?",correct_answer:"Lions Head",incorrect_answers:["Devils Peak","Signal Hill","Tygerberg Hill"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What functional fitness exercise involves throwing a heavy ball at a wall target?",correct_answer:"Wall balls",incorrect_answers:["Slam balls","Medicine ball sit-ups","Kettlebell swings"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"Where does the Cape Town open-water swimming community commonly train?",correct_answer:"Camps Bay tidal pool and Clifton beaches",incorrect_answers:["Indoor pools only","Table Bay harbour","Canal Walk shopping centre"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What is contrast therapy, offered at several Cape Town wellness venues?",correct_answer:"Alternating between hot (sauna/steam) and cold (plunge/ocean) exposure",incorrect_answers:["Bright light therapy for mood","High and low altitude training","Switching between cardio and weights"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"The Sea Point Promenade stretches approximately how many kilometres?",correct_answer:"About 11 km from Mouille Point to Hout Bay",incorrect_answers:["2 km","25 km","50 km"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What health benefit is most commonly associated with regular cold water immersion?",correct_answer:"Reduced inflammation and improved recovery",incorrect_answers:["Increased body fat","Higher blood pressure","Weaker immune system"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"Which suburb hosts the Newlands Forest trails popular with trail runners?",correct_answer:"Newlands",incorrect_answers:["Claremont","Rondebosch","Wynberg"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"What does WOD stand for in CrossFit terminology?",correct_answer:"Workout of the Day",incorrect_answers:["Week of Discipline","Weight on Dumbbells","Winners on Demand"],difficulty:1},
+    {category:"CT Fitness & Wellness",question:"The annual Sanlam Cape Town Marathon follows a route through which scenic areas?",correct_answer:"The city centre, Green Point, and along the Atlantic Seaboard",incorrect_answers:["Only through the V&A Waterfront","Entirely on Table Mountain","Through the Cape Winelands"],difficulty:2},
+    {category:"CT Fitness & Wellness",question:"What Finnish tradition has become a growing wellness trend in Cape Town?",correct_answer:"Sauna culture — regular sauna sessions for health and socialising",incorrect_answers:["Ice fishing","Reindeer herding fitness","Nordic skiing"],difficulty:1}
   ];
 
   // ═══════════════════════════════════════
@@ -3623,13 +3834,34 @@
   var currentPlayer = 'p1';
   var lastStartingPlayer = 'p1';
   var isDoublePoints = false;
+  var isRoulette = false;
+  var rouletteBlockSize = 3;
+  var rouletteCategories = [];
+  var currentRouletteBlock = -1;
+  var ROULETTE_CATS = ['Frenchies','Hiking','SA Wines','Paris','Cheeses','Braai Culture','90s Pop Culture','SA Food & Slang','True or False','CT Coffee & Cafes','Cape Winelands','CT Foodie','Cape Adventures','CT Fitness & Wellness'];
+  var ROULETTE_COLORS = ['#00f0ff','#ff2d78','#8b5cf6','#fbbf24','#10b981','#f97316','#ec4899','#06b6d4','#84cc16','#a78bfa','#f43f5e','#14b8a6','#eab308','#ef4444'];
+  var CATEGORY_MUSIC = {
+    'Frenchies': 'french',
+    'Paris': 'french',
+    'CT Coffee & Cafes': 'bossa',
+    'Cape Winelands': 'classical',
+    'SA Wines': 'classical',
+    'CT Foodie': 'afrobeat',
+    'Braai Culture': 'afrobeat',
+    'SA Food & Slang': 'marabi',
+    'Cape Adventures': 'ambient',
+    'Hiking': 'ambient',
+    '90s Pop Culture': 'synthpop',
+    'Cheeses': 'jazz',
+    'True or False': 'tension',
+    'CT Fitness & Wellness': 'tension'
+  };
 
   let timerInterval = null;
   let timeLeft = 0;
   let prevTimeLeft = 0;
   let answered = false;
   let gameLoading = false;
-  let ttsPlaying = false;
   let isPaused = false;
   let pauseTimeLeft = 0;
   var lastAnswerTime = 0;
@@ -3637,8 +3869,6 @@
 
   // ── Cascade state (to track ongoing cascade animations) ──
   let cascadeInProgress = false;
-  let voiceEnabled = false;
-  let voiceId = '21m00Tcm4TlvDq8ikWAM';
   let lifetimeStats = null;
   // ── Achievement tracking state ──
   var gameTracker = {
@@ -3805,11 +4035,11 @@
     try {
       settings.timer = parseInt(getSelected('timer')) || 15;
       settings.category = getSelected('cat');
+      isRoulette = settings.category === 'roulette';
+      if (isRoulette) {
+        settings.category = ''; // load ALL questions for roulette
+      }
       settings.rounds = parseInt(getSelected('rounds')) || 10;
-      const voiceSetting = getSelected('voice');
-      voiceEnabled = voiceSetting !== 'off';
-      voiceId = voiceSetting === 'custom' ? '5W1ijlUigww8GacnRjZV' : '21m00Tcm4TlvDq8ikWAM';
-
       // Reset both players
       players.p1 = { name: playerNames.p1, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
       players.p2 = { name: playerNames.p2, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
@@ -3818,6 +4048,7 @@
       // Reset cascade state
       cascadeInProgress = false;
       isDoublePoints = false;
+      currentRouletteBlock = -1;
       var dpBadge = document.getElementById('double-points-badge');
       if (dpBadge) dpBadge.remove();
 
@@ -3853,11 +4084,46 @@
         settings.rounds = questions.length;
       }
 
+      // Roulette: pre-pick categories for each block
+      if (isRoulette) {
+        rouletteBlockSize = questions.length <= 10 ? 3 : (questions.length <= 15 ? 4 : 5);
+        var allCats = [];
+        for (var qi = 0; qi < questions.length; qi++) {
+          if (allCats.indexOf(questions[qi].category) === -1) allCats.push(questions[qi].category);
+        }
+        var numBlocks = Math.ceil(questions.length / rouletteBlockSize);
+        rouletteCategories = [];
+        for (var bi = 0; bi < numBlocks; bi++) {
+          rouletteCategories.push(allCats[Math.floor(Math.random() * allCats.length)]);
+        }
+        currentRouletteBlock = -1;
+      }
+
       sfxStart();
-      Music.game();
+      // Play category-themed music (or default game music)
+      if (!isRoulette && settings.category) {
+        var musicTheme = CATEGORY_MUSIC[settings.category];
+        if (musicTheme && Music[musicTheme]) {
+          Music[musicTheme]();
+        } else {
+          Music.game();
+        }
+      } else {
+        Music.game();
+      }
       showScreen('game');
-      showTurnSwitch(currentPlayer, () => {
-        showRoundSplash(1, () => loadQuestion());
+      showTurnSwitch(currentPlayer, function() {
+        if (isRoulette) {
+          currentRouletteBlock = 0;
+          var rouletteCat = rouletteCategories[0] || ROULETTE_CATS[Math.floor(Math.random() * ROULETTE_CATS.length)];
+          showRouletteWheel(rouletteCat, function() {
+            var theme = CATEGORY_MUSIC[rouletteCat] || 'game';
+            if (Music[theme]) { Music[theme](); } else { Music.game(); }
+            showRoundSplash(1, function() { loadQuestion(); });
+          });
+        } else {
+          showRoundSplash(1, function() { loadQuestion(); });
+        }
       });
     } finally {
       gameLoading = false;
@@ -3934,6 +4200,103 @@
     return arr;
   }
 
+  function showRouletteWheel(targetCategory, cb) {
+    var overlay = document.getElementById('roulette-overlay');
+    var canvas = document.getElementById('roulette-wheel');
+    var label = document.getElementById('roulette-label');
+    var ctx = canvas.getContext('2d');
+    var cats = ROULETTE_CATS;
+    var colors = ROULETTE_COLORS;
+    var segAngle = (Math.PI * 2) / cats.length;
+
+    // Find target index
+    var targetIdx = 0;
+    for (var i = 0; i < cats.length; i++) {
+      if (cats[i] === targetCategory) { targetIdx = i; break; }
+    }
+
+    function drawWheel(rotation) {
+      ctx.clearRect(0, 0, 400, 400);
+      ctx.save();
+      ctx.translate(200, 200);
+      ctx.rotate(rotation);
+      for (var i = 0; i < cats.length; i++) {
+        var startA = i * segAngle;
+        // Segment fill
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 195, startA, startA + segAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.globalAlpha = 0.75;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Text
+        ctx.save();
+        ctx.rotate(startA + segAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px Orbitron, monospace';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 3;
+        var displayName = cats[i].length > 16 ? cats[i].substring(0, 14) + '..' : cats[i];
+        ctx.fillText(displayName, 180, 4);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    // Show overlay
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'all';
+    label.style.opacity = '0';
+    label.textContent = '';
+
+    // Spin: target angle puts the selected segment at the top (pointer position)
+    // Pointer is at top (12 o'clock = -PI/2 in canvas coords)
+    var targetAngle = -(targetIdx * segAngle + segAngle / 2) - Math.PI / 2;
+    var totalSpin = Math.PI * 8 + targetAngle; // 4 full spins + target
+    var duration = 3000;
+    var startTime = performance.now();
+    var lastTickStep = -1;
+
+    sfxWhoosh();
+
+    function animate(now) {
+      var elapsed = now - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic for deceleration
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var currentAngle = totalSpin * eased;
+      drawWheel(currentAngle);
+
+      // Tick sound as segments pass the pointer
+      var currentStep = Math.floor(currentAngle / segAngle);
+      if (currentStep !== lastTickStep && progress < 0.9) {
+        sfxTick();
+        lastTickStep = currentStep;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Show result label
+        label.textContent = targetCategory;
+        label.style.opacity = '1';
+        sfxCorrect();
+        setTimeout(function() {
+          overlay.style.opacity = '0';
+          overlay.style.pointerEvents = 'none';
+          if (cb) cb();
+        }, 1200);
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
   var turnSwitchInterval = null;
 
   var turnSwitchCallback = null;
@@ -4004,24 +4367,26 @@
     }
 
     answered = false;
-    ttsPlaying = false;
     const q = questions[currentQ];
-    const answers = shuffleArray([
-      ...q.incorrect_answers.map(a => ({ text: decodeHTML(a), correct: false })),
-      { text: decodeHTML(q.correct_answer), correct: true }
-    ]);
+    const answers = shuffleArray(
+      q.incorrect_answers.map(a => ({ text: decodeHTML(a), correct: false })).concat([
+        { text: decodeHTML(q.correct_answer), correct: true }
+      ])
+    );
 
     document.getElementById('hud-question').textContent = `${currentQ + 1}/${questions.length}`;
 
     // Update current player display
     const playerEl = document.getElementById('hud-player');
-    playerEl.innerHTML = players[currentPlayer].name +
-      (voiceEnabled ? '<span id="hud-speaker" class="hud-speaker">&#128264;</span>' : '');
+    playerEl.textContent = players[currentPlayer].name;
     playerEl.style.color = currentPlayer === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
     document.getElementById('hud-p1-score').textContent = formatScore(players.p1.score);
     document.getElementById('hud-p2-score').textContent = formatScore(players.p2.score);
     document.getElementById('q-category').textContent = decodeHTML(q.category);
+    if (isRoulette && currentRouletteBlock >= 0 && rouletteCategories[currentRouletteBlock]) {
+      document.getElementById('q-category').textContent = '\ud83c\udfb0 ' + rouletteCategories[currentRouletteBlock];
+    }
     document.getElementById('q-text').textContent = decodeHTML(q.question);
 
     // Comeback round: double points if final question and scores are close
@@ -4081,18 +4446,7 @@
       </button>
     `).join('');
 
-    // TTS: read question aloud if enabled
-    if (voiceEnabled) {
-      ttsPlaying = true;
-      const speaker = document.getElementById('hud-speaker');
-      if (speaker) speaker.classList.add('loading');
-      const questionText = decodeHTML(q.question);
-      await playQuestionTTS(questionText);
-      if (speaker) speaker.classList.remove('loading');
-      ttsPlaying = false;
-    }
-
-    // Start timer AFTER TTS finishes
+    // Start timer
     startQuestionTimer();
 
     // Focus first answer for keyboard nav
@@ -4371,6 +4725,20 @@
     currentQ++;
     if (currentQ < questions.length) {
       showTurnSwitch(currentPlayer, function() {
+        // Check if we need a roulette spin for a new block
+        if (isRoulette) {
+          var blockIdx = Math.floor(currentQ / rouletteBlockSize);
+          if (blockIdx !== currentRouletteBlock) {
+            currentRouletteBlock = blockIdx;
+            var rouletteCat = rouletteCategories[blockIdx] || ROULETTE_CATS[Math.floor(Math.random() * ROULETTE_CATS.length)];
+            showRouletteWheel(rouletteCat, function() {
+              var theme = CATEGORY_MUSIC[rouletteCat] || 'game';
+              if (Music[theme]) { Music[theme](); } else { Music.game(); }
+              loadQuestion();
+            });
+            return;
+          }
+        }
         if (currentQ % 5 === 0) {
           showRoundSplash(currentQ + 1, function() { loadQuestion(); });
         } else {
@@ -4389,7 +4757,7 @@
     var now = Date.now();
     if (now - lastAnswerTime < 300) return;
     lastAnswerTime = now;
-    if (answered || ttsPlaying || isPaused) return;
+    if (answered || isPaused) return;
     answered = true;
     stopQuestionTimer();
     ensureAudio();
@@ -4855,33 +5223,6 @@
   }
 
   // ═══════════════════════════════════════
-  //  TTS (ElevenLabs via Cloudflare proxy)
-  // ═══════════════════════════════════════
-  async function playQuestionTTS(text) {
-    if (!voiceEnabled) return false;
-    try {
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voice_id: voiceId }),
-        signal: AbortSignal.timeout(6000)
-      });
-      if (!res.ok) return false;
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audio.volume = 0.5;
-      return new Promise(resolve => {
-        audio.onended = () => { URL.revokeObjectURL(url); resolve(true); };
-        audio.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
-        audio.play().catch(() => { URL.revokeObjectURL(url); resolve(false); });
-      });
-    } catch(e) {
-      return false;
-    }
-  }
-
-  // ═══════════════════════════════════════
   //  ACHIEVEMENTS SYSTEM
   // ═══════════════════════════════════════
   var ACHIEVEMENTS = [
@@ -5240,8 +5581,6 @@
           pinBuffer = '';
           updatePinDots();
           showScreen('admin');
-          loadAdminCosts();
-          loadAdminAudio();
         }, 250);
       } else {
         // Wrong PIN — shake and reset
@@ -5275,265 +5614,6 @@
     }
   }
 
-  function loadAdminCosts() {
-    var loadingEl = document.getElementById('admin-costs-loading');
-    var statsEl = document.getElementById('admin-costs-stats');
-    var errorEl = document.getElementById('admin-costs-error');
-
-    loadingEl.style.display = 'block';
-    statsEl.style.display = 'none';
-    errorEl.style.display = 'none';
-
-    var USD_TO_ZAR = 18.50;
-    var ttsCostZAR = 0;
-    var musicCostZAR = 0;
-    var sfxCostZAR = 0;
-
-    // Fetch all three sources in parallel
-    var ttsPromise = fetch('/api/tts-usage', { signal: AbortSignal.timeout(5000) })
-      .then(function(res) { return res.ok ? res.json() : { totalChars: 0, totalRequests: 0 }; })
-      .catch(function() { return { totalChars: 0, totalRequests: 0 }; });
-
-    var musicPromise = fetch('/api/music?status=true', { signal: AbortSignal.timeout(5000) })
-      .then(function(res) { return res.ok ? res.json() : {}; })
-      .catch(function() { return {}; });
-
-    var sfxPromise = fetch('/api/sfx?status=true', { signal: AbortSignal.timeout(5000) })
-      .then(function(res) { return res.ok ? res.json() : {}; })
-      .catch(function() { return {}; });
-
-    Promise.all([ttsPromise, musicPromise, sfxPromise]).then(function(results) {
-      var ttsData = results[0];
-      var musicData = results[1];
-      var sfxData = results[2];
-
-      loadingEl.style.display = 'none';
-      statsEl.style.display = 'block';
-
-      // TTS costs: ~$0.18 per 1000 chars (Turbo v2.5)
-      var totalChars = ttsData.totalChars || 0;
-      var totalReqs = ttsData.totalRequests || 0;
-      ttsCostZAR = (totalChars / 1000) * 0.18 * USD_TO_ZAR;
-      var avgChars = totalReqs > 0 ? Math.round(totalChars / totalReqs) : 0;
-      var avgCostZAR = totalReqs > 0 ? (ttsCostZAR / totalReqs) : 0;
-
-      document.getElementById('admin-cost-tts').textContent = 'R' + ttsCostZAR.toFixed(2);
-      document.getElementById('admin-cost-tts-detail').textContent = formatScore(totalChars) + ' chars / ' + formatScore(totalReqs) + ' requests';
-      document.getElementById('admin-tts-avg-cost').textContent = 'R' + avgCostZAR.toFixed(2);
-      document.getElementById('admin-tts-avg').textContent = formatScore(avgChars);
-
-      // Music costs: ~$0.71/min (Creator plan: $22/mo for 31 min)
-      var musicTracks = 0;
-      var musicDurationMs = 0;
-      var musicKeys = Object.keys(musicData);
-      for (var i = 0; i < musicKeys.length; i++) {
-        if (musicData[musicKeys[i]]) {
-          musicTracks++;
-          musicDurationMs += (musicData[musicKeys[i]].duration_ms || 0);
-        }
-      }
-      var musicMin = Math.floor(musicDurationMs / 60000);
-      var musicSec = Math.round((musicDurationMs % 60000) / 1000);
-      musicCostZAR = (musicDurationMs / 60000) * 0.71 * USD_TO_ZAR;
-
-      document.getElementById('admin-cost-music').textContent = 'R' + musicCostZAR.toFixed(2);
-      document.getElementById('admin-cost-music-detail').textContent = musicTracks + '/4 tracks / ' + musicMin + 'm ' + musicSec + 's of 31m quota';
-
-      // SFX costs: ~$0.0088/sec (Creator plan: $22/mo for 2,500s)
-      var sfxCount = 0;
-      var sfxDurationSec = 0;
-      var sfxKeys = Object.keys(sfxData);
-      for (var j = 0; j < sfxKeys.length; j++) {
-        if (sfxData[sfxKeys[j]]) {
-          sfxCount++;
-          sfxDurationSec += (sfxData[sfxKeys[j]].duration || 0);
-        }
-      }
-      sfxCostZAR = sfxDurationSec * 0.0088 * USD_TO_ZAR;
-
-      document.getElementById('admin-cost-sfx').textContent = 'R' + sfxCostZAR.toFixed(2);
-      document.getElementById('admin-cost-sfx-detail').textContent = sfxCount + '/12 effects / ' + sfxDurationSec.toFixed(1) + 's of 2,500s quota';
-
-      // Total
-      var totalCostZAR = ttsCostZAR + musicCostZAR + sfxCostZAR;
-      document.getElementById('admin-total-cost').textContent = 'R' + totalCostZAR.toFixed(2);
-    }).catch(function() {
-      loadingEl.style.display = 'none';
-      errorEl.style.display = 'block';
-    });
-  }
-
-  // ═══════════════════════════════════════
-  //  ADMIN: AUDIO ASSETS (ElevenLabs Music + SFX)
-  // ═══════════════════════════════════════
-  var audioGenerating = false;
-
-  function loadAdminAudio() {
-    var loadingEl = document.getElementById('admin-audio-loading');
-    var contentEl = document.getElementById('admin-audio-content');
-    var errorEl = document.getElementById('admin-audio-error');
-
-    loadingEl.style.display = 'block';
-    contentEl.style.display = 'none';
-    errorEl.style.display = 'none';
-
-    Promise.all([
-      fetch('/api/music?status=true', { signal: AbortSignal.timeout(8000) }).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }),
-      fetch('/api/sfx?status=true', { signal: AbortSignal.timeout(8000) }).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; })
-    ]).then(function(results) {
-      loadingEl.style.display = 'none';
-      contentEl.style.display = 'block';
-      renderAudioAssetList('admin-music-list', results[0], 'music');
-      renderAudioAssetList('admin-sfx-list', results[1], 'sfx');
-    }).catch(function() {
-      loadingEl.style.display = 'none';
-      errorEl.style.display = 'block';
-      errorEl.textContent = 'Could not load audio asset status';
-    });
-  }
-
-  function formatFileSize(bytes) {
-    if (!bytes) return '0 B';
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
-  }
-
-  function renderAudioAssetList(containerId, statusMap, type) {
-    var container = document.getElementById(containerId);
-    var names = Object.keys(statusMap);
-    if (names.length === 0) {
-      container.innerHTML = '<div style="color:rgba(255,255,255,0.25); font-family:Rajdhani,sans-serif; font-size:14px; padding:8px 0;">API not available</div>';
-      return;
-    }
-    var html = '';
-    names.forEach(function(name) {
-      var meta = statusMap[name];
-      var statusColor = meta ? 'var(--neon-green)' : 'rgba(255,255,255,0.35)';
-      var statusText = meta ? formatFileSize(meta.size_bytes) : 'Not generated';
-      var label = meta ? (meta.label || name) : name;
-      var btnLabel = meta ? 'Regen' : 'Generate';
-
-      html += '<div class="admin-stat-row" id="audio-row-' + type + '-' + name + '">' +
-        '<span class="admin-stat-label" style="flex:1;">' + label + ' <span style="opacity:0.4;">(' + name + ')</span></span>' +
-        '<span id="audio-status-' + type + '-' + name + '" style="font-family:Orbitron,monospace; font-size:clamp(11px,1.1vw,13px); color:' + statusColor + '; margin-right:12px;">' + statusText + '</span>' +
-        '<button class="btn" onclick="generateSingleAudio(\'' + type + '\',\'' + name + '\')" id="btn-gen-' + type + '-' + name + '" style="font-size:10px; padding:5px 12px; min-width:auto; letter-spacing:0.05em;">' + btnLabel + '</button>' +
-      '</div>';
-    });
-    container.innerHTML = html;
-  }
-
-  function generateSingleAudio(type, name) {
-    if (audioGenerating) return;
-    audioGenerating = true;
-    var btn = document.getElementById('btn-gen-' + type + '-' + name);
-    var statusEl = document.getElementById('audio-status-' + type + '-' + name);
-    if (btn) { btn.textContent = '...'; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.4'; }
-    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.style.color = 'var(--neon-yellow)'; }
-
-    var url = type === 'music' ? '/api/music' : '/api/sfx';
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name }),
-      signal: AbortSignal.timeout(300000) // 5 min timeout for music generation
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      audioGenerating = false;
-      if (data.ok) {
-        if (statusEl) { statusEl.textContent = formatFileSize(data.meta.size_bytes); statusEl.style.color = 'var(--neon-green)'; }
-        if (btn) { btn.textContent = 'Regen'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
-        // Reload the audio into ElevenAudio cache
-        ElevenAudio._fetchAudio('/api/' + type + '?name=' + name).then(function(buf) {
-          if (buf) {
-            if (type === 'music') ElevenAudio.music[name] = buf;
-            else ElevenAudio.sfx[name] = buf;
-          }
-        });
-      } else {
-        var errMsg = data.error || 'Failed';
-        if (data.detail) errMsg += ': ' + (typeof data.detail === 'string' ? data.detail.substring(0, 120) : JSON.stringify(data.detail).substring(0, 120));
-        if (statusEl) { statusEl.textContent = errMsg; statusEl.style.color = 'var(--neon-pink)'; }
-        if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
-      }
-    })
-    .catch(function(e) {
-      audioGenerating = false;
-      if (statusEl) { statusEl.textContent = 'Error: ' + (e.message || 'Unknown'); statusEl.style.color = 'var(--neon-pink)'; }
-      if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
-    });
-  }
-
-  async function generateAllMusic() {
-    if (audioGenerating) return;
-    audioGenerating = true;
-    var progressEl = document.getElementById('admin-audio-progress');
-    var progressText = document.getElementById('admin-audio-progress-text');
-    progressEl.style.display = 'block';
-
-    var names = ['title', 'game', 'victory', 'draw'];
-    for (var i = 0; i < names.length; i++) {
-      progressText.textContent = 'Generating music: ' + names[i] + ' (' + (i + 1) + '/' + names.length + ')...';
-      await generateSingleAudioAsync('music', names[i]);
-    }
-    progressEl.style.display = 'none';
-    audioGenerating = false;
-  }
-
-  async function generateAllSfx() {
-    if (audioGenerating) return;
-    audioGenerating = true;
-    var progressEl = document.getElementById('admin-audio-progress');
-    var progressText = document.getElementById('admin-audio-progress-text');
-    progressEl.style.display = 'block';
-
-    var names = ElevenAudio.SFX_NAMES;
-    for (var i = 0; i < names.length; i++) {
-      progressText.textContent = 'Generating SFX: ' + names[i] + ' (' + (i + 1) + '/' + names.length + ')...';
-      await generateSingleAudioAsync('sfx', names[i]);
-    }
-    progressEl.style.display = 'none';
-    audioGenerating = false;
-  }
-
-  function generateSingleAudioAsync(type, name) {
-    var btn = document.getElementById('btn-gen-' + type + '-' + name);
-    var statusEl = document.getElementById('audio-status-' + type + '-' + name);
-    if (btn) { btn.textContent = '...'; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.4'; }
-    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.style.color = 'var(--neon-yellow)'; }
-
-    var url = type === 'music' ? '/api/music' : '/api/sfx';
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name }),
-      signal: AbortSignal.timeout(300000)
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data.ok) {
-        if (statusEl) { statusEl.textContent = formatFileSize(data.meta.size_bytes); statusEl.style.color = 'var(--neon-green)'; }
-        if (btn) { btn.textContent = 'Regen'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
-        return ElevenAudio._fetchAudio('/api/' + type + '?name=' + name).then(function(buf) {
-          if (buf) {
-            if (type === 'music') ElevenAudio.music[name] = buf;
-            else ElevenAudio.sfx[name] = buf;
-          }
-        });
-      } else {
-        var errMsg2 = data.error || 'Failed';
-        if (data.detail) errMsg2 += ': ' + (typeof data.detail === 'string' ? data.detail.substring(0, 120) : JSON.stringify(data.detail).substring(0, 120));
-        if (statusEl) { statusEl.textContent = errMsg2; statusEl.style.color = 'var(--neon-pink)'; }
-        if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
-      }
-    })
-    .catch(function(e2) {
-      if (statusEl) { statusEl.textContent = 'Error: ' + (e2.message || 'Unknown'); statusEl.style.color = 'var(--neon-pink)'; }
-      if (btn) { btn.textContent = 'Retry'; btn.style.pointerEvents = ''; btn.style.opacity = ''; }
-    });
-  }
-
   // ═══════════════════════════════════════
   //  LANGUAGE SYSTEM
   // ═══════════════════════════════════════
@@ -5549,7 +5629,6 @@
       category: 'Category',
       timer: 'Timer',
       rounds: 'Rounds',
-      voice: 'Voice',
       play: 'Play!',
       back: 'Back',
       home: 'Home',
@@ -5583,7 +5662,6 @@
       category: 'Kategorie',
       timer: 'Tydhouer',
       rounds: 'Rondtes',
-      voice: 'Stem',
       play: 'Speel!',
       back: 'Terug',
       home: 'Huis Toe',
@@ -5625,7 +5703,7 @@
     var settingsTitle = document.querySelector('#screen-settings .screen-title');
     if (settingsTitle) settingsTitle.textContent = t('gameSetup');
     var settingLabels = document.querySelectorAll('#screen-settings .setting-group > label');
-    var labelKeys = ['category', 'timer', 'rounds', 'voice'];
+    var labelKeys = ['category', 'timer', 'rounds'];
     for (var i = 0; i < settingLabels.length && i < labelKeys.length; i++) {
       settingLabels[i].textContent = t(labelKeys[i]);
     }
@@ -5762,7 +5840,7 @@
     const upperKey = key.toUpperCase();
     if (['A','B','C','D'].indexOf(upperKey) !== -1 && document.getElementById('screen-game').classList.contains('active')) {
       const idx = upperKey.charCodeAt(0) - 65;
-      if (!answered && !ttsPlaying && !isPaused) {
+      if (!answered && !isPaused) {
         const btn = document.querySelector('.answer-btn[data-index="' + idx + '"]');
         if (btn) selectAnswer(btn);
       }
@@ -5796,7 +5874,7 @@
     const gameActive = document.getElementById('screen-game').classList.contains('active');
 
     // Navigate 2x2 answer grid during game
-    if (gameActive && !answered && !ttsPlaying && !isPaused) {
+    if (gameActive && !answered && !isPaused) {
       const btns = [].slice.call(document.querySelectorAll('#answers-grid .answer-btn'));
       const idx = btns.indexOf(active);
       if (idx === -1) { if (btns[0]) btns[0].focus(); return; }
