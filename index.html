@@ -201,6 +201,8 @@
     font-size: clamp(16px, 1.8vw, 22px);
     font-weight: 600;
     padding: 12px 28px;
+    min-height: 48px;
+    min-width: 64px;
     border: 1.5px solid rgba(255,255,255,0.15);
     background: rgba(255,255,255,0.03);
     color: rgba(255,255,255,0.5);
@@ -217,6 +219,50 @@
     background: rgba(0,240,255,0.1);
     box-shadow: 0 0 15px rgba(0,240,255,0.15);
     transform: scale(1.05);
+  }
+
+  /* ─── NAME ENTRY SCREEN ─── */
+  .name-entry-container {
+    display: flex; gap: 60px; align-items: center; justify-content: center;
+    margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .name-entry-field {
+    display: flex; flex-direction: column; align-items: center; gap: 15px;
+  }
+  .name-entry-label {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 2.5vw, 28px);
+    font-weight: 700; letter-spacing: 0.1em;
+  }
+  .name-entry-input {
+    background: rgba(15, 15, 40, 0.85);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+    width: 280px;
+    max-width: 80vw;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .name-entry-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0,240,255,0.3);
+  }
+  .name-entry-input.pink-focus:focus {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 20px rgba(255,45,120,0.3);
+  }
+  .name-entry-vs {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 900;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 20px rgba(255,230,0,0.4);
   }
 
   /* ─── GAME SCREEN ─── */
@@ -243,12 +289,12 @@
   }
   .hud-value {
     font-family: 'Orbitron', monospace;
-    font-size: clamp(28px, 3.5vw, 48px);
-    font-weight: 900;
+    font-size: clamp(1.3rem, 2.5vw, 2rem);
+    font-weight: 700;
     color: var(--neon-cyan);
   }
   .hud-value.streak { color: var(--neon-yellow); }
-  .hud-value.score { color: var(--neon-pink); }
+  .hud-value.score { color: var(--neon-pink); font-size: clamp(1.5rem, 3vw, 2.5rem); }
   .hud-value.score-pop {
     animation: scorePop 0.35s ease;
   }
@@ -277,13 +323,28 @@
     animation: turnPulse 1.5s ease infinite;
     pointer-events: none;
   }
-  .hud-item.active-turn.stu-turn::after {
+  .hud-item.active-turn.p2-turn::after {
     border-color: var(--neon-pink);
     box-shadow: 0 0 15px rgba(255,45,120,0.3);
   }
   @keyframes turnPulse {
     0%, 100% { opacity: 0.3; box-shadow: 0 0 10px rgba(0,240,255,0.1); }
     50% { opacity: 1; box-shadow: 0 0 25px rgba(0,240,255,0.4); }
+  }
+  .hud-item.player-active {
+    border: 2px solid var(--neon-cyan);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.3);
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+  }
+  .hud-item.player-active.p2-active {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255,45,120,0.3);
+  }
+  .hud-item.player-inactive {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
   }
 
   /* Speaker icon */
@@ -348,7 +409,7 @@
   /* Question */
   .question-text {
     font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(28px, 3.8vw, 56px);
+    font-size: clamp(2rem, 3.5vw, 3rem);
     font-weight: 700;
     text-align: center;
     max-width: 1100px;
@@ -368,9 +429,10 @@
   }
   .answer-btn {
     font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(20px, 2.5vw, 34px);
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
     font-weight: 600;
     padding: 24px 30px;
+    min-height: 80px;
     border: 2px solid rgba(255,255,255,0.12);
     background: var(--bg-card);
     color: rgba(255,255,255,0.85);
@@ -383,6 +445,7 @@
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(10px);
+    will-change: transform, box-shadow;
   }
   .answer-btn .letter {
     font-family: 'Orbitron', monospace;
@@ -397,10 +460,17 @@
   }
   .answer-btn:hover, .answer-btn:focus {
     border-color: var(--neon-cyan);
-    background: rgba(0,240,255,0.08);
-    transform: scale(1.02);
-    box-shadow: 0 0 25px rgba(0,240,255,0.15);
+    background: rgba(0,240,255,0.12);
+    transform: scale(1.04);
+    box-shadow: 0 0 30px rgba(0,240,255,0.25), inset 0 0 15px rgba(0,240,255,0.08);
     outline: none;
+  }
+  @keyframes focusPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(0,240,255,0.2); }
+    50% { box-shadow: 0 0 35px rgba(0,240,255,0.4); }
+  }
+  .answer-btn:focus {
+    animation: focusPulse 1.5s ease-in-out infinite;
   }
   .answer-btn.correct {
     border-color: var(--correct) !important;
@@ -644,39 +714,55 @@
     text-transform: uppercase;
   }
 
-  /* ─── TURN SWITCH OVERLAY ─── */
+  /* ─── SPOTLIGHT HANDOFF ─── */
   .turn-switch {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     z-index: 10;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    background: rgba(10,10,26,0.92);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.15s ease;
   }
-  .turn-switch.show { opacity: 1; }
+  .turn-switch.show { opacity: 1; pointer-events: all; }
+  .turn-switch-bg {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.92;
+    transition: background 0.2s ease;
+  }
+  .turn-switch-bg.p1-bg {
+    background: linear-gradient(135deg, rgba(0,30,40,0.95), rgba(0,240,255,0.15));
+  }
+  .turn-switch-bg.p2-bg {
+    background: linear-gradient(135deg, rgba(40,0,20,0.95), rgba(255,45,120,0.15));
+  }
   .turn-switch-name {
     font-family: 'Orbitron', monospace;
-    font-size: clamp(40px, 6vw, 80px);
+    font-size: clamp(48px, 8vw, 100px);
     font-weight: 900;
     letter-spacing: 0.1em;
-    margin-bottom: 10px;
+    z-index: 1;
+    animation: spotlightPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   .turn-switch-label {
     font-family: 'Orbitron', monospace;
-    font-size: clamp(18px, 2.5vw, 32px);
-    color: rgba(255,255,255,0.5);
+    font-size: clamp(16px, 2vw, 24px);
+    color: rgba(255,255,255,0.6);
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    margin-bottom: 30px;
+    z-index: 1;
+    margin-top: 15px;
+    animation: spotlightFade 0.6s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
   }
-  .turn-switch-countdown {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(60px, 10vw, 120px);
-    font-weight: 900;
-    color: var(--neon-yellow);
-    text-shadow: 0 0 40px rgba(255,230,0,0.4);
+  @keyframes spotlightPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes spotlightFade {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   /* ─── ERROR SCREEN ─── */
@@ -911,7 +997,7 @@
       text-overflow: ellipsis;
     }
     /* Scores row: span full width on second row */
-    #hud-burden-section, #hud-stu-section {
+    #hud-p1-section, #hud-p2-section {
       padding: 2px 4px;
     }
 
@@ -1054,9 +1140,6 @@
     }
     .turn-switch-label {
       font-size: clamp(14px, 4vw, 24px);
-    }
-    .turn-switch-countdown {
-      font-size: clamp(40px, 14vw, 80px);
     }
 
     /* ── Music Toggle ── */
@@ -1259,7 +1342,7 @@
 
     .round-number { font-size: clamp(40px, 12vw, 80px); }
     .turn-switch-name { font-size: clamp(24px, 6vw, 40px); }
-    .turn-switch-countdown { font-size: clamp(36px, 10vw, 60px); }
+    .turn-switch-label { font-size: clamp(12px, 2vw, 18px); }
 
     .feedback-text { font-size: clamp(28px, 8vw, 56px); }
     .on-fire-text { font-size: clamp(30px, 10vw, 60px); }
@@ -1351,6 +1434,7 @@
   *:focus-visible {
     outline: 3px solid var(--neon-cyan);
     outline-offset: 4px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.3);
   }
 
   /* Loading spinner */
@@ -1632,12 +1716,12 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
-  .achievement-card-player.burden-badge {
+  .achievement-card-player.p1-badge {
     color: var(--neon-cyan);
     border: 1px solid rgba(0,240,255,0.3);
     background: rgba(0,240,255,0.08);
   }
-  .achievement-card-player.stu-badge {
+  .achievement-card-player.p2-badge {
     color: var(--neon-pink);
     border: 1px solid rgba(255,45,120,0.3);
     background: rgba(255,45,120,0.08);
@@ -1795,12 +1879,12 @@
   <div class="title-logo">BRAINBLITZ</div>
   <div class="title-sub">Lekker TV Trivia</div>
   <div class="btn-group btn-row btn-wrap">
-    <button class="btn" onclick="showScreen('settings')" autofocus style="min-width:260px;">Let's Play!</button>
+    <button class="btn" onclick="showScreen('names')" autofocus style="min-width:260px;">Let's Play!</button>
     <button class="btn pink" onclick="showScreen('howto')" style="min-width:220px;">How to Play</button>
     <button class="btn pink" onclick="showScreen('leaderboard')" style="min-width:220px;">Leaderboard</button>
   </div>
   <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
-    <span id="title-burden-wins">BURDEN: 0</span> &nbsp;|&nbsp; <span id="title-stu-wins">STU: 0</span>
+    <span id="title-p1-wins">Player 1: 0</span> &nbsp;|&nbsp; <span id="title-p2-wins">Player 2: 0</span>
   </div>
   <button class="admin-gear" onclick="showScreen('pin')" title="Admin" style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.1em;">ADMIN</button>
 </div>
@@ -1817,6 +1901,26 @@
     <span style="color:rgba(255,255,255,0.4); font-size:0.85em;">Dis maklik, just point and kliek!</span>
   </div>
   <button class="btn" onclick="showScreen('title')">Back</button>
+</div>
+
+<!-- ═══ NAME ENTRY SCREEN ═══ -->
+<div id="screen-names" class="screen">
+  <div class="screen-title">Who's Playing?</div>
+  <div class="name-entry-container">
+    <div class="name-entry-field">
+      <div class="name-entry-label" style="color: var(--neon-cyan);">Player 1</div>
+      <input type="text" id="name-p1" class="name-entry-input" maxlength="12" placeholder="Player 1" autocomplete="off" />
+    </div>
+    <div class="name-entry-vs">VS</div>
+    <div class="name-entry-field">
+      <div class="name-entry-label" style="color: var(--neon-pink);">Player 2</div>
+      <input type="text" id="name-p2" class="name-entry-input pink-focus" maxlength="12" placeholder="Player 2" autocomplete="off" />
+    </div>
+  </div>
+  <div class="btn-group btn-row" id="names-buttons">
+    <button class="btn pink" onclick="showScreen('title')" style="min-width:220px;">Back</button>
+    <button class="btn" onclick="confirmNames()" style="min-width:220px;">Continue</button>
+  </div>
 </div>
 
 <!-- ═══ SETTINGS SCREEN ═══ -->
@@ -1836,6 +1940,10 @@
         <button class="pill" data-val="90s Pop Culture" onclick="selectPill(this,'cat')">90s Pop Culture</button>
         <button class="pill" data-val="SA Food & Slang" onclick="selectPill(this,'cat')">SA Food & Slang</button>
         <button class="pill" data-val="True or False" onclick="selectPill(this,'cat')">True or False</button>
+        <button class="pill" data-val="CT Coffee &amp; Cafes" onclick="selectPill(this,'cat')">CT Coffee &amp; Cafes</button>
+        <button class="pill" data-val="Cape Winelands" onclick="selectPill(this,'cat')">Cape Winelands</button>
+        <button class="pill" data-val="CT Foodie" onclick="selectPill(this,'cat')">CT Foodie</button>
+        <button class="pill" data-val="Cape Adventures" onclick="selectPill(this,'cat')">Cape Adventures</button>
       </div>
     </div>
     <div class="setting-group">
@@ -1884,15 +1992,15 @@
     </div>
     <div class="hud-item">
       <div class="hud-label">Current Player</div>
-      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Burden<span id="hud-speaker" class="hud-speaker" style="display:none;">&#128264;</span></div>
+      <div class="hud-value" id="hud-player" style="color:var(--neon-green);">Player 1<span id="hud-speaker" class="hud-speaker" style="display:none;">&#128264;</span></div>
     </div>
-    <div class="hud-item" id="hud-burden-section">
-      <div class="hud-label">Burden</div>
-      <div class="hud-value score" id="hud-burden-score">0</div>
+    <div class="hud-item" id="hud-p1-section">
+      <div class="hud-label" id="hud-p1-label">Player 1</div>
+      <div class="hud-value score" id="hud-p1-score">0</div>
     </div>
-    <div class="hud-item" id="hud-stu-section">
-      <div class="hud-label">Stu</div>
-      <div class="hud-value score" id="hud-stu-score">0</div>
+    <div class="hud-item" id="hud-p2-section">
+      <div class="hud-label" id="hud-p2-label">Player 2</div>
+      <div class="hud-value score" id="hud-p2-score">0</div>
     </div>
   </div>
   <div class="timer-track">
@@ -1916,33 +2024,33 @@
   <div class="rank-text" id="res-winner" style="margin-bottom: 40px;"></div>
 
   <div class="results-columns">
-    <!-- Burden Stats -->
-    <div id="res-burden-col" class="result-column" style="text-align: center;">
-      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-cyan); margin-bottom: 10px;">BURDEN</div>
-      <div class="results-score" id="res-burden-score" style="font-size: clamp(40px, 8vw, 80px);">0</div>
+    <!-- Player 1 Stats -->
+    <div id="res-p1-col" class="result-column" style="text-align: center;">
+      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-cyan); margin-bottom: 10px;"><span id="res-p1-name">PLAYER 1</span></div>
+      <div class="results-score" id="res-p1-score" style="font-size: clamp(40px, 8vw, 80px);">0</div>
       <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
         <div class="stat-item">
-          <div class="stat-value" id="res-burden-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p1-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Correct</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="res-burden-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p1-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Best Streak</div>
         </div>
       </div>
     </div>
 
-    <!-- Stu Stats -->
-    <div id="res-stu-col" class="result-column" style="text-align: center;">
-      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-pink); margin-bottom: 10px;">STU</div>
-      <div class="results-score" id="res-stu-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+    <!-- Player 2 Stats -->
+    <div id="res-p2-col" class="result-column" style="text-align: center;">
+      <div style="font-family: 'Orbitron', monospace; font-size: 24px; color: var(--neon-pink); margin-bottom: 10px;"><span id="res-p2-name">PLAYER 2</span></div>
+      <div class="results-score" id="res-p2-score" style="font-size: clamp(40px, 8vw, 80px); background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
       <div class="stats-row" style="flex-direction: column; gap: 15px; margin-bottom: 0;">
         <div class="stat-item">
-          <div class="stat-value" id="res-stu-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p2-correct" style="font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Correct</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="res-stu-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
+          <div class="stat-value" id="res-p2-streak" style="color:var(--neon-yellow); font-size: clamp(20px, 3vw, 35px);">0</div>
           <div class="stat-label">Best Streak</div>
         </div>
       </div>
@@ -1971,24 +2079,24 @@
   <div class="screen-title">Leaderboard</div>
   <div id="lb-content" class="lb-columns">
     <div class="lb-column">
-      <div class="lb-name" style="color: var(--neon-cyan);">BURDEN</div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-wins">0</span><span class="lb-label">Wins</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-games">0</span><span class="lb-label">Games</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-draws">0</span><span class="lb-label">Draws</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-total">0</span><span class="lb-label">Total Score</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-correct">0</span><span class="lb-label">Total Correct</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-best">0</span><span class="lb-label">Best Game</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-burden-streak">0</span><span class="lb-label">Best Streak</span></div>
+      <div class="lb-name" style="color: var(--neon-cyan);"><span id="lb-p1-name">PLAYER 1</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-wins">0</span><span class="lb-label">Wins</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-games">0</span><span class="lb-label">Games</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-draws">0</span><span class="lb-label">Draws</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-total">0</span><span class="lb-label">Total Score</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-correct">0</span><span class="lb-label">Total Correct</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-best">0</span><span class="lb-label">Best Game</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p1-streak">0</span><span class="lb-label">Best Streak</span></div>
     </div>
     <div class="lb-column">
-      <div class="lb-name" style="color: var(--neon-pink);">STU</div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-wins">0</span><span class="lb-label">Wins</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-games">0</span><span class="lb-label">Games</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-draws">0</span><span class="lb-label">Draws</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-total">0</span><span class="lb-label">Total Score</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-correct">0</span><span class="lb-label">Total Correct</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-best">0</span><span class="lb-label">Best Game</span></div>
-      <div class="lb-stat"><span class="lb-val" id="lb-stu-streak">0</span><span class="lb-label">Best Streak</span></div>
+      <div class="lb-name" style="color: var(--neon-pink);"><span id="lb-p2-name">PLAYER 2</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-wins">0</span><span class="lb-label">Wins</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-games">0</span><span class="lb-label">Games</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-draws">0</span><span class="lb-label">Draws</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-total">0</span><span class="lb-label">Total Score</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-correct">0</span><span class="lb-label">Total Correct</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-best">0</span><span class="lb-label">Best Game</span></div>
+      <div class="lb-stat"><span class="lb-val" id="lb-p2-streak">0</span><span class="lb-label">Best Streak</span></div>
     </div>
   </div>
   <div id="lb-no-data" class="lb-no-data" style="display:none;">No games played yet. Let's play!</div>
@@ -2130,11 +2238,11 @@
   <div class="on-fire-text">ON FIRE!</div>
 </div>
 
-<!-- Turn switch overlay -->
+<!-- Spotlight handoff overlay -->
 <div class="turn-switch" id="turn-switch">
-  <div class="turn-switch-label">GET READY</div>
-  <div class="turn-switch-name" id="turn-switch-name">BURDEN</div>
-  <div class="turn-switch-countdown" id="turn-switch-countdown">3</div>
+  <div class="turn-switch-bg" id="turn-switch-bg"></div>
+  <div class="turn-switch-name" id="turn-switch-name"></div>
+  <div class="turn-switch-label" id="turn-switch-label">PASS THE REMOTE</div>
 </div>
 
 <!-- Round splash -->
@@ -2407,8 +2515,8 @@
       if (isTenseActive) clearTension();
       return;
     }
-    var bScore = players.burden.score;
-    var sScore = players.stu.score;
+    var bScore = players.p1.score;
+    var sScore = players.p2.score;
     var maxScore = Math.max(bScore, sScore, 1);
     var diff = Math.abs(bScore - sScore);
     var diffPct = diff / maxScore;
@@ -2417,8 +2525,8 @@
         isTenseActive = true;
         var bgGlow = document.querySelector('.bg-glow');
         if (bgGlow) bgGlow.classList.add('tense');
-        var bScoreEl = document.getElementById('hud-burden-score');
-        var sScoreEl = document.getElementById('hud-stu-score');
+        var bScoreEl = document.getElementById('hud-p1-score');
+        var sScoreEl = document.getElementById('hud-p2-score');
         if (bScoreEl) bScoreEl.classList.add('score-tense');
         if (sScoreEl) sScoreEl.classList.add('score-tense');
         if (Music.playing && Music.masterGain) {
@@ -2435,8 +2543,8 @@
     isTenseActive = false;
     var bgGlow = document.querySelector('.bg-glow');
     if (bgGlow) bgGlow.classList.remove('tense');
-    var bScoreEl = document.getElementById('hud-burden-score');
-    var sScoreEl = document.getElementById('hud-stu-score');
+    var bScoreEl = document.getElementById('hud-p1-score');
+    var sScoreEl = document.getElementById('hud-p2-score');
     if (bScoreEl) bScoreEl.classList.remove('score-tense');
     if (sScoreEl) sScoreEl.classList.remove('score-tense');
   }
@@ -3164,6 +3272,226 @@
     {category:"True or False",question:"The human body contains enough iron to make a small nail -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:3},
     {category:"True or False",question:"Australia is wider than the Moon's diameter -- true or false?",correct_answer:"True",incorrect_answers:["False"],difficulty:3},
     {category:"True or False",question:"Ostriches bury their heads in the sand when scared -- true or false?",correct_answer:"False",incorrect_answers:["True"],difficulty:1},
+
+    // ── CT COFFEE & CAFES ──
+    {category:"CT Coffee & Cafes",question:"Which Cape Town coffee shop was voted 'Best Coffee Shop in the World' by The Telegraph in 2016?",correct_answer:"Truth Coffee Roasting",incorrect_answers:["Origin Coffee Roasting","Tribe Coffee","Deluxe Coffeeworks"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"What is the visual theme of Truth Coffee's interior design?",correct_answer:"Steampunk",incorrect_answers:["Art Deco","Industrial Minimalist","Victorian Gothic"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"In which Cape Town neighborhood is Origin Coffee Roasting's flagship cafe located?",correct_answer:"De Waterkant",incorrect_answers:["Woodstock","Gardens","Sea Point"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town roastery operates from a converted warehouse in Woodstock and is known for single-origin beans?",correct_answer:"Rosetta Roastery",incorrect_answers:["Bean There","Bootlegger","Haas Coffee"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What is the name of the popular Saturday morning market at the Old Biscuit Mill known for its artisan coffee stalls?",correct_answer:"Neighbourgoods Market",incorrect_answers:["Oranjezicht City Farm Market","Bay Harbour Market","Hout Bay Market"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town coffee chain has the most locations across the city, known for its relaxed beach-suburb vibe?",correct_answer:"Bootlegger Coffee Company",incorrect_answers:["Vida e Caffe","Seattle Coffee","Mugg & Bean"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Tribe Coffee Roasting is located in which trendy Cape Town suburb?",correct_answer:"Woodstock",incorrect_answers:["Observatory","Salt River","Mowbray"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"What type of coffee brewing method uses a slow drip through a ceramic filter, popular at many CT specialty cafes?",correct_answer:"Pour-over",incorrect_answers:["French press","Moka pot","Percolator"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town bakery on Bree Street is famous for combining artisan baked goods with specialty coffee?",correct_answer:"Jason Bakery",incorrect_answers:["Honest Chocolate","Clarke's Bar & Dining Room","Superette"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What is the name of the fair-trade focused Cape Town roastery that sources beans directly from African farmers?",correct_answer:"Bean There Coffee Company",incorrect_answers:["Cape Coffee Beans","Rosetta Roastery","Father Coffee"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town street is considered the city's main 'cafe strip', lined with numerous coffee shops and restaurants?",correct_answer:"Kloof Street",incorrect_answers:["Long Street","Bree Street","Loop Street"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Deluxe Coffeeworks is best known for roasting which style of coffee?",correct_answer:"Single-origin specialty",incorrect_answers:["Instant coffee blends","Espresso-only dark roasts","Flavored coffee"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town coffee spot on Wale Street is known for its minimalist Scandinavian-inspired design?",correct_answer:"Espresso Lab Microroasters",incorrect_answers:["Truth Coffee","Haas Coffee","Tribe Coffee"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"What brewing device, resembling an hourglass, is commonly seen at Cape Town specialty cafes for making filter coffee?",correct_answer:"Chemex",incorrect_answers:["Siphon","Ibrik","Percolator"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town suburb's Exchange building houses multiple coffee roasters and creative studios?",correct_answer:"Woodstock Exchange",incorrect_answers:["Salt River Studios","Observatory Hub","Gardens Centre"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What is a 'flat white', the coffee drink that dominates Cape Town cafe menus?",correct_answer:"Espresso with steamed milk and a thin layer of microfoam",incorrect_answers:["Black coffee with cream","Espresso with whipped cream","Cold brew with ice"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Which annual Cape Town event celebrates the city's specialty coffee culture with tastings and barista competitions?",correct_answer:"Cape Town Coffee Festival",incorrect_answers:["Cape Coffee Week","Barista Awards CT","Bean Festival"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What is the typical price range (in ZAR) for a specialty flat white in a Cape Town cafe as of 2024?",correct_answer:"R35-R55",incorrect_answers:["R15-R25","R60-R90","R100-R120"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which coffee processing method, giving beans a fruity flavor profile, has become increasingly popular among CT roasters?",correct_answer:"Natural (dry) process",incorrect_answers:["Washed process","Honey process","Wet-hulled"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"What is latte art, commonly practiced by Cape Town baristas?",correct_answer:"Designs created by pouring steamed milk into espresso",incorrect_answers:["Paintings on coffee cups","Coffee bean arrangements","Drawings on napkins"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town coffee brand is known for its bright yellow packaging and African-sourced beans?",correct_answer:"Father Coffee",incorrect_answers:["Truth Coffee","Bootlegger","Cape Coffee Beans"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"The V&A Waterfront has a branch of which internationally recognized Cape Town-born coffee brand?",correct_answer:"Origin Coffee Roasting",incorrect_answers:["Starbucks","Costa Coffee","Lavazza"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What does 'single origin' mean on a Cape Town cafe menu?",correct_answer:"Coffee beans sourced from one specific farm or region",incorrect_answers:["Coffee made with one shot of espresso","Coffee served without milk","Coffee brewed using one method only"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Which Sea Point cafe is a popular dog-friendly spot known for specialty coffee and all-day breakfast?",correct_answer:"Bootlegger Sea Point",incorrect_answers:["Jarryds","Loading Bay","Ladder Coffee"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What is an AeroPress, a brewing device favored by many Cape Town coffee enthusiasts?",correct_answer:"A manual pressure-based coffee brewer using a plunger and paper filter",incorrect_answers:["An automatic espresso machine","A large commercial drip brewer","A steam-powered coffee maker"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which suburb along the Atlantic Seaboard has seen a boom in specialty coffee shops in recent years?",correct_answer:"Sea Point",incorrect_answers:["Hout Bay","Llandudno","Camps Bay"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Bree Street in Cape Town is known for being a hub of what food and drink culture?",correct_answer:"Artisan food and craft coffee",incorrect_answers:["Fast food chains","Traditional Afrikaans cuisine","Seafood restaurants only"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"What does SCA stand for in the context of Cape Town coffee culture?",correct_answer:"Specialty Coffee Association",incorrect_answers:["South Cape Agriculture","Southern Coffee Alliance","Standard Cafe Accreditation"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town roastery hosts public cupping sessions where customers can taste and compare different beans?",correct_answer:"Origin Coffee Roasting",incorrect_answers:["Nescafe","Douwe Egberts","Ricoffy"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What coffee drink consists of espresso 'stained' with a small amount of foamed milk?",correct_answer:"Macchiato",incorrect_answers:["Americano","Lungo","Ristretto"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which Green Point cafe is known for its Scandi-meets-Cape Town aesthetic and avocado toast?",correct_answer:"Loading Bay",incorrect_answers:["Giovanni's","Newport Deli","Willoughby & Co"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"What is cold brew coffee, increasingly popular at Cape Town cafes during summer?",correct_answer:"Coffee brewed with cold water over 12-24 hours",incorrect_answers:["Hot coffee poured over ice","Instant coffee mixed with cold water","Espresso blended with ice cream"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town neighborhood is home to both Truth Coffee and numerous other specialty roasters?",correct_answer:"CBD / City Centre",incorrect_answers:["Constantia","Newlands","Rondebosch"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"What South African coffee brand, founded in Cape Town, focuses exclusively on Ethiopian single-origin beans?",correct_answer:"Rosetta Roastery",incorrect_answers:["Masterton's","House of Coffees","Ciro"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"In coffee terminology, what does 'dialing in' mean?",correct_answer:"Adjusting grind size and extraction time to perfect an espresso shot",incorrect_answers:["Calling in a coffee order","Tuning a radio in a cafe","Setting an alarm for coffee time"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"Which method of milk texturing creates the glossy 'microfoam' essential for latte art?",correct_answer:"Steam wand on an espresso machine",incorrect_answers:["Shaking milk in a jar","Microwaving milk","Using a hand whisk"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What is a cortado, a drink gaining popularity in Cape Town cafes?",correct_answer:"Equal parts espresso and warm steamed milk",incorrect_answers:["Espresso with cold milk","Double espresso with no milk","Coffee with condensed milk"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town market at the V&A Waterfront features local coffee roasters alongside fresh produce?",correct_answer:"Oranjezicht City Farm Market",incorrect_answers:["Neighbourgoods Market","Hout Bay Craft Market","Milnerton Flea Market"],difficulty:1},
+    {category:"CT Coffee & Cafes",question:"What does 'third wave coffee' refer to, a movement embraced by Cape Town's specialty scene?",correct_answer:"Treating coffee as an artisanal product like wine, focusing on origin and quality",incorrect_answers:["The third cup of coffee in a day","Coffee served in three courses","A brand of instant coffee"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"Which Gardens-area cafe is a favorite among UCT students for study sessions and coffee?",correct_answer:"Starlings",incorrect_answers:["McDonald's","Spur","Wimpy"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"What is the most common espresso machine brand found in Cape Town specialty cafes?",correct_answer:"La Marzocco",incorrect_answers:["Keurig","Nespresso","Mr. Coffee"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"Roughly how many specialty coffee roasters operate in Cape Town as of 2024?",correct_answer:"Over 30",incorrect_answers:["Under 5","Exactly 10","Over 200"],difficulty:2},
+    {category:"CT Coffee & Cafes",question:"What role does altitude play in coffee bean quality, a fact Cape Town roasters often highlight?",correct_answer:"Higher altitude produces denser beans with more complex flavors",incorrect_answers:["Lower altitude makes stronger coffee","Altitude has no effect on coffee","Higher altitude makes coffee more bitter"],difficulty:3},
+    {category:"CT Coffee & Cafes",question:"Which Cape Town coffee shop is known for serving coffee in a laboratory-style setting with beakers and flasks?",correct_answer:"Truth Coffee Roasting",incorrect_answers:["Origin Coffee","Haas Coffee","Tribe Coffee"],difficulty:1},
+
+    // ── CAPE WINELANDS ──
+    {category:"Cape Winelands",question:"What is the oldest wine-producing region in South Africa?",correct_answer:"Constantia",incorrect_answers:["Stellenbosch","Franschhoek","Paarl"],difficulty:1},
+    {category:"Cape Winelands",question:"Which historic Constantia estate, founded in 1685, is the oldest wine farm in South Africa?",correct_answer:"Groot Constantia",incorrect_answers:["Klein Constantia","Buitenverwachting","Steenberg"],difficulty:1},
+    {category:"Cape Winelands",question:"What grape variety is considered South Africa's signature red wine?",correct_answer:"Pinotage",incorrect_answers:["Cabernet Sauvignon","Merlot","Shiraz"],difficulty:1},
+    {category:"Cape Winelands",question:"Pinotage is a cross between which two grape varieties?",correct_answer:"Pinot Noir and Cinsaut (Hermitage)",incorrect_answers:["Cabernet and Merlot","Shiraz and Grenache","Chardonnay and Chenin Blanc"],difficulty:2},
+    {category:"Cape Winelands",question:"Which Cape Winelands town was settled by French Huguenots fleeing religious persecution?",correct_answer:"Franschhoek",incorrect_answers:["Stellenbosch","Paarl","Wellington"],difficulty:1},
+    {category:"Cape Winelands",question:"What does 'Franschhoek' translate to in English?",correct_answer:"French Corner",incorrect_answers:["French Valley","French Mountain","French River"],difficulty:2},
+    {category:"Cape Winelands",question:"Which Stellenbosch wine estate produces the famous red blend called 'The Chocolate Block'?",correct_answer:"Boekenhoutskloof",incorrect_answers:["Kanonkop","Rust en Vrede","Meerlust"],difficulty:2},
+    {category:"Cape Winelands",question:"What is MCC in South African wine terminology?",correct_answer:"Methode Cap Classique — traditional method sparkling wine",incorrect_answers:["Mixed Cape Cultivar","Medium Cask Chardonnay","Matured Cape Cabernet"],difficulty:2},
+    {category:"Cape Winelands",question:"Which is the most widely planted white wine grape in South Africa?",correct_answer:"Chenin Blanc",incorrect_answers:["Sauvignon Blanc","Chardonnay","Riesling"],difficulty:1},
+    {category:"Cape Winelands",question:"What is the name of the hop-on hop-off tram that takes visitors between wine estates in Franschhoek?",correct_answer:"Franschhoek Wine Tram",incorrect_answers:["Cape Wine Express","Vineyard Shuttle","Winelands Rail"],difficulty:1},
+    {category:"Cape Winelands",question:"Which Stellenbosch estate is famous for its Rubicon red Bordeaux-style blend?",correct_answer:"Meerlust",incorrect_answers:["Kanonkop","Thelema","Jordan"],difficulty:3},
+    {category:"Cape Winelands",question:"Kanonkop estate is widely regarded as the benchmark producer of which varietal?",correct_answer:"Pinotage",incorrect_answers:["Cabernet Sauvignon","Chenin Blanc","Shiraz"],difficulty:2},
+    {category:"Cape Winelands",question:"Which wine guide is considered the 'bible' of South African wine, publishing annual ratings?",correct_answer:"Platter's South African Wine Guide",incorrect_answers:["Wine Spectator SA","Robert Parker's SA Guide","Decanter Africa"],difficulty:2},
+    {category:"Cape Winelands",question:"What is the maximum star rating in the Platter's Wine Guide?",correct_answer:"5 stars",incorrect_answers:["3 stars","10 stars","100 points"],difficulty:2},
+    {category:"Cape Winelands",question:"Which cool-climate valley near Hermanus is renowned for its Pinot Noir and Chardonnay?",correct_answer:"Hemel-en-Aarde Valley",incorrect_answers:["Elgin Valley","Tulbagh Valley","Swartland"],difficulty:2},
+    {category:"Cape Winelands",question:"What does 'Hemel-en-Aarde' translate to in English?",correct_answer:"Heaven and Earth",incorrect_answers:["Hills and Valleys","Sun and Moon","Sky and Sea"],difficulty:1},
+    {category:"Cape Winelands",question:"Hamilton Russell Vineyards in Hemel-en-Aarde is considered a benchmark producer of which wine?",correct_answer:"Pinot Noir",incorrect_answers:["Pinotage","Cabernet Sauvignon","Chenin Blanc"],difficulty:3},
+    {category:"Cape Winelands",question:"Which Constantia wine estate is famous for its Vin de Constance dessert wine, once favored by Napoleon?",correct_answer:"Klein Constantia",incorrect_answers:["Groot Constantia","Steenberg","Buitenverwachting"],difficulty:2},
+    {category:"Cape Winelands",question:"What wine region, north of Cape Town, is known for its old-vine Chenin Blanc and natural winemaking?",correct_answer:"Swartland",incorrect_answers:["Constantia","Durbanville","Elgin"],difficulty:2},
+    {category:"Cape Winelands",question:"Which luxury Stellenbosch estate features a Laurence Graff art collection and hilltop restaurant?",correct_answer:"Delaire Graff Estate",incorrect_answers:["Tokara","Jordan","Waterford"],difficulty:2},
+    {category:"Cape Winelands",question:"What is the Stellenbosch University's contribution to South African winemaking?",correct_answer:"It has a world-renowned oenology and viticulture department",incorrect_answers:["It owns the largest vineyard in Africa","It invented Pinotage commercially","It operates a wine retail chain"],difficulty:2},
+    {category:"Cape Winelands",question:"In what year was Pinotage first created by Abraham Perold at Stellenbosch University?",correct_answer:"1925",incorrect_answers:["1948","1901","1965"],difficulty:3},
+    {category:"Cape Winelands",question:"Which Franschhoek estate is known for its MCC and underground cellar tours?",correct_answer:"Haute Cabriere",incorrect_answers:["La Motte","Boschendal","Grande Provence"],difficulty:2},
+    {category:"Cape Winelands",question:"What is a 'Cape Blend' in South African wine?",correct_answer:"A red blend that must contain 30-70% Pinotage",incorrect_answers:["Any wine from the Western Cape","A blend of white grapes only","A sparkling wine style"],difficulty:3},
+    {category:"Cape Winelands",question:"Which historic Franschhoek estate, dating to 1685, is one of the oldest in South Africa?",correct_answer:"Boschendal",incorrect_answers:["La Motte","Haute Cabriere","Chamonix"],difficulty:2},
+    {category:"Cape Winelands",question:"What is the name of the annual Stellenbosch wine and food festival?",correct_answer:"Stellenbosch Wine Festival",incorrect_answers:["Cape Wine Show","Harvest Festival","Vine & Dine"],difficulty:1},
+    {category:"Cape Winelands",question:"Tokara wine estate in Stellenbosch is also famous for producing what non-wine product?",correct_answer:"Extra virgin olive oil",incorrect_answers:["Craft beer","Artisan cheese","Biltong"],difficulty:2},
+    {category:"Cape Winelands",question:"Which wine region near Cape Town is known for its cool climate due to proximity to False Bay?",correct_answer:"Elgin",incorrect_answers:["Paarl","Robertson","Worcester"],difficulty:3},
+    {category:"Cape Winelands",question:"What color is a typical Pinotage wine?",correct_answer:"Deep red to ruby",incorrect_answers:["Pale gold","Light pink","Dark amber"],difficulty:1},
+    {category:"Cape Winelands",question:"Which Paarl wine estate hosts the annual Paarl Wine Route and is one of South Africa's largest producers?",correct_answer:"KWV",incorrect_answers:["Fairview","Glen Carlou","Babylonstoren"],difficulty:2},
+    {category:"Cape Winelands",question:"Fairview estate in Paarl is famous for pairing wine with what food product?",correct_answer:"Goat's cheese",incorrect_answers:["Chocolate","Biltong","Olives"],difficulty:1},
+    {category:"Cape Winelands",question:"What is the primary climate classification of the Cape Winelands?",correct_answer:"Mediterranean climate",incorrect_answers:["Tropical","Continental","Oceanic"],difficulty:1},
+    {category:"Cape Winelands",question:"Which wine estate near Stellenbosch is known for its Bordeaux-style reds and was South Africa's first wine estate restaurant?",correct_answer:"Rust en Vrede",incorrect_answers:["Meerlust","Kanonkop","Thelema"],difficulty:3},
+    {category:"Cape Winelands",question:"What unique feature does the Babylonstoren estate in the Drakenstein Valley have?",correct_answer:"A historic Cape Dutch garden with over 300 varieties of plants",incorrect_answers:["An underground river","A working diamond mine","A private zoo"],difficulty:2},
+    {category:"Cape Winelands",question:"Which Cape Winelands town is known as the 'Pearl' of the winelands?",correct_answer:"Paarl",incorrect_answers:["Stellenbosch","Franschhoek","Wellington"],difficulty:1},
+    {category:"Cape Winelands",question:"The Durbanville wine region is particularly noted for which white varietal?",correct_answer:"Sauvignon Blanc",incorrect_answers:["Riesling","Viognier","Gewurztraminer"],difficulty:3},
+    {category:"Cape Winelands",question:"What is a 'cellar door' experience at a Cape Winelands estate?",correct_answer:"A tasting and direct purchasing experience at the winery",incorrect_answers:["A VIP storage locker","A wine delivery service","An online shopping portal"],difficulty:1},
+    {category:"Cape Winelands",question:"Jordan Wine Estate in Stellenbosch overlooks which body of water on clear days?",correct_answer:"False Bay and Table Mountain",incorrect_answers:["The Atlantic Ocean","The Indian Ocean","Langebaan Lagoon"],difficulty:3},
+    {category:"Cape Winelands",question:"What century did winemaking begin in the Cape?",correct_answer:"17th century (1659)",incorrect_answers:["15th century","19th century","20th century"],difficulty:1},
+    {category:"Cape Winelands",question:"What is the typical cost (ZAR) for a standard wine tasting at a Stellenbosch estate?",correct_answer:"R50-R150",incorrect_answers:["R10-R20","R200-R500","Free everywhere"],difficulty:2},
+    {category:"Cape Winelands",question:"Which Cape Winelands region is the warmest and driest, known for its fortified wines and hearty reds?",correct_answer:"Robertson",incorrect_answers:["Constantia","Elgin","Walker Bay"],difficulty:3},
+    {category:"Cape Winelands",question:"Creation Wines in the Hemel-en-Aarde is known for pairing its wines with what?",correct_answer:"Artisanal food and tasting platters designed for each wine",incorrect_answers:["Live music performances","Cooking classes","Horse riding tours"],difficulty:2},
+    {category:"Cape Winelands",question:"La Motte in Franschhoek houses a museum dedicated to which type of art?",correct_answer:"South African art and the Rupert family collection",incorrect_answers:["Ancient Roman pottery","Modern sculpture only","Photography exclusively"],difficulty:3},
+    {category:"Cape Winelands",question:"What is the approximate driving distance from Cape Town CBD to Stellenbosch?",correct_answer:"About 50 km",incorrect_answers:["About 15 km","About 120 km","About 200 km"],difficulty:1},
+    {category:"Cape Winelands",question:"Which wine estate in Constantia is housed in a historic Cape Dutch homestead from 1682?",correct_answer:"Steenberg",incorrect_answers:["Eagles' Nest","Silvermist","Constantia Uitsig"],difficulty:3},
+
+    // ── CT FOODIE ──
+    {category:"CT Foodie",question:"What is a gatsby in Cape Town food culture?",correct_answer:"A massive sub-style sandwich filled with chips, meat, and sauce",incorrect_answers:["A type of bunny chow","A seafood platter","A dessert pastry"],difficulty:1},
+    {category:"CT Foodie",question:"In which Cape Town area did the gatsby sandwich originate?",correct_answer:"The Cape Flats (Athlone area)",incorrect_answers:["The Waterfront","Camps Bay","Constantia"],difficulty:2},
+    {category:"CT Foodie",question:"What is bobotie, the Cape Malay dish often considered South Africa's national dish?",correct_answer:"Spiced minced meat baked with an egg custard topping",incorrect_answers:["A seafood stew","A grilled chicken dish","A rice pudding dessert"],difficulty:1},
+    {category:"CT Foodie",question:"Which colorful Cape Town neighborhood is the historical home of Cape Malay cuisine?",correct_answer:"Bo-Kaap",incorrect_answers:["Woodstock","Observatory","District Six"],difficulty:1},
+    {category:"CT Foodie",question:"What spice is essential to traditional Cape Malay cooking and gives dishes their yellow color?",correct_answer:"Turmeric",incorrect_answers:["Paprika","Saffron","Cayenne"],difficulty:1},
+    {category:"CT Foodie",question:"Which Cape Town restaurant, located in Woodstock, was ranked among the World's 50 Best Restaurants?",correct_answer:"The Test Kitchen",incorrect_answers:["La Colombe","The Pot Luck Club","Harbour House"],difficulty:1},
+    {category:"CT Foodie",question:"Who is the chef behind The Test Kitchen?",correct_answer:"Luke Dale-Roberts",incorrect_answers:["Reuben Riffel","Jan Hendrik van der Westhuizen","Margot Janse"],difficulty:2},
+    {category:"CT Foodie",question:"La Colombe restaurant is located in which Cape Town suburb?",correct_answer:"Constantia",incorrect_answers:["Camps Bay","Green Point","Franschhoek"],difficulty:2},
+    {category:"CT Foodie",question:"What is koeksister in Cape Malay tradition (Cape Town style)?",correct_answer:"A spiced, syrup-soaked doughnut rolled in coconut",incorrect_answers:["A braided fried dough with syrup","A chocolate brownie","A milk tart"],difficulty:2},
+    {category:"CT Foodie",question:"How does a Cape Malay koeksister differ from an Afrikaans koeksister?",correct_answer:"Cape Malay version is round with coconut; Afrikaans version is braided and crunchy",incorrect_answers:["They are exactly the same","Cape Malay version is savory","Afrikaans version uses coconut"],difficulty:2},
+    {category:"CT Foodie",question:"What type of fish is snoek, a staple of Cape Town cuisine?",correct_answer:"A large, elongated predatory fish (barracuda family)",incorrect_answers:["A type of salmon","A freshwater trout","A shellfish"],difficulty:2},
+    {category:"CT Foodie",question:"What is the traditional way to prepare snoek on the Cape?",correct_answer:"Braaied over coals with apricot jam glaze",incorrect_answers:["Deep fried in batter","Served raw as sashimi","Baked in pastry"],difficulty:2},
+    {category:"CT Foodie",question:"Which Hout Bay harbor spot is famous for its casual fish and chips?",correct_answer:"Fish on the Rocks",incorrect_answers:["Ocean Basket","Spur Steak Ranch","Wharfside Grill"],difficulty:1},
+    {category:"CT Foodie",question:"The Old Biscuit Mill hosts the Neighbourgoods Market on which day?",correct_answer:"Saturday",incorrect_answers:["Sunday","Friday","Wednesday"],difficulty:1},
+    {category:"CT Foodie",question:"What is waterblommetjiebredie, a traditional Cape dish?",correct_answer:"A lamb stew made with waterblommetjies (water lily flowers)",incorrect_answers:["A chicken soup","A vegetable curry","A fish pie"],difficulty:2},
+    {category:"CT Foodie",question:"Which Cape Town market at the V&A Waterfront focuses on local farm produce and artisan food?",correct_answer:"Oranjezicht City Farm Market",incorrect_answers:["Greenmarket Square","Pan African Market","Blue Shed Market"],difficulty:1},
+    {category:"CT Foodie",question:"What is biltong?",correct_answer:"Air-dried, cured meat — South Africa's signature snack",incorrect_answers:["A type of sausage","Pickled fish","Smoked cheese"],difficulty:1},
+    {category:"CT Foodie",question:"How does biltong differ from beef jerky?",correct_answer:"Biltong is air-dried and typically thicker; jerky is smoked and thinner",incorrect_answers:["They are the same thing","Jerky is South African, biltong is American","Biltong is always made from game meat"],difficulty:2},
+    {category:"CT Foodie",question:"What is droewors, often sold alongside biltong?",correct_answer:"Dried sausage made from beef and spices",incorrect_answers:["A type of bread","A dried fruit snack","A cheese stick"],difficulty:1},
+    {category:"CT Foodie",question:"Which Cape Town craft brewery, based in Salt River, is known for its Kings Blockhouse IPA?",correct_answer:"Devil's Peak Brewing Company",incorrect_answers:["Jack Black","Darling Brew","CBC"],difficulty:2},
+    {category:"CT Foodie",question:"What is Rooibos tea, which originates from the Western Cape?",correct_answer:"A caffeine-free herbal tea from the Cederberg region",incorrect_answers:["A type of green tea","A black tea from Kenya","A coffee substitute"],difficulty:1},
+    {category:"CT Foodie",question:"In which mountain range does Rooibos naturally grow?",correct_answer:"Cederberg Mountains",incorrect_answers:["Table Mountain","Drakensberg","Swartberg"],difficulty:2},
+    {category:"CT Foodie",question:"What is the Pot Luck Club, located atop the Old Biscuit Mill?",correct_answer:"A tapas-style sharing restaurant by Luke Dale-Roberts",incorrect_answers:["A gambling venue","A cooking school","A grocery store"],difficulty:2},
+    {category:"CT Foodie",question:"What type of pastry is a samoosa in Cape Malay cuisine?",correct_answer:"A triangular deep-fried pastry filled with spiced mince or vegetables",incorrect_answers:["A flat bread","A sweet doughnut","A stuffed pancake"],difficulty:1},
+    {category:"CT Foodie",question:"Which Cape Town suburb is known as the new culinary hotspot, with restaurants lining its main road?",correct_answer:"Bree Street (CBD)",incorrect_answers:["Bellville","Muizenberg","Milnerton"],difficulty:1},
+    {category:"CT Foodie",question:"What is a 'Gatsby Special' typically filled with?",correct_answer:"Hot chips, masala steak, and sauce in a long roll",incorrect_answers:["Sushi and wasabi","Caesar salad","Grilled chicken and salad"],difficulty:1},
+    {category:"CT Foodie",question:"Cape Malay pickled fish is traditionally eaten during which holiday?",correct_answer:"Easter (Good Friday)",incorrect_answers:["Christmas","Heritage Day","New Year"],difficulty:2},
+    {category:"CT Foodie",question:"Which Jack Black beer style is their flagship product, brewed in Cape Town?",correct_answer:"Lager",incorrect_answers:["Stout","Pilsner","Wheat Beer"],difficulty:2},
+    {category:"CT Foodie",question:"What is melktert (milk tart)?",correct_answer:"A traditional South African custard tart with a cinnamon dusting",incorrect_answers:["A lemon meringue pie","A chocolate mousse","A fruit salad"],difficulty:1},
+    {category:"CT Foodie",question:"Which Kalk Bay restaurant is famous for its seafood and views of the fishing harbor?",correct_answer:"Harbour House",incorrect_answers:["Spur","Steers","Ocean Basket"],difficulty:1},
+    {category:"CT Foodie",question:"What is a 'bunny chow' — another iconic South African street food?",correct_answer:"A hollowed-out bread loaf filled with curry",incorrect_answers:["Rabbit stew","A veggie burger","A hot dog"],difficulty:1},
+    {category:"CT Foodie",question:"Bunny chow originated in which South African city?",correct_answer:"Durban",incorrect_answers:["Cape Town","Johannesburg","Port Elizabeth"],difficulty:2},
+    {category:"CT Foodie",question:"What is Cape Town's version of a 'braaibroodjie'?",correct_answer:"A toasted sandwich with cheese, tomato, and onion cooked on the braai",incorrect_answers:["A baguette with pate","A hot dog roll","A pizza slice"],difficulty:1},
+    {category:"CT Foodie",question:"Which farm-to-table restaurant in Franschhoek, set in a Cape Dutch manor, is a culinary destination?",correct_answer:"Babylonstoren",incorrect_answers:["Rust en Vrede","Delaire Graff","The Restaurant at Waterkloof"],difficulty:2},
+    {category:"CT Foodie",question:"What is potjiekos?",correct_answer:"A slow-cooked stew made in a cast-iron pot over coals",incorrect_answers:["A type of porridge","A cold soup","A grilled meat dish"],difficulty:1},
+    {category:"CT Foodie",question:"Which heritage area's forced removals in the 1960s-70s displaced a vibrant food culture of mixed cuisines?",correct_answer:"District Six",incorrect_answers:["Bo-Kaap","Salt River","Woodstock"],difficulty:2},
+    {category:"CT Foodie",question:"What type of bread is 'roosterkoek', popular at South African braais?",correct_answer:"Dough rolls grilled over coals",incorrect_answers:["Sliced white bread","Sourdough loaf","Flatbread baked in an oven"],difficulty:2},
+    {category:"CT Foodie",question:"Which Cape Town food market operates on Sundays in Hout Bay?",correct_answer:"Bay Harbour Market",incorrect_answers:["Neighbourgoods Market","OZCF Market","Root44 Market"],difficulty:2},
+    {category:"CT Foodie",question:"What is 'pap' (pronounced 'pup'), often served at braais?",correct_answer:"A stiff maize meal porridge",incorrect_answers:["A fruit smoothie","A type of bread","A potato salad"],difficulty:1},
+    {category:"CT Foodie",question:"Darling Brew, a craft brewery near Cape Town, is known for its commitment to what?",correct_answer:"Sustainability and eco-friendly brewing",incorrect_answers:["Only brewing lagers","Using imported hops exclusively","Making non-alcoholic beer only"],difficulty:3},
+    {category:"CT Foodie",question:"Which Camps Bay restaurant offers fine dining with sunset views over the Atlantic?",correct_answer:"The Roundhouse",incorrect_answers:["McDonald's","Steers","Wimpy"],difficulty:3},
+    {category:"CT Foodie",question:"What Cape Town delicacy consists of smoked snoek blended into a pate or spread?",correct_answer:"Smoked snoek pate",incorrect_answers:["Snoek sashimi","Snoek ice cream","Snoek soup"],difficulty:1},
+    {category:"CT Foodie",question:"What is 'vetkoek' — a popular South African street food?",correct_answer:"Deep-fried dough bread, often filled with mince or jam",incorrect_answers:["A salad","A grilled sandwich","A type of pizza"],difficulty:1},
+    {category:"CT Foodie",question:"Which famous Cape Town deli on Kloof Street is known for its cured meats and cheese boards?",correct_answer:"Giovanni's Deli World",incorrect_answers:["Woolworths Food","Pick n Pay Deli","Checkers Deli"],difficulty:2},
+
+    // ── CAPE ADVENTURES ──
+    {category:"Cape Adventures",question:"How high is the summit of Table Mountain above sea level?",correct_answer:"1,085 metres",incorrect_answers:["2,500 metres","500 metres","3,000 metres"],difficulty:1},
+    {category:"Cape Adventures",question:"What is the name of the most popular (and steepest) hiking route up Table Mountain?",correct_answer:"Platteklip Gorge",incorrect_answers:["India Venster","Skeleton Gorge","Kasteelspoort"],difficulty:1},
+    {category:"Cape Adventures",question:"What unique feature does the Table Mountain Aerial Cableway car have?",correct_answer:"A revolving floor that gives a 360-degree view during the ride",incorrect_answers:["A glass floor","An open-air top deck","A waterfall inside"],difficulty:1},
+    {category:"Cape Adventures",question:"Which Table Mountain hiking route starts from Kirstenbosch and goes through indigenous forest?",correct_answer:"Skeleton Gorge",incorrect_answers:["Platteklip Gorge","India Venster","Pipe Track"],difficulty:2},
+    {category:"Cape Adventures",question:"What is the Pipe Track on Table Mountain?",correct_answer:"A gentle contour path along the mountain's front face following old water pipes",incorrect_answers:["A vertical climbing route","A mountain bike trail","A cable car maintenance path"],difficulty:2},
+    {category:"Cape Adventures",question:"Lion's Head is popular for full moon hikes. How high is its summit?",correct_answer:"669 metres",incorrect_answers:["1,200 metres","350 metres","900 metres"],difficulty:2},
+    {category:"Cape Adventures",question:"What feature on the Lion's Head hike requires using chains and ladders?",correct_answer:"The final scramble section near the summit",incorrect_answers:["The parking area","The first 100 metres","A river crossing"],difficulty:1},
+    {category:"Cape Adventures",question:"What is the name of the famous coastal drive between Hout Bay and Noordhoek?",correct_answer:"Chapman's Peak Drive",incorrect_answers:["Victoria Road","Marine Drive","Boyes Drive"],difficulty:1},
+    {category:"Cape Adventures",question:"How many curves does Chapman's Peak Drive have?",correct_answer:"114",incorrect_answers:["50","200","75"],difficulty:3},
+    {category:"Cape Adventures",question:"Cape Point is often confused with the Cape of Good Hope. Which one is the actual southwestern-most point?",correct_answer:"Cape of Good Hope",incorrect_answers:["Cape Point","Both are the same point","Neither — it's Cape Agulhas"],difficulty:2},
+    {category:"Cape Adventures",question:"What is the southernmost point of the African continent?",correct_answer:"Cape Agulhas",incorrect_answers:["Cape Point","Cape of Good Hope","Cape Town"],difficulty:2},
+    {category:"Cape Adventures",question:"What funicular railway takes visitors to the old lighthouse at Cape Point?",correct_answer:"The Flying Dutchman",incorrect_answers:["The Cape Flyer","Table Mountain Express","Point Runner"],difficulty:2},
+    {category:"Cape Adventures",question:"Which Simonstown beach is home to a colony of African penguins?",correct_answer:"Boulders Beach",incorrect_answers:["Muizenberg Beach","Camps Bay Beach","Clifton Beach"],difficulty:1},
+    {category:"Cape Adventures",question:"What species of penguin is found at Boulders Beach?",correct_answer:"African Penguin (Spheniscus demersus)",incorrect_answers:["Emperor Penguin","King Penguin","Rockhopper Penguin"],difficulty:2},
+    {category:"Cape Adventures",question:"Muizenberg is famous as a beginner-friendly spot for which water sport?",correct_answer:"Surfing",incorrect_answers:["Scuba diving","Jet skiing","Water polo"],difficulty:1},
+    {category:"Cape Adventures",question:"What are the colorful structures along Muizenberg beach called?",correct_answer:"Beach huts (or bathing boxes)",incorrect_answers:["Lifeguard towers","Surf shops","Public toilets"],difficulty:1},
+    {category:"Cape Adventures",question:"What is the shark spotting program in Muizenberg?",correct_answer:"Trained spotters on the mountain raise flags to warn swimmers of shark activity",incorrect_answers:["Drones that follow sharks","Underwater electric fences","Shark nets across the bay"],difficulty:2},
+    {category:"Cape Adventures",question:"From which location in Cape Town can you go paragliding with views of the Atlantic Seaboard?",correct_answer:"Signal Hill / Lion's Head",incorrect_answers:["Table Mountain summit","Robben Island","Hout Bay harbour"],difficulty:1},
+    {category:"Cape Adventures",question:"What is the name of the elevated treetop walkway in Kirstenbosch Botanical Garden?",correct_answer:"The Boomslang",incorrect_answers:["The Canopy Walk","The Tree Bridge","The Sky Path"],difficulty:1},
+    {category:"Cape Adventures",question:"What does 'Boomslang' mean in Afrikaans?",correct_answer:"Tree snake",incorrect_answers:["Tree bridge","Big tree","Forest path"],difficulty:2},
+    {category:"Cape Adventures",question:"Which island, a short ferry ride from the V&A Waterfront, was a prison for political activists including Nelson Mandela?",correct_answer:"Robben Island",incorrect_answers:["Seal Island","Dassen Island","Bird Island"],difficulty:1},
+    {category:"Cape Adventures",question:"How many years did Nelson Mandela spend imprisoned on Robben Island?",correct_answer:"18 years",incorrect_answers:["27 years (total, but not all on Robben Island)","10 years","5 years"],difficulty:3},
+    {category:"Cape Adventures",question:"What is shark cage diving, popular near Cape Town?",correct_answer:"Being lowered in a metal cage into the ocean to observe great white sharks up close",incorrect_answers:["Swimming freely with sharks","Feeding sharks from a boat","Catching sharks for research"],difficulty:1},
+    {category:"Cape Adventures",question:"Which town near Cape Town is the main departure point for shark cage diving?",correct_answer:"Gansbaai",incorrect_answers:["Hermanus","Simonstown","Kalk Bay"],difficulty:2},
+    {category:"Cape Adventures",question:"What extreme sport involves rappelling down the front face of Table Mountain?",correct_answer:"Abseiling",incorrect_answers:["Bungee jumping","Base jumping","Zip lining"],difficulty:1},
+    {category:"Cape Adventures",question:"The Two Oceans Aquarium is located at which Cape Town landmark?",correct_answer:"V&A Waterfront",incorrect_answers:["Camps Bay","Hout Bay","Sea Point Promenade"],difficulty:1},
+    {category:"Cape Adventures",question:"What are the two oceans referred to in the Two Oceans Aquarium name?",correct_answer:"Atlantic Ocean and Indian Ocean",incorrect_answers:["Pacific and Atlantic","Indian and Pacific","Arctic and Atlantic"],difficulty:1},
+    {category:"Cape Adventures",question:"Which Cape Town mountain is part of the Table Mountain National Park and overlooks the Southern Suburbs?",correct_answer:"Devil's Peak",incorrect_answers:["Signal Hill","Lion's Head","Constantiaberg"],difficulty:2},
+    {category:"Cape Adventures",question:"What outdoor cinema experience takes place in Kirstenbosch during summer?",correct_answer:"The Galileo Open Air Cinema",incorrect_answers:["IMAX Under Stars","Netflix Outdoors","CinePark"],difficulty:2},
+    {category:"Cape Adventures",question:"Kirstenbosch is one of how many National Botanical Gardens in South Africa?",correct_answer:"10",incorrect_answers:["3","20","1"],difficulty:3},
+    {category:"Cape Adventures",question:"What is coasteering, an activity available along the Cape Peninsula?",correct_answer:"Exploring the coastline by swimming, cliff jumping, and scrambling over rocks",incorrect_answers:["Coastal road cycling","Beach volleyball","Fishing from shore"],difficulty:2},
+    {category:"Cape Adventures",question:"Which Table Mountain route is known as the most scenic but involves scrambling and is not for beginners?",correct_answer:"India Venster",incorrect_answers:["Platteklip Gorge","Nursery Ravine","Constantia Nek"],difficulty:2},
+    {category:"Cape Adventures",question:"What is the Cape Canopy Tour?",correct_answer:"A zip line experience through the Hottentots Holland Mountains near Elgin",incorrect_answers:["A tree planting program","A helicopter tour","A canoe trip"],difficulty:2},
+    {category:"Cape Adventures",question:"Which nature reserve at the tip of the Cape Peninsula is home to diverse fynbos and wildlife?",correct_answer:"Cape of Good Hope Nature Reserve",incorrect_answers:["Kirstenbosch","Silvermine","Tokai Forest"],difficulty:1},
+    {category:"Cape Adventures",question:"What animals are famously cheeky and steal food from tourists at Cape Point?",correct_answer:"Baboons (Chacma baboons)",incorrect_answers:["Monkeys","Seagulls","Penguins"],difficulty:1},
+    {category:"Cape Adventures",question:"Zeitz MOCAA at the V&A Waterfront is Africa's largest museum of what?",correct_answer:"Contemporary African art",incorrect_answers:["Natural history","Maritime history","Dinosaur fossils"],difficulty:1},
+    {category:"Cape Adventures",question:"The building housing Zeitz MOCAA was originally used for what purpose?",correct_answer:"A grain silo",incorrect_answers:["A prison","A hospital","A church"],difficulty:2},
+    {category:"Cape Adventures",question:"What famous long-distance hiking trail stretches through the Cape mountains?",correct_answer:"The Hoerikwaggo Trail",incorrect_answers:["The Otter Trail","The Drakensberg Traverse","The Garden Route Trail"],difficulty:3},
+    {category:"Cape Adventures",question:"What popular Sea Point attraction is a free public swimming area built into the ocean rocks?",correct_answer:"Sea Point Pavilion / Promenade tidal pools",incorrect_answers:["Camps Bay Beach","Clifton Fourth Beach","Maiden's Cove"],difficulty:1},
+    {category:"Cape Adventures",question:"Which annual cycling event features a route around the Cape Peninsula?",correct_answer:"Cape Town Cycle Tour",incorrect_answers:["Tour de France Cape","Peninsula Pedal","Atlantic Dash"],difficulty:1},
+    {category:"Cape Adventures",question:"The Cape Town Cycle Tour is the world's largest individually timed what?",correct_answer:"Cycling event",incorrect_answers:["Marathon","Triathlon","Swimming event"],difficulty:2},
+    {category:"Cape Adventures",question:"What is the Silvermine Nature Reserve known for among hikers?",correct_answer:"Its tranquil dam and fynbos-covered trails overlooking False Bay",incorrect_answers:["A silver mine still in operation","Snow sports in winter","Underground caves"],difficulty:2},
+    {category:"Cape Adventures",question:"Which clifftop path connects Sea Point to Bantry Bay along the Atlantic coast?",correct_answer:"Sea Point Promenade",incorrect_answers:["Chapman's Peak Drive","Boyes Drive","Victoria Road walkway"],difficulty:1},
+    {category:"Cape Adventures",question:"Table Mountain was named one of the New7Wonders of Nature in which year?",correct_answer:"2011",incorrect_answers:["2005","2015","2020"],difficulty:2},
+    {category:"Cape Adventures",question:"What type of vegetation, unique to the Cape, covers much of Table Mountain?",correct_answer:"Fynbos",incorrect_answers:["Rainforest","Savanna grassland","Desert scrub"],difficulty:1},
+
+    // ── ADDITIONAL HIKING (Cape Town specific) ──
+    {category:"Hiking",question:"Which Cape Town hiking trail follows a contour path from Constantia Nek to Hout Bay?",correct_answer:"The Vlakkenberg Trail",incorrect_answers:["Pipe Track","Platteklip Gorge","Newlands Forest Loop"],difficulty:2},
+    {category:"Hiking",question:"What is the Newlands Forest loop trail popular for among Cape Town runners?",correct_answer:"Its shady, flat trails through indigenous forest alongside a stream",incorrect_answers:["Its steep mountain summit","Its beachside path","Its desert landscape"],difficulty:1},
+    {category:"Hiking",question:"Which Table Mountain trail passes through Orangekloof and requires a permit?",correct_answer:"Orangekloof Trail",incorrect_answers:["Platteklip Gorge","India Venster","Skeleton Gorge"],difficulty:3},
+    {category:"Hiking",question:"What safety precaution is essential when hiking Table Mountain due to rapidly changing weather?",correct_answer:"Bring warm layers — the mountain creates its own weather and temperatures can drop suddenly",incorrect_answers:["Wear flip flops for comfort","Never bring water","Hike only at night"],difficulty:1},
+    {category:"Hiking",question:"The Constantia Greenbelts offer easy walking trails through which type of terrain?",correct_answer:"Indigenous forest and vineyard edges",incorrect_answers:["Desert dunes","Snow fields","Mangrove swamps"],difficulty:1},
+    {category:"Hiking",question:"Which challenging scramble on Table Mountain's western face rewards hikers with views of Camps Bay?",correct_answer:"Kasteelspoort",incorrect_answers:["Platteklip Gorge","Nursery Ravine","Cecilia Ravine"],difficulty:2},
+    {category:"Hiking",question:"What is the recommended starting time for a Platteklip Gorge hike to avoid afternoon heat?",correct_answer:"Early morning (before 8am)",incorrect_answers:["Midday","Late afternoon","After dark"],difficulty:1},
+    {category:"Hiking",question:"Which trail in the Tokai area of Cape Town passes through a pine plantation and indigenous forest?",correct_answer:"Tokai Arboretum Trail",incorrect_answers:["Platteklip Gorge","Pipe Track","Lion's Head Path"],difficulty:2},
+    {category:"Hiking",question:"What animal might you encounter on the India Venster trail that you should keep distance from?",correct_answer:"Dassies (rock hyraxes)",incorrect_answers:["Lions","Elephants","Crocodiles"],difficulty:1},
+    {category:"Hiking",question:"The Amphitheatre on Table Mountain's back table is accessed via which trail?",correct_answer:"Skeleton Gorge or Nursery Ravine",incorrect_answers:["Platteklip Gorge only","Cable car only","Chapman's Peak"],difficulty:3},
+
+    // ── ADDITIONAL SA FOOD & SLANG (Cape specific) ──
+    {category:"SA Food & Slang",question:"What does 'lekker slaap' mean in Cape Town slang?",correct_answer:"Sleep well",incorrect_answers:["Good morning","Enjoy your meal","See you later"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is 'dagga' in South African slang?",correct_answer:"Cannabis / marijuana",incorrect_answers:["A type of food","A dance move","A greeting"],difficulty:2},
+    {category:"SA Food & Slang",question:"What does the Cape Flats expression 'jol' mean?",correct_answer:"To party or have a good time",incorrect_answers:["To work hard","To sleep","To argue"],difficulty:1},
+    {category:"SA Food & Slang",question:"In Cape Town slang, what is a 'dop'?",correct_answer:"An alcoholic drink",incorrect_answers:["A hat","A car","A joke"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is 'denningvleis', a traditional Cape Malay meat dish?",correct_answer:"Braised lamb with tamarind and a sweet-sour sauce",incorrect_answers:["Grilled chicken","A beef stir-fry","A pork roast"],difficulty:3},
+    {category:"SA Food & Slang",question:"What does 'aweh' (or 'awe') mean in Cape Town slang?",correct_answer:"A greeting meaning hello, cool, or I agree",incorrect_answers:["Goodbye","I'm angry","Help me"],difficulty:1},
+    {category:"SA Food & Slang",question:"What is a 'stompie' in Cape Town slang?",correct_answer:"A cigarette butt",incorrect_answers:["A small child","A short person","A type of dance"],difficulty:2},
+    {category:"SA Food & Slang",question:"What Cape Malay dessert is made from vermicelli noodles, sugar, and cardamom?",correct_answer:"Boeber",incorrect_answers:["Melktert","Koeksister","Peppermint Crisp Tart"],difficulty:3},
+
+    // ── ADDITIONAL TRUE OR FALSE (Cape Town facts) ──
+    {category:"True or False",question:"True or False: Table Mountain is one of the New 7 Wonders of Nature.",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"True or False: Cape Town is the southernmost city on the African continent.",correct_answer:"False",incorrect_answers:["True"],difficulty:2},
+    {category:"True or False",question:"True or False: The Cape Town Stadium was built for the 2010 FIFA World Cup.",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"True or False: Table Mountain is estimated to be approximately 600 million years old.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"True or False: Cape Town was the first city in South Africa.",correct_answer:"True",incorrect_answers:["False"],difficulty:1},
+    {category:"True or False",question:"True or False: The two oceans that meet at the Cape are the Atlantic and Pacific.",correct_answer:"False",incorrect_answers:["True"],difficulty:1},
+    {category:"True or False",question:"True or False: Robben Island was used as a prison for over 400 years.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"True or False: The Bo-Kaap houses were painted in bright colors to celebrate the end of slavery.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"True or False: There are more than 2,200 plant species on Table Mountain.",correct_answer:"True",incorrect_answers:["False"],difficulty:2},
+    {category:"True or False",question:"True or False: Cape Town's tap water comes primarily from underground springs.",correct_answer:"False",incorrect_answers:["True"],difficulty:2}
   ];
 
   // ═══════════════════════════════════════
@@ -3174,11 +3502,12 @@
   let currentQ = 0;
 
   // Two-player state
-  let players = {
-    burden: { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 },
-    stu: { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 }
+  var playerNames = { p1: 'Player 1', p2: 'Player 2' };
+  var players = {
+    p1: { name: 'Player 1', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 },
+    p2: { name: 'Player 2', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 }
   };
-  let currentPlayer = 'burden';
+  var currentPlayer = 'p1';
 
   let timerInterval = null;
   let timeLeft = 0;
@@ -3188,6 +3517,8 @@
   let ttsPlaying = false;
   let isPaused = false;
   let pauseTimeLeft = 0;
+  var lastAnswerTime = 0;
+  var lastBackTime = 0;
 
   // ── Cascade state (to track ongoing cascade animations) ──
   let cascadeInProgress = false;
@@ -3196,14 +3527,14 @@
   let lifetimeStats = null;
   // ── Achievement tracking state ──
   var gameTracker = {
-    answerTimes: { burden: [], stu: [] },
+    answerTimes: { p1: [], p2: [] },
     scoreDiffs: [],
     secondAnswerers: [],
-    fastAnswers: { burden: 0, stu: 0 },
-    blitzAnswers: { burden: false, stu: false },
-    previousScores: { burden: null, stu: null }
+    fastAnswers: { p1: 0, p2: 0 },
+    blitzAnswers: { p1: false, p2: false },
+    previousScores: { p1: null, p2: null }
   };
-  var achievementCache = { burden: null, stu: null };
+  var achievementCache = { p1: null, p2: null };
 
   // ═══════════════════════════════════════
   //  NAVIGATION
@@ -3235,7 +3566,7 @@
       if (confetti) confetti.innerHTML = '';
     }
     // Music transitions — title music for menu screens
-    if (['title', 'settings', 'howto', 'leaderboard', 'achievements', 'pin', 'admin'].indexOf(id) !== -1) {
+    if (['title', 'names', 'settings', 'howto', 'leaderboard', 'achievements', 'pin', 'admin'].indexOf(id) !== -1) {
       Music.title();
     }
     // Refresh stats when entering leaderboard or title
@@ -3336,6 +3667,20 @@
   }
 
   // ═══════════════════════════════════════
+  //  NAME ENTRY
+  // ═══════════════════════════════════════
+  function confirmNames() {
+    var n1 = document.getElementById('name-p1').value.trim();
+    var n2 = document.getElementById('name-p2').value.trim();
+    playerNames.p1 = n1 || 'Player 1';
+    playerNames.p2 = n2 || 'Player 2';
+    try {
+      localStorage.setItem('brainblitz_names', JSON.stringify(playerNames));
+    } catch(e) {}
+    showScreen('settings');
+  }
+
+  // ═══════════════════════════════════════
   //  GAME LOGIC
   // ═══════════════════════════════════════
   async function startGame() {
@@ -3351,26 +3696,30 @@
       voiceId = voiceSetting === 'custom' ? '5W1ijlUigww8GacnRjZV' : '21m00Tcm4TlvDq8ikWAM';
 
       // Reset both players
-      players.burden = { name: 'Burden', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
-      players.stu = { name: 'Stu', score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
-      currentPlayer = 'burden';
+      players.p1 = { name: playerNames.p1, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
+      players.p2 = { name: playerNames.p2, score: 0, streak: 0, bestStreak: 0, correctCount: 0, totalTime: 0 };
+      currentPlayer = 'p1';
       currentQ = 0;
       // Reset cascade state
       cascadeInProgress = false;
 
+      // Set dynamic HUD labels
+      document.getElementById('hud-p1-label').textContent = players.p1.name;
+      document.getElementById('hud-p2-label').textContent = players.p2.name;
+
       // Reset achievement tracker for this game
-      gameTracker.answerTimes = { burden: [], stu: [] };
+      gameTracker.answerTimes = { p1: [], p2: [] };
       gameTracker.scoreDiffs = [0];
       gameTracker.secondAnswerers = [];
-      gameTracker.fastAnswers = { burden: 0, stu: 0 };
-      gameTracker.blitzAnswers = { burden: false, stu: false };
+      gameTracker.fastAnswers = { p1: 0, p2: 0 };
+      gameTracker.blitzAnswers = { p1: false, p2: false };
       // Load previous scores for "Consistent" achievement
       try {
         var prevScores = JSON.parse(localStorage.getItem('brainblitz_prev_scores') || '{}');
-        gameTracker.previousScores.burden = (prevScores.burden !== undefined) ? prevScores.burden : null;
-        gameTracker.previousScores.stu = (prevScores.stu !== undefined) ? prevScores.stu : null;
+        gameTracker.previousScores.p1 = (prevScores.p1 !== undefined) ? prevScores.p1 : null;
+        gameTracker.previousScores.p2 = (prevScores.p2 !== undefined) ? prevScores.p2 : null;
       } catch(e) {
-        gameTracker.previousScores = { burden: null, stu: null };
+        gameTracker.previousScores = { p1: null, p2: null };
       }
 
       selectQuestions();
@@ -3465,37 +3814,39 @@
     return arr;
   }
 
-  let turnSwitchInterval = null;
+  var turnSwitchInterval = null;
 
   function showTurnSwitch(playerKey, cb) {
-    if (turnSwitchInterval) { clearInterval(turnSwitchInterval); turnSwitchInterval = null; }
-    const overlay = document.getElementById('turn-switch');
-    const nameEl = document.getElementById('turn-switch-name');
-    const countEl = document.getElementById('turn-switch-countdown');
-    const name = players[playerKey].name.toUpperCase();
-    const color = playerKey === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    if (turnSwitchInterval) { clearTimeout(turnSwitchInterval); turnSwitchInterval = null; }
+    var overlay = document.getElementById('turn-switch');
+    var nameEl = document.getElementById('turn-switch-name');
+    var bgEl = document.getElementById('turn-switch-bg');
+    var labelEl = document.getElementById('turn-switch-label');
+    var name = players[playerKey].name.toUpperCase();
+    var isP1 = playerKey === 'p1';
 
     nameEl.textContent = name;
-    nameEl.style.color = color;
-    nameEl.style.textShadow = `0 0 40px ${playerKey === 'burden' ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)'}`;
+    nameEl.style.color = isP1 ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    nameEl.style.textShadow = '0 0 40px ' + (isP1 ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)');
 
-    let count = 2;
-    countEl.textContent = count;
+    // Reset and retrigger animations
+    nameEl.style.animation = 'none';
+    labelEl.style.animation = 'none';
+    void nameEl.offsetHeight;
+    nameEl.style.animation = 'spotlightPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+    labelEl.style.animation = 'spotlightFade 0.6s ease forwards 0.2s';
+    labelEl.style.opacity = '0';
+    labelEl.textContent = 'PASS THE REMOTE';
+
+    bgEl.className = 'turn-switch-bg ' + (isP1 ? 'p1-bg' : 'p2-bg');
     overlay.classList.add('show');
-    sfxTick();
+    sfxWhoosh();
 
-    turnSwitchInterval = setInterval(() => {
-      count--;
-      if (count > 0) {
-        countEl.textContent = count;
-        sfxTick();
-      } else {
-        clearInterval(turnSwitchInterval);
-        turnSwitchInterval = null;
-        overlay.classList.remove('show');
-        if (cb) cb();
-      }
-    }, 400);
+    turnSwitchInterval = setTimeout(function() {
+      turnSwitchInterval = null;
+      overlay.classList.remove('show');
+      if (cb) cb();
+    }, 1200);
   }
 
   function showRoundSplash(num, cb) {
@@ -3529,10 +3880,10 @@
     const playerEl = document.getElementById('hud-player');
     playerEl.innerHTML = players[currentPlayer].name +
       (voiceEnabled ? '<span id="hud-speaker" class="hud-speaker">&#128264;</span>' : '');
-    playerEl.style.color = currentPlayer === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    playerEl.style.color = currentPlayer === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
-    document.getElementById('hud-burden-score').textContent = formatScore(players.burden.score);
-    document.getElementById('hud-stu-score').textContent = formatScore(players.stu.score);
+    document.getElementById('hud-p1-score').textContent = formatScore(players.p1.score);
+    document.getElementById('hud-p2-score').textContent = formatScore(players.p2.score);
     document.getElementById('q-category').textContent = decodeHTML(q.category);
     document.getElementById('q-text').textContent = decodeHTML(q.question);
 
@@ -3540,12 +3891,25 @@
     updateDifficultyHUD(q);
 
     // Update turn indicator
-    document.getElementById('hud-burden-section').classList.remove('active-turn', 'stu-turn');
-    document.getElementById('hud-stu-section').classList.remove('active-turn', 'stu-turn');
-    if (currentPlayer === 'burden') {
-      document.getElementById('hud-burden-section').classList.add('active-turn');
+    document.getElementById('hud-p1-section').classList.remove('active-turn', 'p2-turn');
+    document.getElementById('hud-p2-section').classList.remove('active-turn', 'p2-turn');
+    if (currentPlayer === 'p1') {
+      document.getElementById('hud-p1-section').classList.add('active-turn');
     } else {
-      document.getElementById('hud-stu-section').classList.add('active-turn', 'stu-turn');
+      document.getElementById('hud-p2-section').classList.add('active-turn', 'p2-turn');
+    }
+
+    // Active/inactive player emphasis
+    var p1Section = document.getElementById('hud-p1-section');
+    var p2Section = document.getElementById('hud-p2-section');
+    p1Section.classList.remove('player-active', 'player-inactive', 'p2-active');
+    p2Section.classList.remove('player-active', 'player-inactive', 'p2-active');
+    if (currentPlayer === 'p1') {
+      p1Section.classList.add('player-active');
+      p2Section.classList.add('player-inactive');
+    } else {
+      p2Section.classList.add('player-active', 'p2-active');
+      p1Section.classList.add('player-inactive');
     }
 
     const grid = document.getElementById('answers-grid');
@@ -3847,7 +4211,11 @@
     currentQ++;
     if (currentQ < questions.length) {
       showTurnSwitch(currentPlayer, function() {
-        showRoundSplash(currentQ + 1, function() { loadQuestion(); });
+        if (currentQ % 5 === 0) {
+          showRoundSplash(currentQ + 1, function() { loadQuestion(); });
+        } else {
+          loadQuestion();
+        }
       });
     } else {
       endGame();
@@ -3858,6 +4226,9 @@
   //  SELECT ANSWER (cascade + difficulty)
   // =======================================
   function selectAnswer(btn) {
+    var now = Date.now();
+    if (now - lastAnswerTime < 300) return;
+    lastAnswerTime = now;
     if (answered || ttsPlaying || isPaused) return;
     answered = true;
     stopQuestionTimer();
@@ -3888,7 +4259,7 @@
       var points = basePoints + speedBonus + streakBonus;
       player.score += points;
 
-      spawnParticles(btn, 12);
+      spawnParticles(btn, 20);
       showFeedback('correct');
       if (player.streak >= 3) {
         var streakMsgs = [
@@ -3910,18 +4281,18 @@
     }
 
     // Update HUD scores
-    updateScoreDisplay('hud-burden-score', players.burden.score);
-    updateScoreDisplay('hud-stu-score', players.stu.score);
+    updateScoreDisplay('hud-p1-score', players.p1.score);
+    updateScoreDisplay('hud-p2-score', players.p2.score);
 
     // Track data for achievements
     gameTracker.answerTimes[currentPlayer].push(elapsed);
     if (isCorrect && elapsed < 3) gameTracker.fastAnswers[currentPlayer]++;
     if (isCorrect && elapsed < 1) gameTracker.blitzAnswers[currentPlayer] = true;
-    gameTracker.scoreDiffs.push(players.burden.score - players.stu.score);
+    gameTracker.scoreDiffs.push(players.p1.score - players.p2.score);
     if (currentQ % 2 === 1) gameTracker.secondAnswerers.push(currentPlayer);
 
     // Alternate turn for the NEXT question
-    currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
+    currentPlayer = currentPlayer === 'p1' ? 'p2' : 'p1';
 
     // After feedback delay: advance to next question
     setTimeout(function() {
@@ -3946,11 +4317,11 @@
 
     // Track timeout for achievements
     gameTracker.answerTimes[currentPlayer].push(settings.timer);
-    gameTracker.scoreDiffs.push(players.burden.score - players.stu.score);
+    gameTracker.scoreDiffs.push(players.p1.score - players.p2.score);
     if (currentQ % 2 === 1) gameTracker.secondAnswerers.push(currentPlayer);
 
     // Alternate players
-    currentPlayer = currentPlayer === 'burden' ? 'stu' : 'burden';
+    currentPlayer = currentPlayer === 'p1' ? 'p2' : 'p1';
 
     setTimeout(function() {
       advanceAfterAnswer();
@@ -4051,40 +4422,44 @@
   function endGame() {
     stopQuestionTimer();
 
-    // Display Burden's stats
-    document.getElementById('res-burden-score').textContent = players.burden.score;
-    document.getElementById('res-burden-correct').textContent = players.burden.correctCount;
-    document.getElementById('res-burden-streak').textContent = players.burden.bestStreak;
+    // Set dynamic result screen names
+    document.getElementById('res-p1-name').textContent = players.p1.name.toUpperCase();
+    document.getElementById('res-p2-name').textContent = players.p2.name.toUpperCase();
 
-    // Display Stu's stats
-    document.getElementById('res-stu-score').textContent = players.stu.score;
-    document.getElementById('res-stu-correct').textContent = players.stu.correctCount;
-    document.getElementById('res-stu-streak').textContent = players.stu.bestStreak;
+    // Display Player 1's stats
+    document.getElementById('res-p1-score').textContent = players.p1.score;
+    document.getElementById('res-p1-correct').textContent = players.p1.correctCount;
+    document.getElementById('res-p1-streak').textContent = players.p1.bestStreak;
+
+    // Display Player 2's stats
+    document.getElementById('res-p2-score').textContent = players.p2.score;
+    document.getElementById('res-p2-correct').textContent = players.p2.correctCount;
+    document.getElementById('res-p2-streak').textContent = players.p2.bestStreak;
 
     // Reset column classes
-    const burdenCol = document.getElementById('res-burden-col');
-    const stuCol = document.getElementById('res-stu-col');
-    burdenCol.className = 'result-column';
-    stuCol.className = 'result-column';
-    burdenCol.style.textAlign = 'center';
-    stuCol.style.textAlign = 'center';
+    var p1Col = document.getElementById('res-p1-col');
+    var p2Col = document.getElementById('res-p2-col');
+    p1Col.className = 'result-column';
+    p2Col.className = 'result-column';
+    p1Col.style.textAlign = 'center';
+    p2Col.style.textAlign = 'center';
 
-    const trophy = document.getElementById('res-trophy');
+    var trophy = document.getElementById('res-trophy');
 
     // Determine winner
-    let winnerText = '';
-    if (players.burden.score > players.stu.score) {
-      winnerText = t('burdenWins');
-      burdenCol.classList.add('winner-column');
-      stuCol.classList.add('loser-column');
+    var winnerText = '';
+    if (players.p1.score > players.p2.score) {
+      winnerText = t('playerWins').replace('{name}', players.p1.name.toUpperCase());
+      p1Col.classList.add('winner-column');
+      p2Col.classList.add('loser-column');
       trophy.style.display = 'block';
       sfxVictory();
       Music.victory();
       createConfetti();
-    } else if (players.stu.score > players.burden.score) {
-      winnerText = t('stuWins');
-      stuCol.classList.add('winner-column');
-      burdenCol.classList.add('loser-column');
+    } else if (players.p2.score > players.p1.score) {
+      winnerText = t('playerWins').replace('{name}', players.p2.name.toUpperCase());
+      p2Col.classList.add('winner-column');
+      p1Col.classList.add('loser-column');
       trophy.style.display = 'block';
       sfxVictory();
       Music.victory();
@@ -4103,8 +4478,8 @@
     // Save scores for "Consistent" achievement in next game
     try {
       localStorage.setItem('brainblitz_prev_scores', JSON.stringify({
-        burden: players.burden.score,
-        stu: players.stu.score
+        p1: players.p1.score,
+        p2: players.p2.score
       }));
     } catch(e) {}
 
@@ -4119,7 +4494,8 @@
   // ═══════════════════════════════════════
   async function loadLifetimeStats() {
     try {
-      const res = await fetch('/api/scores', { signal: AbortSignal.timeout(5000) });
+      var url = '/api/scores?p1=' + encodeURIComponent(playerNames.p1) + '&p2=' + encodeURIComponent(playerNames.p2);
+      var res = await fetch(url, { signal: AbortSignal.timeout(5000) });
       if (res.ok) {
         lifetimeStats = await res.json();
         updateTitleWins();
@@ -4132,10 +4508,12 @@
 
   function updateTitleWins() {
     if (!lifetimeStats) return;
-    const bWins = (lifetimeStats.burden && lifetimeStats.burden.wins) || 0;
-    const sWins = (lifetimeStats.stu && lifetimeStats.stu.wins) || 0;
-    document.getElementById('title-burden-wins').textContent = `BURDEN: ${bWins}`;
-    document.getElementById('title-stu-wins').textContent = `STU: ${sWins}`;
+    var p1Stats = lifetimeStats.p1 || lifetimeStats.burden || {};
+    var p2Stats = lifetimeStats.p2 || lifetimeStats.stu || {};
+    var p1Wins = p1Stats.wins || 0;
+    var p2Wins = p2Stats.wins || 0;
+    document.getElementById('title-p1-wins').textContent = playerNames.p1.toUpperCase() + ': ' + p1Wins;
+    document.getElementById('title-p2-wins').textContent = playerNames.p2.toUpperCase() + ': ' + p2Wins;
     document.getElementById('lifetime-wins').style.opacity = '1';
   }
 
@@ -4146,55 +4524,60 @@
       return;
     }
 
-    const b = lifetimeStats.burden || {};
-    const s = lifetimeStats.stu || {};
+    var b = lifetimeStats.p1 || lifetimeStats.burden || {};
+    var s = lifetimeStats.p2 || lifetimeStats.stu || {};
 
-    const hasData = (b.gamesPlayed || 0) > 0 || (s.gamesPlayed || 0) > 0;
+    var hasData = (b.gamesPlayed || 0) > 0 || (s.gamesPlayed || 0) > 0;
     document.getElementById('lb-content').style.display = hasData ? 'flex' : 'none';
     document.getElementById('lb-no-data').style.display = hasData ? 'none' : 'block';
 
-    // Check if leaderboard is currently visible for counter animation
-    const isVisible = document.getElementById('screen-leaderboard').classList.contains('active');
-    const dur = isVisible ? 600 : 0;
+    // Set dynamic leaderboard names
+    document.getElementById('lb-p1-name').textContent = playerNames.p1.toUpperCase();
+    document.getElementById('lb-p2-name').textContent = playerNames.p2.toUpperCase();
 
-    const setLB = (id, val) => {
-      const el = document.getElementById(id);
+    // Check if leaderboard is currently visible for counter animation
+    var isVisible = document.getElementById('screen-leaderboard').classList.contains('active');
+    var dur = isVisible ? 600 : 0;
+
+    var setLB = function(id, val) {
+      var el = document.getElementById(id);
       if (dur > 0 && val > 0) { animateCounter(el, val, dur); }
       else { el.textContent = formatScore(val); }
     };
 
-    setLB('lb-burden-wins', b.wins || 0);
-    setLB('lb-burden-games', b.gamesPlayed || 0);
-    setLB('lb-burden-draws', b.draws || 0);
-    setLB('lb-burden-total', b.totalScore || 0);
-    setLB('lb-burden-correct', b.totalCorrect || 0);
-    setLB('lb-burden-best', b.bestGameScore || 0);
-    setLB('lb-burden-streak', b.bestStreak || 0);
+    setLB('lb-p1-wins', b.wins || 0);
+    setLB('lb-p1-games', b.gamesPlayed || 0);
+    setLB('lb-p1-draws', b.draws || 0);
+    setLB('lb-p1-total', b.totalScore || 0);
+    setLB('lb-p1-correct', b.totalCorrect || 0);
+    setLB('lb-p1-best', b.bestGameScore || 0);
+    setLB('lb-p1-streak', b.bestStreak || 0);
 
-    setLB('lb-stu-wins', s.wins || 0);
-    setLB('lb-stu-games', s.gamesPlayed || 0);
-    setLB('lb-stu-draws', s.draws || 0);
-    setLB('lb-stu-total', s.totalScore || 0);
-    setLB('lb-stu-correct', s.totalCorrect || 0);
-    setLB('lb-stu-best', s.bestGameScore || 0);
-    setLB('lb-stu-streak', s.bestStreak || 0);
+    setLB('lb-p2-wins', s.wins || 0);
+    setLB('lb-p2-games', s.gamesPlayed || 0);
+    setLB('lb-p2-draws', s.draws || 0);
+    setLB('lb-p2-total', s.totalScore || 0);
+    setLB('lb-p2-correct', s.totalCorrect || 0);
+    setLB('lb-p2-best', s.bestGameScore || 0);
+    setLB('lb-p2-streak', s.bestStreak || 0);
   }
 
   async function saveGameResult() {
-    const isDraw = players.burden.score === players.stu.score;
-    const burdenWon = players.burden.score > players.stu.score;
+    var isDraw = players.p1.score === players.p2.score;
+    var p1Won = players.p1.score > players.p2.score;
 
     try {
       await fetch('/api/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          player: 'burden',
-          won: burdenWon && !isDraw,
+          player: 'p1',
+          playerName: playerNames.p1,
+          won: p1Won && !isDraw,
           draw: isDraw,
-          score: players.burden.score,
-          correct: players.burden.correctCount,
-          bestStreak: players.burden.bestStreak
+          score: players.p1.score,
+          correct: players.p1.correctCount,
+          bestStreak: players.p1.bestStreak
         }),
         signal: AbortSignal.timeout(5000)
       });
@@ -4203,12 +4586,13 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          player: 'stu',
-          won: !burdenWon && !isDraw,
+          player: 'p2',
+          playerName: playerNames.p2,
+          won: !p1Won && !isDraw,
           draw: isDraw,
-          score: players.stu.score,
-          correct: players.stu.correctCount,
-          bestStreak: players.stu.bestStreak
+          score: players.p2.score,
+          correct: players.p2.correctCount,
+          bestStreak: players.p2.bestStreak
         }),
         signal: AbortSignal.timeout(5000)
       });
@@ -4258,7 +4642,7 @@
       description: 'Answer all questions correctly in one game',
       check: function(player, opponent, sett, stats, playerKey) {
         var totalPlayerQs = Math.ceil(sett.rounds / 2);
-        if (playerKey === 'stu') totalPlayerQs = Math.floor(sett.rounds / 2);
+        if (playerKey === 'p2') totalPlayerQs = Math.floor(sett.rounds / 2);
         return player.correctCount === totalPlayerQs && totalPlayerQs > 0;
       }
     },
@@ -4270,11 +4654,11 @@
       check: function(player, opponent, sett, stats, playerKey) {
         var won = player.score > opponent.score;
         if (!won) return false;
-        var isBurden = playerKey === 'burden';
+        var isP1 = playerKey === 'p1';
         for (var i = 0; i < gameTracker.scoreDiffs.length; i++) {
           var diff = gameTracker.scoreDiffs[i];
-          if (isBurden && diff <= -200) return true;
-          if (!isBurden && diff >= 200) return true;
+          if (isP1 && diff <= -200) return true;
+          if (!isP1 && diff >= 200) return true;
         }
         return false;
       }
@@ -4313,7 +4697,7 @@
       description: 'Win with 90%+ accuracy',
       check: function(player, opponent, sett, stats, playerKey) {
         var totalPlayerQs = Math.ceil(sett.rounds / 2);
-        if (playerKey === 'stu') totalPlayerQs = Math.floor(sett.rounds / 2);
+        if (playerKey === 'p2') totalPlayerQs = Math.floor(sett.rounds / 2);
         if (totalPlayerQs < 3) return false;
         var accuracy = player.correctCount / totalPlayerQs;
         return accuracy >= 0.9 && player.score > opponent.score;
@@ -4421,19 +4805,20 @@
 
   // Load achievements from KV for both players
   function loadAchievements(callback) {
-    fetch('/api/achievements', { signal: AbortSignal.timeout(5000) })
+    var url = '/api/achievements?p1=' + encodeURIComponent(playerNames.p1) + '&p2=' + encodeURIComponent(playerNames.p2);
+    fetch(url, { signal: AbortSignal.timeout(5000) })
       .then(function(res) {
         if (res.ok) return res.json();
         throw new Error('Failed');
       })
       .then(function(data) {
-        achievementCache.burden = data.burden || { earned: [], history: [] };
-        achievementCache.stu = data.stu || { earned: [], history: [] };
+        achievementCache.p1 = data.p1 || data.burden || { earned: [], history: [] };
+        achievementCache.p2 = data.p2 || data.stu || { earned: [], history: [] };
         if (callback) callback();
       })
       .catch(function() {
-        if (!achievementCache.burden) achievementCache.burden = { earned: [], history: [] };
-        if (!achievementCache.stu) achievementCache.stu = { earned: [], history: [] };
+        if (!achievementCache.p1) achievementCache.p1 = { earned: [], history: [] };
+        if (!achievementCache.p2) achievementCache.p2 = { earned: [], history: [] };
         if (callback) callback();
       });
   }
@@ -4441,7 +4826,7 @@
   // Check achievements for one player, return array of newly earned achievement objects
   function checkPlayerAchievements(playerKey) {
     var player = players[playerKey];
-    var opponentKey = playerKey === 'burden' ? 'stu' : 'burden';
+    var opponentKey = playerKey === 'p1' ? 'p2' : 'p1';
     var opponent = players[opponentKey];
     var cached = achievementCache[playerKey];
     var earned = (cached && cached.earned) ? cached.earned : [];
@@ -4488,23 +4873,23 @@
     setTimeout(function() {
       var allNew = [];
 
-      var burdenNew = checkPlayerAchievements('burden');
-      var burdenIds = [];
-      for (var i = 0; i < burdenNew.length; i++) {
-        burdenIds.push(burdenNew[i].id);
-        allNew.push({ achievement: burdenNew[i], playerKey: 'burden' });
-        if (achievementCache.burden) achievementCache.burden.earned.push(burdenNew[i].id);
+      var p1New = checkPlayerAchievements('p1');
+      var p1Ids = [];
+      for (var i = 0; i < p1New.length; i++) {
+        p1Ids.push(p1New[i].id);
+        allNew.push({ achievement: p1New[i], playerKey: 'p1' });
+        if (achievementCache.p1) achievementCache.p1.earned.push(p1New[i].id);
       }
-      saveAchievements('burden', burdenIds);
+      saveAchievements('p1', p1Ids);
 
-      var stuNew = checkPlayerAchievements('stu');
-      var stuIds = [];
-      for (var j = 0; j < stuNew.length; j++) {
-        stuIds.push(stuNew[j].id);
-        allNew.push({ achievement: stuNew[j], playerKey: 'stu' });
-        if (achievementCache.stu) achievementCache.stu.earned.push(stuNew[j].id);
+      var p2New = checkPlayerAchievements('p2');
+      var p2Ids = [];
+      for (var j = 0; j < p2New.length; j++) {
+        p2Ids.push(p2New[j].id);
+        allNew.push({ achievement: p2New[j], playerKey: 'p2' });
+        if (achievementCache.p2) achievementCache.p2.earned.push(p2New[j].id);
       }
-      saveAchievements('stu', stuIds);
+      saveAchievements('p2', p2Ids);
 
       for (var k = 0; k < allNew.length; k++) {
         (function(item, delay) {
@@ -4524,8 +4909,8 @@
     var toast = document.createElement('div');
     toast.className = 'achievement-toast';
 
-    var playerName = playerKey === 'burden' ? 'Burden' : 'Stu';
-    var playerColor = playerKey === 'burden' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    var playerName = players[playerKey] ? players[playerKey].name : playerNames[playerKey] || playerKey;
+    var playerColor = playerKey === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
 
     toast.innerHTML =
       '<div class="achievement-toast-icon">' + achievement.icon + '</div>' +
@@ -4553,21 +4938,21 @@
     var grid = document.getElementById('achievements-grid');
     grid.innerHTML = '';
 
-    var burdenEarned = (achievementCache.burden && achievementCache.burden.earned) ? achievementCache.burden.earned : [];
-    var stuEarned = (achievementCache.stu && achievementCache.stu.earned) ? achievementCache.stu.earned : [];
+    var p1Earned = (achievementCache.p1 && achievementCache.p1.earned) ? achievementCache.p1.earned : [];
+    var p2Earned = (achievementCache.p2 && achievementCache.p2.earned) ? achievementCache.p2.earned : [];
 
     for (var i = 0; i < ACHIEVEMENTS.length; i++) {
       var ach = ACHIEVEMENTS[i];
-      var bHas = burdenEarned.indexOf(ach.id) !== -1;
-      var sHas = stuEarned.indexOf(ach.id) !== -1;
+      var bHas = p1Earned.indexOf(ach.id) !== -1;
+      var sHas = p2Earned.indexOf(ach.id) !== -1;
       var isEarned = bHas || sHas;
 
       var card = document.createElement('div');
       card.className = 'achievement-card ' + (isEarned ? 'earned' : 'locked');
 
       var playersHtml = '';
-      if (bHas) playersHtml += '<span class="achievement-card-player burden-badge">Burden</span>';
-      if (sHas) playersHtml += '<span class="achievement-card-player stu-badge">Stu</span>';
+      if (bHas) playersHtml += '<span class="achievement-card-player p1-badge">' + playerNames.p1 + '</span>';
+      if (sHas) playersHtml += '<span class="achievement-card-player p2-badge">' + playerNames.p2 + '</span>';
       if (!isEarned) playersHtml = '<span style="font-family:Orbitron,monospace;font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:0.1em;">\uD83D\uDD12 LOCKED</span>';
 
       card.innerHTML =
@@ -4579,7 +4964,7 @@
       grid.appendChild(card);
     }
 
-    if (!achievementCache.burden && !achievementCache.stu) {
+    if (!achievementCache.p1 && !achievementCache.p2) {
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);font-family:Rajdhani,sans-serif;font-size:20px;">Loading achievements...</div>';
       loadAchievements(function() { renderAchievementsScreen(); });
     }
@@ -4929,8 +5314,7 @@
       correctFb: ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Yoh Nailed It!', 'Eish, Too Easy!', 'Baie Mooi!', "Jy's 'n Bees!", 'Sharp Sharp!'],
       wrongFb: ['Eina!', 'Ag Nee!', 'Haibo!', 'Shame Man!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!'],
       timeoutFb: 'Tyd Op, Bru!',
-      burdenWins: 'BURDEN WINS! Lekker Gespeel!',
-      stuWins: "STU WINS! Jy's die Boss!",
+      playerWins: '{name} WINS! Lekker Gespeel!',
       draw: "IT'S A DRAW! Sharp Sharp!",
       gamesPlayed: 'Games Played',
       wins: 'Wins',
@@ -4964,8 +5348,7 @@
       correctFb: ['Lekker!', 'Ja Boet!', 'Kwaai!', 'Sjoe!', 'Mooi Man!', 'Te Maklik!', 'Baie Mooi!', "Jy's 'n Bees!", 'Sharp Sharp!', "Nou Gaan Ons Braai!"],
       wrongFb: ['Eina!', 'Ag Nee!', 'Haibo!', 'Skande!', 'Dis Verkeerd!', 'Yoh!', 'Aikona!', 'Sies Man!'],
       timeoutFb: 'Tyd Op, Bru!',
-      burdenWins: 'BURDEN WEN! Lekker Gespeel!',
-      stuWins: "STU WEN! Jy's die Baas!",
+      playerWins: '{name} WEN! Lekker Gespeel!',
       draw: "GELYKOP! Sharp Sharp!",
       gamesPlayed: 'Spelle Gespeel',
       wins: 'Oorwinnings',
@@ -5110,7 +5493,7 @@
     }
 
     // Arrow navigation
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(key) !== -1) {
       e.preventDefault();
       handleArrowNav(key);
       return;
@@ -5127,7 +5510,7 @@
 
     // A/B/C/D to select answers during game
     const upperKey = key.toUpperCase();
-    if (['A','B','C','D'].includes(upperKey) && document.getElementById('screen-game').classList.contains('active')) {
+    if (['A','B','C','D'].indexOf(upperKey) !== -1 && document.getElementById('screen-game').classList.contains('active')) {
       const idx = upperKey.charCodeAt(0) - 65;
       if (!answered && !ttsPlaying && !isPaused) {
         const btn = document.querySelector('.answer-btn[data-index="' + idx + '"]');
@@ -5137,10 +5520,14 @@
   });
 
   function handleBack() {
+    var now = Date.now();
+    if (now - lastBackTime < 300) return;
+    lastBackTime = now;
     const active = document.querySelector('.screen.active');
     if (!active) return;
     switch(active.id) {
       case 'screen-howto':
+      case 'screen-names':
       case 'screen-settings':
       case 'screen-leaderboard':
       case 'screen-achievements':
@@ -5166,8 +5553,8 @@
 
       let newIdx = idx;
       switch(key) {
-        case 'ArrowRight': newIdx = idx % 2 === 0 && idx + 1 < btns.length ? idx + 1 : idx; break;
-        case 'ArrowLeft': newIdx = idx % 2 === 1 ? idx - 1 : idx; break;
+        case 'ArrowRight': newIdx = idx % 2 === 0 ? Math.min(idx + 1, btns.length - 1) : idx - 1; break;
+        case 'ArrowLeft': newIdx = idx % 2 === 1 ? idx - 1 : Math.min(idx + 1, btns.length - 1); break;
         case 'ArrowDown': newIdx = idx + 2 < btns.length ? idx + 2 : idx; break;
         case 'ArrowUp': newIdx = idx - 2 >= 0 ? idx - 2 : idx; break;
       }
@@ -5199,6 +5586,20 @@
   // Restore saved settings and load stats/achievements on page load
   restoreSettings();
   restoreLang();
+
+  // Restore saved player names
+  try {
+    var savedNames = JSON.parse(localStorage.getItem('brainblitz_names') || '{}');
+    if (savedNames.p1) {
+      document.getElementById('name-p1').value = savedNames.p1;
+      playerNames.p1 = savedNames.p1;
+    }
+    if (savedNames.p2) {
+      document.getElementById('name-p2').value = savedNames.p2;
+      playerNames.p2 = savedNames.p2;
+    }
+  } catch(e) {}
+
   loadLifetimeStats();
   loadAchievements();
   // Load cached ElevenLabs audio assets (non-blocking)
