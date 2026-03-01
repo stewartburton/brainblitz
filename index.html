@@ -201,6 +201,8 @@
     font-size: clamp(16px, 1.8vw, 22px);
     font-weight: 600;
     padding: 12px 28px;
+    min-height: 48px;
+    min-width: 64px;
     border: 1.5px solid rgba(255,255,255,0.15);
     background: rgba(255,255,255,0.03);
     color: rgba(255,255,255,0.5);
@@ -3291,6 +3293,8 @@
   let ttsPlaying = false;
   let isPaused = false;
   let pauseTimeLeft = 0;
+  var lastAnswerTime = 0;
+  var lastBackTime = 0;
 
   // ── Cascade state (to track ongoing cascade animations) ──
   let cascadeInProgress = false;
@@ -3998,6 +4002,9 @@
   //  SELECT ANSWER (cascade + difficulty)
   // =======================================
   function selectAnswer(btn) {
+    var now = Date.now();
+    if (now - lastAnswerTime < 300) return;
+    lastAnswerTime = now;
     if (answered || ttsPlaying || isPaused) return;
     answered = true;
     stopQuestionTimer();
@@ -5289,6 +5296,9 @@
   });
 
   function handleBack() {
+    var now = Date.now();
+    if (now - lastBackTime < 300) return;
+    lastBackTime = now;
     const active = document.querySelector('.screen.active');
     if (!active) return;
     switch(active.id) {
@@ -5319,8 +5329,8 @@
 
       let newIdx = idx;
       switch(key) {
-        case 'ArrowRight': newIdx = idx % 2 === 0 && idx + 1 < btns.length ? idx + 1 : idx; break;
-        case 'ArrowLeft': newIdx = idx % 2 === 1 ? idx - 1 : idx; break;
+        case 'ArrowRight': newIdx = idx % 2 === 0 ? Math.min(idx + 1, btns.length - 1) : idx - 1; break;
+        case 'ArrowLeft': newIdx = idx % 2 === 1 ? idx - 1 : Math.min(idx + 1, btns.length - 1); break;
         case 'ArrowDown': newIdx = idx + 2 < btns.length ? idx + 2 : idx; break;
         case 'ArrowUp': newIdx = idx - 2 >= 0 ? idx - 2 : idx; break;
       }
