@@ -1927,8 +1927,13 @@
     <button class="btn pink" onclick="showScreen('howto')" style="min-width:220px;">How to Play</button>
     <button class="btn pink" onclick="showScreen('leaderboard')" style="min-width:220px;">Leaderboard</button>
   </div>
-  <div id="lifetime-wins" style="margin-top:30px; font-family:'Orbitron',monospace; font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3); letter-spacing:0.1em; opacity:0; transition:opacity 0.5s ease;">
-    <span id="title-p1-wins">Player 1: 0</span> &nbsp;|&nbsp; <span id="title-p2-wins">Player 2: 0</span>
+  <div id="lifetime-wins" style="margin-top:30px; opacity:0; transition:opacity 0.5s ease;">
+    <div style="font-family:'Orbitron',monospace; font-size:clamp(12px,1.2vw,16px); color:rgba(255,255,255,0.4); letter-spacing:0.15em; margin-bottom:8px;">HEAD TO HEAD</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:15px; font-family:'Orbitron',monospace;">
+      <span id="title-p1-wins" style="font-size:clamp(18px,2.5vw,28px); color:var(--neon-cyan); text-shadow:0 0 10px rgba(0,240,255,0.4);">0</span>
+      <span style="font-size:clamp(14px,1.5vw,20px); color:rgba(255,255,255,0.3);">vs</span>
+      <span id="title-p2-wins" style="font-size:clamp(18px,2.5vw,28px); color:var(--neon-pink); text-shadow:0 0 10px rgba(255,45,120,0.4);">0</span>
+    </div>
   </div>
   <button class="admin-gear" onclick="showScreen('pin')" title="Admin" style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.1em;">ADMIN</button>
 </div>
@@ -3743,7 +3748,6 @@
   // ═══════════════════════════════════════
   async function startGame() {
     if (gameLoading) return;
-      document.getElementById('hud-p2-streak').textContent = '';
 
     try {
       settings.timer = parseInt(getSelected('timer')) || 15;
@@ -3760,10 +3764,15 @@
       currentQ = 0;
       // Reset cascade state
       cascadeInProgress = false;
+      isDoublePoints = false;
+      var dpBadge = document.getElementById('double-points-badge');
+      if (dpBadge) dpBadge.remove();
 
       // Set dynamic HUD labels
       document.getElementById('hud-p1-label').textContent = players.p1.name;
       document.getElementById('hud-p2-label').textContent = players.p2.name;
+      document.getElementById('hud-p1-streak').textContent = '';
+      document.getElementById('hud-p2-streak').textContent = '';
 
       // Reset achievement tracker for this game
       gameTracker.answerTimes = { p1: [], p2: [] };
@@ -3944,6 +3953,23 @@
     document.getElementById('hud-p2-score').textContent = formatScore(players.p2.score);
     document.getElementById('q-category').textContent = decodeHTML(q.category);
     document.getElementById('q-text').textContent = decodeHTML(q.question);
+
+    // Comeback round: double points if final question and scores are close
+    isDoublePoints = false;
+    var dpBadge = document.getElementById('double-points-badge');
+    if (dpBadge) dpBadge.remove();
+
+    if (currentQ === questions.length - 1) {
+      var scoreDiff = Math.abs(players.p1.score - players.p2.score);
+      if (scoreDiff <= 200) {
+        isDoublePoints = true;
+        var badge = document.createElement('div');
+        badge.className = 'double-points-badge';
+        badge.id = 'double-points-badge';
+        badge.textContent = '2\u00d7 POINTS!';
+        document.getElementById('screen-game').appendChild(badge);
+      }
+    }
 
     // Final question dramatic sting
     if (currentQ === questions.length - 1) {
@@ -4299,6 +4325,7 @@
     ensureAudio();
 
     var isCorrect = btn.dataset.correct === 'true';
+    var points = 0;
     var elapsed = settings.timer - timeLeft;
     var player = players[currentPlayer];
     player.totalTime += elapsed;
@@ -4320,7 +4347,8 @@
       var basePoints = Math.round(100 * diffMult);
       var speedBonus = Math.round((timeLeft / settings.timer) * 100);
       var streakBonus = Math.min(player.streak, 5) * 20;
-      var points = basePoints + speedBonus + streakBonus;
+      points = basePoints + speedBonus + streakBonus;
+      if (isDoublePoints) points = points * 2;
       player.score += points;
 
       spawnParticles(btn, 20);
@@ -4345,8 +4373,8 @@
     }
 
     // Update HUD scores
-    updateScoreDisplay('hud-p1-score', players.p1.score);
-    updateScoreDisplay('hud-p2-score', players.p2.score);
+    updateScoreDisplay('hud-p1-score', players.p1.score, currentPlayer === 'p1' ? points : null);
+    updateScoreDisplay('hud-p2-score', players.p2.score, currentPlayer === 'p2' ? points : null);
     updateStreakHUD('p1');
     updateStreakHUD('p2');
 
@@ -4402,16 +4430,37 @@
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
-  // Update score display with pop animation
-  function updateScoreDisplay(id, score) {
-    const el = document.getElementById(id);
-    const oldText = el.textContent;
-    const newText = formatScore(score);
-    if (oldText !== newText) {
-      el.textContent = newText;
-      el.classList.remove('score-pop');
-      void el.offsetHeight; // force reflow
-      el.classList.add('score-pop');
+  // Update score display with count-up animation and floating points popup
+  function updateScoreDisplay(id, score, points) {
+    var el = document.getElementById(id);
+    var oldScore = parseInt(el.textContent.replace(/,/g, '')) || 0;
+    var newScore = score;
+    if (oldScore === newScore) return;
+
+    // Animate count-up with ease-out cubic
+    var duration = 400;
+    var startTime = performance.now();
+    function tick(now) {
+      var progress = Math.min((now - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.round(oldScore + (newScore - oldScore) * eased);
+      el.textContent = formatScore(current);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // Pop animation
+    el.classList.remove("score-pop");
+    void el.offsetHeight;
+    el.classList.add("score-pop");
+
+    // Floating points popup
+    if (points && points > 0) {
+      var popup = document.createElement("div");
+      popup.className = "points-earned";
+      popup.textContent = "+" + points;
+      el.parentElement.appendChild(popup);
+      setTimeout(function() { popup.remove(); }, 1100);
     }
   }
 
@@ -4599,8 +4648,8 @@
     var p2Stats = lifetimeStats.p2 || lifetimeStats.stu || {};
     var p1Wins = p1Stats.wins || 0;
     var p2Wins = p2Stats.wins || 0;
-    document.getElementById('title-p1-wins').textContent = playerNames.p1.toUpperCase() + ': ' + p1Wins;
-    document.getElementById('title-p2-wins').textContent = playerNames.p2.toUpperCase() + ': ' + p2Wins;
+    document.getElementById('title-p1-wins').innerHTML = playerNames.p1.toUpperCase() + '<br>' + p1Wins + ' win' + (p1Wins !== 1 ? 's' : '');
+    document.getElementById('title-p2-wins').innerHTML = playerNames.p2.toUpperCase() + '<br>' + p2Wins + ' win' + (p2Wins !== 1 ? 's' : '');
     document.getElementById('lifetime-wins').style.opacity = '1';
   }
 
