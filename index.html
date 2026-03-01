@@ -329,6 +329,21 @@
     0%, 100% { opacity: 0.3; box-shadow: 0 0 10px rgba(0,240,255,0.1); }
     50% { opacity: 1; box-shadow: 0 0 25px rgba(0,240,255,0.4); }
   }
+  .hud-item.player-active {
+    border: 2px solid var(--neon-cyan);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.3);
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+  }
+  .hud-item.player-active.p2-active {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255,45,120,0.3);
+  }
+  .hud-item.player-inactive {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
 
   /* Speaker icon */
   .hud-speaker {
@@ -688,39 +703,55 @@
     text-transform: uppercase;
   }
 
-  /* ─── TURN SWITCH OVERLAY ─── */
+  /* ─── SPOTLIGHT HANDOFF ─── */
   .turn-switch {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     z-index: 10;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    background: rgba(10,10,26,0.92);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.15s ease;
   }
-  .turn-switch.show { opacity: 1; }
+  .turn-switch.show { opacity: 1; pointer-events: all; }
+  .turn-switch-bg {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.92;
+    transition: background 0.2s ease;
+  }
+  .turn-switch-bg.p1-bg {
+    background: linear-gradient(135deg, rgba(0,30,40,0.95), rgba(0,240,255,0.15));
+  }
+  .turn-switch-bg.p2-bg {
+    background: linear-gradient(135deg, rgba(40,0,20,0.95), rgba(255,45,120,0.15));
+  }
   .turn-switch-name {
     font-family: 'Orbitron', monospace;
-    font-size: clamp(40px, 6vw, 80px);
+    font-size: clamp(48px, 8vw, 100px);
     font-weight: 900;
     letter-spacing: 0.1em;
-    margin-bottom: 10px;
+    z-index: 1;
+    animation: spotlightPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   .turn-switch-label {
     font-family: 'Orbitron', monospace;
-    font-size: clamp(18px, 2.5vw, 32px);
-    color: rgba(255,255,255,0.5);
+    font-size: clamp(16px, 2vw, 24px);
+    color: rgba(255,255,255,0.6);
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    margin-bottom: 30px;
+    z-index: 1;
+    margin-top: 15px;
+    animation: spotlightFade 0.6s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
   }
-  .turn-switch-countdown {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(60px, 10vw, 120px);
-    font-weight: 900;
-    color: var(--neon-yellow);
-    text-shadow: 0 0 40px rgba(255,230,0,0.4);
+  @keyframes spotlightPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes spotlightFade {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   /* ─── ERROR SCREEN ─── */
@@ -1099,9 +1130,6 @@
     .turn-switch-label {
       font-size: clamp(14px, 4vw, 24px);
     }
-    .turn-switch-countdown {
-      font-size: clamp(40px, 14vw, 80px);
-    }
 
     /* ── Music Toggle ── */
     .music-toggle {
@@ -1303,7 +1331,7 @@
 
     .round-number { font-size: clamp(40px, 12vw, 80px); }
     .turn-switch-name { font-size: clamp(24px, 6vw, 40px); }
-    .turn-switch-countdown { font-size: clamp(36px, 10vw, 60px); }
+    .turn-switch-label { font-size: clamp(12px, 2vw, 18px); }
 
     .feedback-text { font-size: clamp(28px, 8vw, 56px); }
     .on-fire-text { font-size: clamp(30px, 10vw, 60px); }
@@ -2194,11 +2222,11 @@
   <div class="on-fire-text">ON FIRE!</div>
 </div>
 
-<!-- Turn switch overlay -->
+<!-- Spotlight handoff overlay -->
 <div class="turn-switch" id="turn-switch">
-  <div class="turn-switch-label">GET READY</div>
+  <div class="turn-switch-bg" id="turn-switch-bg"></div>
   <div class="turn-switch-name" id="turn-switch-name"></div>
-  <div class="turn-switch-countdown" id="turn-switch-countdown">3</div>
+  <div class="turn-switch-label" id="turn-switch-label">PASS THE REMOTE</div>
 </div>
 
 <!-- Round splash -->
@@ -3548,37 +3576,39 @@
     return arr;
   }
 
-  let turnSwitchInterval = null;
+  var turnSwitchInterval = null;
 
   function showTurnSwitch(playerKey, cb) {
-    if (turnSwitchInterval) { clearInterval(turnSwitchInterval); turnSwitchInterval = null; }
-    const overlay = document.getElementById('turn-switch');
-    const nameEl = document.getElementById('turn-switch-name');
-    const countEl = document.getElementById('turn-switch-countdown');
-    const name = players[playerKey].name.toUpperCase();
-    const color = playerKey === 'p1' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    if (turnSwitchInterval) { clearTimeout(turnSwitchInterval); turnSwitchInterval = null; }
+    var overlay = document.getElementById('turn-switch');
+    var nameEl = document.getElementById('turn-switch-name');
+    var bgEl = document.getElementById('turn-switch-bg');
+    var labelEl = document.getElementById('turn-switch-label');
+    var name = players[playerKey].name.toUpperCase();
+    var isP1 = playerKey === 'p1';
 
     nameEl.textContent = name;
-    nameEl.style.color = color;
-    nameEl.style.textShadow = `0 0 40px ${playerKey === 'p1' ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)'}`;
+    nameEl.style.color = isP1 ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+    nameEl.style.textShadow = '0 0 40px ' + (isP1 ? 'rgba(0,240,255,0.5)' : 'rgba(255,45,120,0.5)');
 
-    let count = 2;
-    countEl.textContent = count;
+    // Reset and retrigger animations
+    nameEl.style.animation = 'none';
+    labelEl.style.animation = 'none';
+    void nameEl.offsetHeight;
+    nameEl.style.animation = 'spotlightPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+    labelEl.style.animation = 'spotlightFade 0.6s ease forwards 0.2s';
+    labelEl.style.opacity = '0';
+    labelEl.textContent = 'PASS THE REMOTE';
+
+    bgEl.className = 'turn-switch-bg ' + (isP1 ? 'p1-bg' : 'p2-bg');
     overlay.classList.add('show');
-    sfxTick();
+    sfxWhoosh();
 
-    turnSwitchInterval = setInterval(() => {
-      count--;
-      if (count > 0) {
-        countEl.textContent = count;
-        sfxTick();
-      } else {
-        clearInterval(turnSwitchInterval);
-        turnSwitchInterval = null;
-        overlay.classList.remove('show');
-        if (cb) cb();
-      }
-    }, 400);
+    turnSwitchInterval = setTimeout(function() {
+      turnSwitchInterval = null;
+      overlay.classList.remove('show');
+      if (cb) cb();
+    }, 1200);
   }
 
   function showRoundSplash(num, cb) {
@@ -3629,6 +3659,19 @@
       document.getElementById('hud-p1-section').classList.add('active-turn');
     } else {
       document.getElementById('hud-p2-section').classList.add('active-turn', 'p2-turn');
+    }
+
+    // Active/inactive player emphasis
+    var p1Section = document.getElementById('hud-p1-section');
+    var p2Section = document.getElementById('hud-p2-section');
+    p1Section.classList.remove('player-active', 'player-inactive', 'p2-active');
+    p2Section.classList.remove('player-active', 'player-inactive', 'p2-active');
+    if (currentPlayer === 'p1') {
+      p1Section.classList.add('player-active');
+      p2Section.classList.add('player-inactive');
+    } else {
+      p2Section.classList.add('player-active', 'p2-active');
+      p1Section.classList.add('player-inactive');
     }
 
     const grid = document.getElementById('answers-grid');
@@ -3930,7 +3973,11 @@
     currentQ++;
     if (currentQ < questions.length) {
       showTurnSwitch(currentPlayer, function() {
-        showRoundSplash(currentQ + 1, function() { loadQuestion(); });
+        if (currentQ % 5 === 0) {
+          showRoundSplash(currentQ + 1, function() { loadQuestion(); });
+        } else {
+          loadQuestion();
+        }
       });
     } else {
       endGame();
