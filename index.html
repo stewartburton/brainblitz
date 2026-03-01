@@ -666,6 +666,23 @@
   }
   .loser-column { opacity: 0.55; }
 
+  /* Victory variants */
+  .victory-text-blowout {
+    animation: blowoutPulse 0.5s ease-in-out 3;
+  }
+  @keyframes blowoutPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  .victory-text-close {
+    animation: closeShake 0.3s ease-in-out 2;
+  }
+  @keyframes closeShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
   /* Trophy animation */
   .trophy-icon {
     font-size: clamp(40px, 6vw, 80px);
@@ -2504,6 +2521,15 @@
     playTone(440, 0.3, 'sine', 0.1);
     setTimeout(() => playTone(440, 0.3, 'triangle', 0.08), 300);
   }
+  function sfxCloseWin() {
+    // Tense build then resolution
+    ensureAudio();
+    playTone(262, 0.2, 'sine', 0.08);
+    setTimeout(function() { playTone(294, 0.2, 'sine', 0.08); }, 200);
+    setTimeout(function() { playTone(330, 0.2, 'sine', 0.08); }, 400);
+    setTimeout(function() { playTone(392, 0.2, 'sine', 0.1); }, 600);
+    setTimeout(function() { playTone(523, 0.5, 'sine', 0.12); }, 800);
+  }
   function sfxFinalQuestion() {
     ensureAudio();
     // Dramatic 3-note descending power chord
@@ -3711,12 +3737,13 @@
   // ═══════════════════════════════════════
   //  CONFETTI
   // ═══════════════════════════════════════
-  function createConfetti() {
-    const container = document.getElementById('confetti-container');
+  function createConfetti(count) {
+    count = count || 60;
+    var container = document.getElementById('confetti-container');
     container.innerHTML = '';
-    const colors = ['#00f0ff', '#ff2d78', '#ffe600', '#00ff88', '#b44dff', '#ffd700'];
-    for (let i = 0; i < 60; i++) {
-      const piece = document.createElement('div');
+    var colors = ['#00f0ff', '#ff2d78', '#ffe600', '#00ff88', '#b44dff', '#ffd700'];
+    for (var i = 0; i < count; i++) {
+      var piece = document.createElement('div');
       piece.className = 'confetti-piece';
       piece.style.left = Math.random() * 100 + '%';
       piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -4575,32 +4602,76 @@
     p2Col.style.textAlign = 'center';
 
     var trophy = document.getElementById('res-trophy');
+    var winnerEl = document.getElementById('res-winner');
 
-    // Determine winner
+    // Fade out game music for dramatic pause
+    Music.stop(0.3);
+
+    // Determine winner and margin
     var winnerText = '';
+    var margin = Math.abs(players.p1.score - players.p2.score);
+    var winnerKey = null;
+
     if (players.p1.score > players.p2.score) {
+      winnerKey = 'p1';
       winnerText = t('playerWins').replace('{name}', players.p1.name.toUpperCase());
       p1Col.classList.add('winner-column');
       p2Col.classList.add('loser-column');
       trophy.style.display = 'block';
-      sfxVictory();
-      Music.victory();
-      createConfetti();
     } else if (players.p2.score > players.p1.score) {
+      winnerKey = 'p2';
       winnerText = t('playerWins').replace('{name}', players.p2.name.toUpperCase());
       p2Col.classList.add('winner-column');
       p1Col.classList.add('loser-column');
       trophy.style.display = 'block';
-      sfxVictory();
-      Music.victory();
-      createConfetti();
     } else {
       winnerText = t('draw');
       trophy.style.display = 'none';
-      sfxDraw();
-      Music.draw();
     }
-    document.getElementById('res-winner').textContent = winnerText;
+
+    winnerEl.textContent = winnerText;
+    winnerEl.className = 'rank-text';
+
+    // Dramatic pause (500ms silence) then celebration
+    setTimeout(function() {
+      if (winnerKey) {
+        // Check for comeback: winner was losing at the halfway point
+        var halfwayIdx = Math.floor(gameTracker.scoreDiffs.length / 2);
+        var halfwayDiff = gameTracker.scoreDiffs[halfwayIdx] || 0;
+        var isComeback = (winnerKey === 'p1' && halfwayDiff < -50) || (winnerKey === 'p2' && halfwayDiff > 50);
+
+        if (isComeback) {
+          // COMEBACK WIN
+          winnerEl.textContent = '\ud83d\udd25 COMEBACK! ' + winnerText;
+          sfxCloseWin();
+          Music.victory();
+          createConfetti(80);
+        } else if (margin > 300) {
+          // BLOWOUT
+          winnerEl.classList.add('victory-text-blowout');
+          sfxVictory();
+          Music.victory();
+          createConfetti(120);
+          sfxCrowdCheer();
+        } else if (margin <= 100) {
+          // CLOSE GAME
+          winnerEl.classList.add('victory-text-close');
+          winnerEl.textContent = '\ud83d\ude2c ' + winnerText;
+          sfxCloseWin();
+          Music.victory();
+          createConfetti(40);
+        } else {
+          // NORMAL WIN
+          sfxVictory();
+          Music.victory();
+          createConfetti(60);
+        }
+      } else {
+        // DRAW
+        sfxDraw();
+        Music.draw();
+      }
+    }, 500);
 
     // Save result (fire-and-forget)
     saveGameResult();
