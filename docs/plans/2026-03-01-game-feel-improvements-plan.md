@@ -4,7 +4,7 @@
 
 **Goal:** Add 8 game feel and competitive features to make BrainBlitz more exciting on the TV.
 
-**Architecture:** All changes are in `index.html` (single-file app). Features are independent — CSS additions near existing styles, JS additions near related functions. No API changes needed.
+**Architecture:** All changes are in `index.html` (single-file app). Features are independent - CSS additions near existing styles, JS additions near related functions. No API changes needed.
 
 **Tech Stack:** Vanilla JS, CSS animations, Web Audio API. Must avoid `?.`, `??`, spread `[...arr]`, `.includes()`, `inset: 0`.
 
@@ -15,7 +15,7 @@
 Add a visible flame/streak counter below each player's score in the HUD during gameplay. Shows `🔥×3`, `🔥×5` etc. Hidden when streak is 0.
 
 **Files:**
-- Modify: `index.html` — HUD HTML (~line 1999-2003), CSS, and JS (`selectAnswer`, `loadQuestion`, `startGame`)
+- Modify: `index.html` - HUD HTML (~line 1999-2003), CSS, and JS (`selectAnswer`, `loadQuestion`, `startGame`)
 
 **Step 1: Add streak HTML elements to HUD**
 
@@ -94,7 +94,7 @@ git commit -m "feat: add live streak fire indicator in gameplay HUD"
 Replace the instant score update with an animated counter that counts up from old score to new score, plus a points-earned popup.
 
 **Files:**
-- Modify: `index.html` — `updateScoreDisplay` function (~line 4338), add CSS for points popup
+- Modify: `index.html` - `updateScoreDisplay` function (~line 4338), add CSS for points popup
 
 **Step 1: Add CSS for floating points popup**
 
@@ -174,7 +174,7 @@ updateScoreDisplay('hud-p1-score', players.p1.score, currentPlayer === 'p2' ? nu
 updateScoreDisplay('hud-p2-score', players.p2.score, currentPlayer === 'p1' ? null : points);
 ```
 
-Wait — `currentPlayer` hasn't been swapped yet at line 4284. So the current player IS the answerer. Pass `points` only for the current player's score element:
+Wait - `currentPlayer` hasn't been swapped yet at line 4284. So the current player IS the answerer. Pass `points` only for the current player's score element:
 
 ```javascript
 updateScoreDisplay('hud-p1-score', players.p1.score, currentPlayer === 'p1' ? points : null);
@@ -191,12 +191,12 @@ git commit -m "feat: animated score count-up with floating points popup"
 
 ---
 
-### Task 3: Enhanced SFX — Final Question Sting
+### Task 3: Enhanced SFX - Final Question Sting
 
 Add a dramatic SFX sting when the FINAL question loads, signaling the climax.
 
 **Files:**
-- Modify: `index.html` — add `sfxFinalQuestion` function, trigger in `loadQuestion`
+- Modify: `index.html` - add `sfxFinalQuestion` function, trigger in `loadQuestion`
 
 **Step 1: Add sfxFinalQuestion function**
 
@@ -234,12 +234,12 @@ git commit -m "feat: dramatic SFX sting on final question"
 
 ---
 
-### Task 4: Comeback Round — Double Points on Final Question
+### Task 4: Comeback Round - Double Points on Final Question
 
 If the score difference on the final question is close (within 200 points), the final question is worth double points.
 
 **Files:**
-- Modify: `index.html` — `loadQuestion` and `selectAnswer` functions, add visual indicator
+- Modify: `index.html` - `loadQuestion` and `selectAnswer` functions, add visual indicator
 
 **Step 1: Add CSS for double-points indicator**
 
@@ -314,7 +314,7 @@ isDoublePoints = false;
 **Step 6: Commit**
 
 ```
-git commit -m "feat: comeback round — double points on final question when scores are close"
+git commit -m "feat: comeback round - double points on final question when scores are close"
 ```
 
 ---
@@ -324,7 +324,7 @@ git commit -m "feat: comeback round — double points on final question when sco
 Add a "Rematch!" button on the results screen that restarts the game with the same settings but swaps who goes first.
 
 **Files:**
-- Modify: `index.html` — results screen HTML, add `rematch` function
+- Modify: `index.html` - results screen HTML, add `rematch` function
 
 **Step 1: Add Rematch button to results screen**
 
@@ -370,12 +370,12 @@ function rematch() {
 
 When the user navigates through the normal flow (title → names → settings → play), reset to p1. In `confirmNames()` or at the start of `startGame` when coming from settings, ensure:
 
-Actually, keep it simple: `startGame()` already sets `currentPlayer = 'p1'`. Change it to use `lastStartingPlayer`. The `rematch()` function swaps it. When going through normal flow, `lastStartingPlayer` stays as whatever it was, which is fine — it means the "loser" of the previous session gets to start next time, even across full game restarts. This is actually good behavior.
+Actually, keep it simple: `startGame()` already sets `currentPlayer = 'p1'`. Change it to use `lastStartingPlayer`. The `rematch()` function swaps it. When going through normal flow, `lastStartingPlayer` stays as whatever it was, which is fine - it means the "loser" of the previous session gets to start next time, even across full game restarts. This is actually good behavior.
 
 **Step 6: Commit**
 
 ```
-git commit -m "feat: quick rematch button — swaps starting player"
+git commit -m "feat: quick rematch button - swaps starting player"
 ```
 
 ---
@@ -385,7 +385,7 @@ git commit -m "feat: quick rematch button — swaps starting player"
 Make the win record more prominent with larger text, player colors, and a "vs" separator.
 
 **Files:**
-- Modify: `index.html` — `lifetime-wins` HTML and `updateTitleWins` function
+- Modify: `index.html` - `lifetime-wins` HTML and `updateTitleWins` function
 
 **Step 1: Replace lifetime-wins HTML**
 
@@ -432,7 +432,7 @@ git commit -m "feat: enhanced head-to-head win display on title screen"
 Different victory animations based on margin: blowout (>300 pts), close game (<100 pts), comeback (was losing, now winning), and draw. More confetti for blowouts, dramatic music for close games.
 
 **Files:**
-- Modify: `index.html` — `endGame` function, `createConfetti` function, add new SFX
+- Modify: `index.html` - `endGame` function, `createConfetti` function, add new SFX
 
 **Step 1: Add sfxCloseWin function**
 
@@ -513,20 +513,20 @@ if (winnerKey) {
   var isComeback = (winnerKey === 'p1' && halfwayDiff < -50) || (winnerKey === 'p2' && halfwayDiff > 50);
 
   if (isComeback) {
-    // COMEBACK WIN — dramatic build
+    // COMEBACK WIN - dramatic build
     winnerEl.textContent = '\ud83d\udd25 COMEBACK! ' + winnerText;
     sfxCloseWin();
     Music.victory();
     createConfetti(80);
   } else if (margin > 300) {
-    // BLOWOUT — big celebration
+    // BLOWOUT - big celebration
     winnerEl.classList.add('victory-text-blowout');
     sfxVictory();
     Music.victory();
     createConfetti(120);
     sfxCrowdCheer();
   } else if (margin <= 100) {
-    // CLOSE GAME — tense resolution
+    // CLOSE GAME - tense resolution
     winnerEl.classList.add('victory-text-close');
     winnerEl.textContent = '\ud83d\ude2c ' + winnerText;
     sfxCloseWin();
@@ -554,7 +554,7 @@ function createConfetti(count) {
 **Step 5: Commit**
 
 ```
-git commit -m "feat: victory celebration variants — blowout, close game, comeback"
+git commit -m "feat: victory celebration variants - blowout, close game, comeback"
 ```
 
 ---
@@ -564,7 +564,7 @@ git commit -m "feat: victory celebration variants — blowout, close game, comeb
 Ensure music transitions are smooth: stop game music before victory/draw, fade between states, and add a brief silence before the victory fanfare for dramatic effect.
 
 **Files:**
-- Modify: `index.html` — `endGame` function, Music object
+- Modify: `index.html` - `endGame` function, Music object
 
 **Step 1: Add dramatic pause before victory music**
 

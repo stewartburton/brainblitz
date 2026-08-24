@@ -1,4 +1,4 @@
-# BrainBlitz LG TV Improvements — Design Document
+# BrainBlitz LG TV Improvements - Design Document
 
 **Date:** 2026-03-01
 **Status:** Approved
@@ -28,8 +28,8 @@ Players are hardcoded as "Burden" and "Stu". Anyone else playing has to pretend 
 - Default placeholder: "Player 1" / "Player 2" if left blank
 
 **KV Storage Redesign:**
-- `players:index` — JSON array of all known player names
-- `player:{normalized_name}` — stats object (wins, gamesPlayed, draws, totalScore, totalCorrect, bestGameScore, bestStreak, lastPlayed)
+- `players:index` - JSON array of all known player names
+- `player:{normalized_name}` - stats object (wins, gamesPlayed, draws, totalScore, totalCorrect, bestGameScore, bestStreak, lastPlayed)
 - Normalized = lowercase, trimmed
 - Achievements: `achievements:{normalized_name}`
 - Leaderboard: head-to-head view between current two players (not global ranking)
@@ -44,7 +44,7 @@ Players are hardcoded as "Burden" and "Stu". Anyone else playing has to pretend 
 
 ---
 
-## 2. Turn Switch — "Spotlight Handoff"
+## 2. Turn Switch - "Spotlight Handoff"
 
 ### Problem
 Current 2-second countdown ("3... 2... 1...") is sluggish and kills momentum.
@@ -57,7 +57,7 @@ Current 2-second countdown ("3... 2... 1...") is sluggish and kills momentum.
 
 **Audio:** Quick whoosh SFX on transition.
 
-**Round splashes:** Reduced frequency — only on question 1, 6, 11, 16 (every 5 questions) instead of every question.
+**Round splashes:** Reduced frequency - only on question 1, 6, 11, 16 (every 5 questions) instead of every question.
 
 **Active player indicator:** During gameplay, active player's HUD panel gets a glowing border in their color. Inactive player's panel dims to opacity 0.6.
 
@@ -79,7 +79,7 @@ Current 2-second countdown ("3... 2... 1...") is sluggish and kills momentum.
 
 ### Focus States
 - All focusable elements: 4px glowing border (neon cyan/magenta)
-- Focused buttons: `scale(1.05)` transform — visible pop from 3m away
+- Focused buttons: `scale(1.05)` transform - visible pop from 3m away
 - Answer buttons: animated pulsing glow on focus
 - Menu buttons: same glow treatment
 

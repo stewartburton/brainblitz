@@ -12,7 +12,7 @@
 
 ### Task 1: Strip ElevenLabs TTS
 
-Remove TTS system entirely — the voice reading questions aloud.
+Remove TTS system entirely - the voice reading questions aloud.
 
 **Files:** Modify `index.html`
 
@@ -39,7 +39,7 @@ Remove TTS system entirely — the voice reading questions aloud.
    if (voiceEnabled) { ... await playQuestionTTS ... }
    ```
 
-5. Also in `loadQuestion()` (line 4019), simplify HUD player display — remove speaker icon:
+5. Also in `loadQuestion()` (line 4019), simplify HUD player display - remove speaker icon:
    ```javascript
    // CHANGE FROM:
    playerEl.innerHTML = players[currentPlayer].name +
@@ -74,9 +74,9 @@ Remove cost tracker and audio asset manager from admin.
 
 **Changes:**
 
-1. Delete the "ElevenLabs Costs" admin section (lines 2240-2279) — the entire `<div class="admin-section">` block
+1. Delete the "ElevenLabs Costs" admin section (lines 2240-2279) - the entire `<div class="admin-section">` block
 
-2. Delete the "Audio Assets (ElevenLabs)" admin section (lines 2292-2316) — the entire `<div class="admin-section">` block
+2. Delete the "Audio Assets (ElevenLabs)" admin section (lines 2292-2316) - the entire `<div class="admin-section">` block
 
 3. Remove `loadAdminCosts()` and `loadAdminAudio()` calls from PIN success handler (lines 5243-5244)
 
@@ -142,7 +142,7 @@ Keep GET (serve cached SFX from KV), remove POST (ElevenLabs generation).
 
 **Changes:**
 
-Rewrite to only handle GET requests — serve cached MP3 from KV by name:
+Rewrite to only handle GET requests - serve cached MP3 from KV by name:
 
 ```javascript
 export async function onRequest(context) {
@@ -261,7 +261,7 @@ After the "Any" pill (line 2024), add:
 </div>
 ```
 
-Actually, use a canvas for the wheel — it's simpler to draw segments with text. Canvas is well-supported on webOS.
+Actually, use a canvas for the wheel - it's simpler to draw segments with text. Canvas is well-supported on webOS.
 
 **6d. Add roulette game state variables:**
 
@@ -414,7 +414,7 @@ if (isRoulette) {
 }
 ```
 
-Actually simpler approach: pre-assign categories to questions at game start, then show the wheel at block boundaries. The wheel is purely visual — the category is pre-assigned.
+Actually simpler approach: pre-assign categories to questions at game start, then show the wheel at block boundaries. The wheel is purely visual - the category is pre-assigned.
 
 **Commit:** `feat: add Category Roulette mode with spinning wheel`
 
@@ -452,15 +452,15 @@ var CATEGORY_MUSIC = {
 
 Add these methods to the Music object. Each is a short 4-8 bar synth loop:
 
-- `Music.french()` — Accordion waltz: 3/4 time, musette chords, tremolo
-- `Music.bossa()` — Bossa nova: warm Rhodes, gentle syncopation
-- `Music.classical()` — Strings: sustained pad, arpeggiated melody
-- `Music.afrobeat()` — Upbeat: strong kick pattern, bright chords
-- `Music.ambient()` — Pad + light percussion, pentatonic melody
-- `Music.marabi()` — Jazz shuffle: walking bass, swing rhythm
-- `Music.synthpop()` — 80s synth: saw lead, arpeggiated bass
-- `Music.jazz()` — Light pizzicato: plucked strings, swing
-- `Music.tension()` — Game-show pulse: minor key, building intensity
+- `Music.french()` - Accordion waltz: 3/4 time, musette chords, tremolo
+- `Music.bossa()` - Bossa nova: warm Rhodes, gentle syncopation
+- `Music.classical()` - Strings: sustained pad, arpeggiated melody
+- `Music.afrobeat()` - Upbeat: strong kick pattern, bright chords
+- `Music.ambient()` - Pad + light percussion, pentatonic melody
+- `Music.marabi()` - Jazz shuffle: walking bass, swing rhythm
+- `Music.synthpop()` - 80s synth: saw lead, arpeggiated bass
+- `Music.jazz()` - Light pizzicato: plucked strings, swing
+- `Music.tension()` - Game-show pulse: minor key, building intensity
 
 Each follows the existing pattern: `this._init(vol)`, `this._startScheduler(callback)`, using `this._kick()`, `this._hihat()`, `this._note()`.
 
@@ -491,11 +491,11 @@ Music[theme] ? Music[theme]() : Music.game();
 
 **Changes:**
 
-1. Search entire file for `.includes(` — replace with `.indexOf() !== -1`
-2. Search for spread syntax `[...` — replace with `[].slice.call()`
-3. Search for `?.` optional chaining — replace with explicit checks
-4. Search for `??` nullish coalescing — replace with `||` or ternary
-5. Search for `inset: 0` — replace with explicit `top:0;left:0;right:0;bottom:0`
+1. Search entire file for `.includes(` - replace with `.indexOf() !== -1`
+2. Search for spread syntax `[...` - replace with `[].slice.call()`
+3. Search for `?.` optional chaining - replace with explicit checks
+4. Search for `??` nullish coalescing - replace with `||` or ternary
+5. Search for `inset: 0` - replace with explicit `top:0;left:0;right:0;bottom:0`
 6. Verify all new code uses `var` or safe `let`/`const` (no class fields)
 7. Verify canvas API calls are webOS-safe
 

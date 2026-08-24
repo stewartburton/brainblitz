@@ -1,6 +1,6 @@
-# 🧠 BRAINBLITZ — Lekker TV Trivia
+# 🧠 BRAINBLITZ - Lekker TV Trivia
 
-A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and any browser). Burden vs Stu — who's the Boss? Features South African Afrikaans expressions throughout for that local flavour.
+A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and any browser). Burden vs Stu - who's the Boss? Features South African Afrikaans expressions throughout for that local flavour.
 
 ![Built for TV](https://img.shields.io/badge/Built%20For-LG%20webOS%20TV-ff2d78?style=flat-square)
 ![HTML5](https://img.shields.io/badge/HTML5-Single%20File-00f0ff?style=flat-square)
@@ -8,28 +8,28 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 
 ## Features
 
-- **Two-player game** — Burden vs Stu, alternating turns
-- **Game show UI** — Neon-styled, large text optimised for TV viewing distance
-- **Magic Remote + Arrow Keys** — Full LG remote navigation support
-- **Keyboard support** — Press A/B/C/D to answer (pair a Bluetooth keyboard)
-- **Speed scoring** — Faster answers earn more points
-- **Streak multiplier** — 3+ correct in a row gives bonus points
-- **Winner celebration** — Confetti, trophy animation, and victory fanfare
-- **Sound effects** — Web Audio API synth sounds, no files needed
-- **Configurable** — Timer, categories, rounds, and voice selection (persisted across sessions)
-- **Voice mode** — Two ElevenLabs voices (Rachel & Butcher) using fast Turbo v2.5 model
-- **AI Music** — ElevenLabs Music API generates 4 custom tracks (title, game, victory, draw), cached in KV. Falls back to Web Audio API step sequencer
-- **AI Sound Effects** — ElevenLabs SFX API generates 12 custom effects, cached in KV. Falls back to synthesized SFX
-- **Leaderboard** — Lifetime stats persisted via Cloudflare KV with counter animations
-- **SA Expressions** — Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
-- **Custom categories** — Frenchies, Hiking, SA Wines, Paris, Cheeses, Braai Culture, 90s Pop Culture, SA Food & Slang, True or False (250+ built-in questions)
-- **Difficulty scaling** — Questions tagged easy/medium/hard; harder questions earn more points
-- **Answer cascade** — Wrong answers grey out one-by-one before revealing the correct answer
-- **Achievements** — 15 unlockable badges per player, persisted in KV with toast notifications
-- **Admin panel** — PIN-locked admin settings with ElevenLabs cost dashboard (TTS, Music, SFX), audio asset management, and language toggle
-- **Bilingual** — Switch between South African English and Afrikaans in admin settings
-- **Polish** — Score pop animation, timer danger pulse, particle bursts, turn switch countdown, screen transitions
-- **Cost tracking** — TTS character usage, Music generation (vs 31 min Creator quota), and SFX generation (vs 2,500s quota) tracked with estimated ZAR costs in admin panel
+- **Two-player game** - Burden vs Stu, alternating turns
+- **Game show UI** - Neon-styled, large text optimised for TV viewing distance
+- **Magic Remote + Arrow Keys** - Full LG remote navigation support
+- **Keyboard support** - Press A/B/C/D to answer (pair a Bluetooth keyboard)
+- **Speed scoring** - Faster answers earn more points
+- **Streak multiplier** - 3+ correct in a row gives bonus points
+- **Winner celebration** - Confetti, trophy animation, and victory fanfare
+- **Sound effects** - Web Audio API synth sounds, no files needed
+- **Configurable** - Timer, categories, rounds, and voice selection (persisted across sessions)
+- **Voice mode** - Two ElevenLabs voices (Rachel & Butcher) using fast Turbo v2.5 model
+- **AI Music** - ElevenLabs Music API generates 4 custom tracks (title, game, victory, draw), cached in KV. Falls back to Web Audio API step sequencer
+- **AI Sound Effects** - ElevenLabs SFX API generates 12 custom effects, cached in KV. Falls back to synthesized SFX
+- **Leaderboard** - Lifetime stats persisted via Cloudflare KV with counter animations
+- **SA Expressions** - Lekker Afrikaans feedback like "Ja Boet!", "Kwaai!", "Eina!", and "Haibo!"
+- **Custom categories** - Frenchies, Hiking, SA Wines, Paris, Cheeses, Braai Culture, 90s Pop Culture, SA Food & Slang, True or False (250+ built-in questions)
+- **Difficulty scaling** - Questions tagged easy/medium/hard; harder questions earn more points
+- **Answer cascade** - Wrong answers grey out one-by-one before revealing the correct answer
+- **Achievements** - 15 unlockable badges per player, persisted in KV with toast notifications
+- **Admin panel** - PIN-locked admin settings with ElevenLabs cost dashboard (TTS, Music, SFX), audio asset management, and language toggle
+- **Bilingual** - Switch between South African English and Afrikaans in admin settings
+- **Polish** - Score pop animation, timer danger pulse, particle bursts, turn switch countdown, screen transitions
+- **Cost tracking** - TTS character usage, Music generation (vs 31 min Creator quota), and SFX generation (vs 2,500s quota) tracked with estimated ZAR costs in admin panel
 
 ## How to Play on Your LG TV
 
@@ -55,7 +55,7 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 
 1. Go to [Cloudflare Pages](https://pages.cloudflare.com)
 2. Connect this GitHub repo
-3. Deploy — you'll get a URL like `brainblitz.pages.dev`
+3. Deploy - you'll get a URL like `brainblitz.pages.dev`
 4. Open that URL in your TV browser
 
 #### Setting up Cloudflare KV (Score Persistence)
@@ -64,7 +64,7 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 2. Create a new KV namespace called `BRAINBLITZ_KV`
 3. Go to your Pages project > **Settings > Functions > KV namespace bindings**
 4. Add binding: Variable name = `BRAINBLITZ_KV`, KV namespace = the one you created
-5. Redeploy — scores will now persist!
+5. Redeploy - scores will now persist!
 
 #### Setting up ElevenLabs TTS (Optional Voice)
 
@@ -72,7 +72,7 @@ A Triviaverse-inspired two-player trivia game show built for LG webOS TVs (and a
 2. Create a restricted API key with **Text to Speech → Access** permission
 3. In Cloudflare Pages > **Settings > Environment variables**
 4. Add: `ELEVENLABS_API_KEY` = your API key
-5. Redeploy — choose "Rachel" or "Butcher" voice in game settings to hear questions read aloud
+5. Redeploy - choose "Rachel" or "Butcher" voice in game settings to hear questions read aloud
 
 #### Setting up ElevenLabs Music & SFX (Optional)
 
@@ -80,7 +80,7 @@ The same `ELEVENLABS_API_KEY` powers AI-generated music and sound effects. With 
 
 1. Open the game and go to **Admin Panel** (PIN: `1945`)
 2. Scroll to **Audio Assets (ElevenLabs)**
-3. Click **Generate All** for Music and SFX — each track/effect is generated and cached in KV
+3. Click **Generate All** for Music and SFX - each track/effect is generated and cached in KV
 4. The game automatically uses cached audio. If none exists, it falls back to the built-in Web Audio synthesizer
 
 ## File Structure

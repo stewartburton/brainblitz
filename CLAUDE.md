@@ -1,4 +1,4 @@
-# BRAINBLITZ — Development Notes
+# BRAINBLITZ - Development Notes
 
 ## Deployment
 
@@ -15,8 +15,8 @@ The automatic GitHub → Cloudflare Pages pipeline may lag or miss commits. Alwa
 The LG TV browser runs an older JS engine. Do NOT use:
 - Optional chaining (`?.`)
 - Nullish coalescing (`??`)
-- Spread syntax (`[...arr]`) — use `[].slice.call(arr)`
-- `inset: 0` CSS shorthand — use explicit `top/left/right/bottom: 0`
+- Spread syntax (`[...arr]`) - use `[].slice.call(arr)`
+- `inset: 0` CSS shorthand - use explicit `top/left/right/bottom: 0`
 
 ## Project Structure
 
@@ -24,4 +24,4 @@ Single HTML file (`index.html`) with all CSS + JS inline. Cloudflare Pages Funct
 
 ## Admin Panel
 
-PIN code: `1945` — accessed via ADMIN button on title screen (bottom-right).
+PIN code: `1945` - accessed via ADMIN button on title screen (bottom-right).

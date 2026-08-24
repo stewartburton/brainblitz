@@ -1,4 +1,4 @@
-# BrainBlitz LG TV Improvements — Implementation Plan
+# BrainBlitz LG TV Improvements - Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -15,10 +15,10 @@
 ## webOS Compatibility Checklist (apply to ALL code)
 
 Before every commit, verify:
-- NO optional chaining (`?.`) — use `&&` chains or explicit checks
-- NO nullish coalescing (`??`) — use `||` or ternary
-- NO spread syntax (`[...arr]`) — use `[].slice.call(arr)` or `.concat()`
-- NO `inset: 0` CSS — use explicit `top:0; left:0; right:0; bottom:0`
+- NO optional chaining (`?.`) - use `&&` chains or explicit checks
+- NO nullish coalescing (`??`) - use `||` or ternary
+- NO spread syntax (`[...arr]`) - use `[].slice.call(arr)` or `.concat()`
+- NO `inset: 0` CSS - use explicit `top:0; left:0; right:0; bottom:0`
 - Use `var` for function-scoped declarations where `let`/`const` might cause issues on oldest webOS
 - Use `indexOf` instead of `includes` for arrays
 
@@ -554,7 +554,7 @@ git commit -m "feat: replace all hardcoded Burden/Stu with dynamic player names"
 
 ---
 
-### Task 6: Spotlight Handoff — Replace Turn Switch
+### Task 6: Spotlight Handoff - Replace Turn Switch
 
 **Files:**
 - Modify: `index.html` (CSS + HTML + JS)
@@ -712,7 +712,7 @@ git commit -m "feat: replace turn switch with spotlight handoff (1.2s dramatic w
 
 ---
 
-### Task 7: LG TV Visual Polish — CSS Updates
+### Task 7: LG TV Visual Polish - CSS Updates
 
 **Files:**
 - Modify: `index.html` (CSS section)
@@ -790,7 +790,7 @@ In `spawnParticles()`, increase the count parameter call from 12 to 20.
 
 ```bash
 git add index.html
-git commit -m "feat: TV visual polish — larger fonts, better focus states, more particles"
+git commit -m "feat: TV visual polish - larger fonts, better focus states, more particles"
 ```
 
 ---
@@ -844,7 +844,7 @@ Add to the `.pill` class:
 
 ```bash
 git add index.html
-git commit -m "feat: remote-friendly controls — debouncing, wrap nav, will-change hints"
+git commit -m "feat: remote-friendly controls - debouncing, wrap nav, will-change hints"
 ```
 
 ---
@@ -1016,7 +1016,7 @@ Cape Town specific hiking trails.
 
 **Step 4: Also add ~10 True or False questions about Cape Town**
 
-Myth-busting facts (Table Mountain one of New 7 Wonders, Cape Town is southernmost city in Africa — False, etc.)
+Myth-busting facts (Table Mountain one of New 7 Wonders, Cape Town is southernmost city in Africa - False, etc.)
 
 **Step 5: Commit**
 
@@ -1061,7 +1061,7 @@ document.getElementById('lb-p2-name').textContent = players.p2.name.toUpperCase(
 Search entire file for:
 - `?.` (optional chaining)
 - `??` (nullish coalescing)
-- `[...` followed by `]` (spread syntax — watch for false positives in strings)
+- `[...` followed by `]` (spread syntax - watch for false positives in strings)
 - `inset:` or `inset :` in CSS
 
 Fix any violations.
@@ -1074,7 +1074,7 @@ Walk through: Title → Names → Settings → Game (turn switches, scoring) →
 
 ```bash
 git add index.html
-git commit -m "feat: final integration — dynamic names in all screens, webOS compatibility verified"
+git commit -m "feat: final integration - dynamic names in all screens, webOS compatibility verified"
 ```
 
 ---
